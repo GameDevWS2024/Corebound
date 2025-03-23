@@ -6,11 +6,8 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 using Game.Scenes.Levels;
-using Game.scripts;
 using Game.Scripts.AI;
 using Game.Scripts.Items;
-
-using GenerativeAI.Exceptions;
 
 using Godot;
 
