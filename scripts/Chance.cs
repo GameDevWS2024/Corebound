@@ -8,6 +8,6 @@ public class Chance
 
     public bool IsHappening(int motivation)
     {
-        return _rand.Next(10)+1 <= motivation; ;
+        return _rand.Next(10) + 1 <= motivation; ;
     }
 }
