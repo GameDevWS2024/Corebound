@@ -256,16 +256,18 @@ public partial class Ally : CharacterBody2D
         if (this.Name == "Ally2" && this.GlobalPosition.DistanceTo(_bigTree.GlobalPosition) < 300)
         {
             _bigTree.Interactable = true;
-            
+
         }
 
         //Cave entrance logic:
-        if (this.SsInventory.ContainsMaterial(Items.Material.Chipcard) && this.GlobalPosition.DistanceTo(_caveEntrance.GlobalPosition) < 300) {
+        if (this.SsInventory.ContainsMaterial(Items.Material.Chipcard) && this.GlobalPosition.DistanceTo(_caveEntrance.GlobalPosition) < 300)
+        {
             _caveEntrance.Interactable = true;
         }
 
         //Tree entrance logic
-        if(this.SsInventory.ContainsMaterial(Items.Material.BucketWater) && this.GlobalPosition.DistanceTo(_scar.GlobalPosition) < 300) {
+        if (this.SsInventory.ContainsMaterial(Items.Material.BucketWater) && this.GlobalPosition.DistanceTo(_scar.GlobalPosition) < 300)
+        {
             _scar.Interactable = true;
         }
     }//Node2D/Abandoned Village/HauntedForestVillage/Big House/Sprite2D/InsideBigHouse2/InsideBigHouse/Sprite2D/ChestInsideHouse
