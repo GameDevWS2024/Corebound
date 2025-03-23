@@ -11,7 +11,7 @@ using Microsoft.Win32;
 
 using FileAccess = Godot.FileAccess;
 
-namespace Game.scripts;
+namespace Game.Scripts;
 
 public partial class AudioOutput : Node
 {

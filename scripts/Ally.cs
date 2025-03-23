@@ -27,7 +27,7 @@ public partial class Ally : CharacterBody2D
     private Health _health = null!;
     protected Game.Scripts.Core _core = null!;
     public Inventory SsInventory = new Inventory(12);
-    private AudioOutput audioOutput = null!;
+    private AudioOutput _audioOutput = null!;
 
 
     private RichTextLabel _ally1ResponseField = null!, _ally2ResponseField = null!;
@@ -77,7 +77,7 @@ public partial class Ally : CharacterBody2D
 
         _ally1ResponseField = GetNode<RichTextLabel>("ResponseField");
         _ally2ResponseField = GetNode<RichTextLabel>("ResponseField");
-        audioOutput = Chat.GetNode<AudioOutput>("Speech");
+        _audioOutput = Chat.GetNode<AudioOutput>("Speech");
 
         _core = GetTree().GetNodesInGroup("Core").OfType<Core>().FirstOrDefault()!;
         Map = GetTree().Root.GetNode<Map>("Node2D");
@@ -286,7 +286,7 @@ public partial class Ally : CharacterBody2D
         }
 
         // send text to AudioOutput Script
-        if (audioOutput.Synthesize)
+        if (_audioOutput.Synthesize)
         {
             string spokenResponse = "couldn't extract";
             foreach ((string op, string content) in ExtractRelevantLines(response))
@@ -299,12 +299,12 @@ public partial class Ally : CharacterBody2D
 
             if (spokenResponse != "couldn't extract")
             {
-                audioOutput.GenerateAndPlaySpeech(spokenResponse);
+                _audioOutput.GenerateAndPlaySpeech(spokenResponse);
                 GeminiService? geminiService = new(ProjectSettings.GlobalizePath("res://api_key.secret"), "You will get tasks of choosing an appropriate emotion for a text. Reply ONLY with the responding emotion, nothing else.");
 
-                audioOutput.DefaultStyle = await geminiService.InternalSendMessage("Choose a correct emotion for the following text. \n" + spokenResponse + " \n The emotion options are: newscast, angry, cheerful, sad, excited, friendly, terrified, shouting, unfriendly, whispering, hopeful. Choose one and reply ONLY(!) with that emotion exactly as it is written here.\n");  // retrieve correct style from ai.
-                audioOutput.DefaultStyle = audioOutput!.DefaultStyle.Replace("\n", "").ToLower();
-                GD.Print("\n" + audioOutput.DefaultStyle + " \n");
+                _audioOutput.DefaultStyle = await geminiService.InternalSendMessage("Choose a correct emotion for the following text. \n" + spokenResponse + " \n The emotion options are: newscast, angry, cheerful, sad, excited, friendly, terrified, shouting, unfriendly, whispering, hopeful. Choose one and reply ONLY(!) with that emotion exactly as it is written here.\n");  // retrieve correct style from ai.
+                _audioOutput.DefaultStyle = _audioOutput!.DefaultStyle.Replace("\n", "").ToLower();
+                GD.Print("\n" + _audioOutput.DefaultStyle + " \n");
             }
             else
             {
