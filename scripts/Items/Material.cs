@@ -2,18 +2,20 @@ namespace Game.Scripts.Items
 {
     public enum Material
     {
-        None,
-        Wood,
-        Stone,
-        Iron,
+        BucketEmpty,
+        BucketWater,
         Copper,
-        Gold,
         Diamond,
-        Torch,
-        LightedTorch,
-        Notebook,
+        FestiveStaff,
         Flashlight,
+        Gold,
+        Iron,
         Key,
-        FestiveStaff
+        LightedTorch,
+        None,
+        Notebook,
+        Stone,
+        Torch,
+        Wood
     }
 }

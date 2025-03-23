@@ -1,4 +1,4 @@
-[gd_scene load_steps=124 format=4 uid="uid://dfkwq6qwtxw25"]
+[gd_scene load_steps=126 format=4 uid="uid://dfkwq6qwtxw25"]
 
 [ext_resource type="Script" path="res://scripts/EnemyManager.cs" id="1_bmkfv"]
 [ext_resource type="Script" path="res://scripts/Map.cs" id="1_pa1ge"]
@@ -45,7 +45,7 @@
 [ext_resource type="Texture2D" uid="uid://d1yvwy2drdwqd" path="res://assets/tilemaps/Reg tree wall.png" id="38_dsao3"]
 [ext_resource type="Texture2D" uid="uid://cn0pcaddy8lcv" path="res://assets/tilemaps/TX Struct.png" id="39_jhhw6"]
 [ext_resource type="Texture2D" uid="uid://bxo85wuubsbn2" path="res://assets/tilemaps/TX Tileset Wall.png" id="40_6y0o1"]
-[ext_resource type="Texture2D" uid="uid://dupi1mwbxnhef" path="res://assets/tilemaps/CaveTileset.png" id="44_3be5u"]
+[ext_resource type="Texture2D" uid="uid://doa646stnhnlu" path="res://assets/tilemaps/CaveTileset.png" id="44_3be5u"]
 [ext_resource type="TileSet" uid="uid://drgqbpyytiqxq" path="res://scenes/levels/CaveTileset.tres" id="44_njbx8"]
 [ext_resource type="TileSet" uid="uid://d2huqyd455jkj" path="res://assets/tilemaps/CratersTileset.tres" id="44_pqt0n"]
 [ext_resource type="Texture2D" uid="uid://cf35q1itw0rjk" path="res://assets/tilemaps/OtherTileset.png" id="44_ue1vq"]
@@ -15748,3 +15748,12 @@ position = Vector2(516, 1737)
 ObjectName = "BEGINNING OF THE GAME"
 ObjectDescription = "Greet the commander in a friendly tone, ask for his name and tell him to move upwards."
 ObjectHint = "Keep explaining to the commander what our missions is for the first few messages but stop if he indicates he understood everything."
+
+[node name="Well" parent="." instance=ExtResource("13_05imv")]
+unique_name_in_owner = true
+position = Vector2(8577, -2210)
+ObjectName = "Well"
+ObjectDescription = "can be used to fill an empty bucket with water"
+Interactable = false
+RemovedAfter = false
+CustomOverrideMessage = "the ally now has a water bucket"
