@@ -2,7 +2,9 @@
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
+
 using Game.Scripts.AI;
+
 using Godot;
 
 using Environment = System.Environment;
@@ -38,7 +40,7 @@ public partial class AudioOutput : Node
         }
 
         // Fallback to registry (Windows-only)
-        #if WINDOWS
+#if WINDOWS
         try
         {
             using Microsoft.Win32.RegistryKey? key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Python\PythonCore");
@@ -64,7 +66,7 @@ public partial class AudioOutput : Node
         {
             GD.PrintErr($"Error reading registry: {ex.Message}"); // More specific error
         }
-        #endif
+#endif
 
         return null; // No Python found
     }
@@ -197,7 +199,7 @@ public partial class AudioOutput : Node
             GD.PrintErr("Audio file was not generated.");
         }
     }
-     private void OnAudioFinished()
+    private void OnAudioFinished()
     {
         if (_audioPlayer.Playing)
         {
@@ -205,7 +207,7 @@ public partial class AudioOutput : Node
         }
 
         _audioPlayer.Stream = null;
-       
+
         string audioFilePath = Path.Combine(Path.GetDirectoryName(ProjectSettings.GlobalizePath("res://" + PythonScriptPath)) ?? throw new InvalidOperationException(), "output.wav");
 
         try
