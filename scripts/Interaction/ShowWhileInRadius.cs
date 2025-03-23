@@ -56,6 +56,7 @@ public partial class ShowWhileInRadius : Node2D
 
     public override void _PhysicsProcess(double delta)
     {
+        GD.Print(Interactable.TreeCured);
         if (ItemActivationStatus == true && !_debugOnce)
         {
             GD.Print("ItemActivationStatus = true");
@@ -144,8 +145,12 @@ public partial class ShowWhileInRadius : Node2D
                        aiNode.FromChosenMaterial = Game.Scripts.Items.Material.FestiveStaff;
                    }
                    */
-
                 }
+                //For insideBigTree only
+                if(body.GlobalPosition.DistanceTo(GlobalPosition) < Radius && Interactable.TreeCured) {
+                    show = true;
+                }
+
 
                 if (entity is Ally allyinv)
                 {

@@ -12,7 +12,6 @@ script = ExtResource("1_hwoq0")
 
 [node name="VisibleForAI" type="Node2D" parent="."]
 script = ExtResource("2_32jrn")
-NameForAi = "Notebook"
 
 [node name="ItemAdder" type="Node2D" parent="."]
 script = ExtResource("3_hv6ah")

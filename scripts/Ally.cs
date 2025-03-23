@@ -25,7 +25,6 @@ public partial class Ally : CharacterBody2D
     protected Game.Scripts.Core _core = null!;
     public Inventory SsInventory = new Inventory(12);
     private AudioOutput _audioOutput = null!;
-    private AiNode _bigTree = null!;
     private AiNode _caveEntrance = null!;
     private AiNode _scar = null!;
 
@@ -43,7 +42,7 @@ public partial class Ally : CharacterBody2D
     [Export] public VisibleForAI[] AlwaysVisible = [];
     private GenerativeAI.Methods.ChatSession? _chat;
     private GeminiService? _geminiService;
-    [Export] AnimationPlayer _animPlayer = null!;
+    [Export] public AnimationPlayer _animPlayer = null!;
     private PointLight2D _coreLight = null!;
 
     private PointLight2D _torch = null!;
@@ -61,7 +60,7 @@ public partial class Ally : CharacterBody2D
     private Ally _otherAlly = null!;
     public override void _Ready()
     {
-        _well = GetNode<AiNode>("%Well");
+        _well = GetTree().Root.GetNode<AiNode>("Node2D/%Well");
         _coreLight = GetParent().GetNode<PointLight2D>("%Core/%CoreLight");
         foreach (Ally ally in GetTree().GetNodesInGroup("Entities").OfType<Ally>().ToList())
         {
@@ -74,9 +73,9 @@ public partial class Ally : CharacterBody2D
         SsInventory.AddItem(new Itemstack(Game.Scripts.Items.Material.Torch));
         lit = true; */
         // SsInventory.AddItem(new Itemstack(Items.Material.FestiveStaff, 1));
-        //SsInventory.AddItem(new Itemstack(Items.Material.Copper, 1));
+        // SsInventory.AddItem(new Itemstack(Items.Material.Copper, 1));
+        SsInventory.AddItem(new Itemstack(Items.Material.BucketWater, 1));
         _torch = GetNode<PointLight2D>("AllyTorch");
-        _bigTree = GetNode<AiNode>("%Big Tree");
         _caveEntrance = GetNode<AiNode>("%CaveEntrance");
         _scar = GetNode<AiNode>("%Scar");
 
@@ -254,23 +253,10 @@ public partial class Ally : CharacterBody2D
              */
         }
 
-        //Tree logic:
-        if (this.Name == "Ally2" && this.GlobalPosition.DistanceTo(_bigTree.GlobalPosition) < 300)
-        {
-            _bigTree.Interactable = true;
-
-        }
-
         //Cave entrance logic:
         if (this.SsInventory.ContainsMaterial(Items.Material.Chipcard) && this.GlobalPosition.DistanceTo(_caveEntrance.GlobalPosition) < 300)
         {
             _caveEntrance.Interactable = true;
-        }
-
-        //Tree entrance logic
-        if (this.SsInventory.ContainsMaterial(Items.Material.BucketWater) && this.GlobalPosition.DistanceTo(_scar.GlobalPosition) < 300)
-        {
-            _scar.Interactable = true;
         }
         //Well logic:
         if (GlobalPosition.DistanceTo(_well.GlobalPosition) < 300 &&
