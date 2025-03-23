@@ -52,6 +52,7 @@
 [ext_resource type="TileSet" uid="uid://cr4dvg656pbdl" path="res://scenes/levels/GrassTileset.tres" id="45_sj3iv"]
 [ext_resource type="TileSet" uid="uid://ctvb82jg20e6r" path="res://assets/tilemaps/AlienTrees.tres" id="45_xsodu"]
 [ext_resource type="Texture2D" uid="uid://bdww2mlgdic6y" path="res://assets/tilemaps/TreesTileset.png" id="47_3i3s2"]
+[ext_resource type="PackedScene" uid="uid://dr53bjmurlnut" path="res://scenes/Tutorial.tscn" id="48_3yv6f"]
 [ext_resource type="Script" path="res://scripts/Interaction/CodeInput.cs" id="48_x4dce"]
 [ext_resource type="Texture2D" uid="uid://b1n85g1blpu64" path="res://assets/tilemaps/Houses.png" id="49_pb6br"]
 
@@ -14950,6 +14951,12 @@ position = Vector2(2595, 2509)
 script = ExtResource("1_pa1ge")
 _darknessCircleDamage = 1
 _allyHealthChangeIntervall = 5.0
+
+[node name="Tutorial" parent="." instance=ExtResource("48_3yv6f")]
+offset_left = 536.0
+offset_top = 898.0
+offset_right = 536.0
+offset_bottom = 898.0
 
 [node name="Ally" parent="." node_paths=PackedStringArray("_responseField", "_nameLabel", "Chat") instance=ExtResource("6_l8h37")]
 position = Vector2(923, 2052)
