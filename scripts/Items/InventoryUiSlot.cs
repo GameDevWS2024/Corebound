@@ -86,7 +86,7 @@ public partial class InventoryUiSlot : Panel
                 _icon.Visible = true;
                 _icon.Texture = GD.Load<Texture2D>("res://assets/items/bucket_empty.png");
                 break;
-            
+
             default:
                 _icon.Visible = true;
                 _icon.Texture = GD.Load<Texture2D>("res://assets/items/missing_texture.png");
