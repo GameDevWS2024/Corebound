@@ -49,8 +49,8 @@ _data = {
 }
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_rn1pq"]
-radius = 35.0
-height = 120.0
+radius = 23.0
+height = 100.0
 
 [sub_resource type="Animation" id="Animation_yikeh"]
 resource_name = "Idle"
@@ -129,6 +129,7 @@ script = ExtResource("5_moxt6")
 
 [node name="ProgressBar" type="ProgressBar" parent="." node_paths=PackedStringArray("_health")]
 self_modulate = Color(1.26103e-05, 0.840319, 1.15514e-06, 1)
+z_index = 99
 offset_left = -33.0
 offset_top = -115.0
 offset_right = 39.0
@@ -145,6 +146,7 @@ ListenToInteract = false
 [node name="MotivationBar" type="ProgressBar" parent="." node_paths=PackedStringArray("_motivation")]
 modulate = Color(0.0627451, 0.74902, 1, 1)
 self_modulate = Color(0.0627451, 0.301961, 1, 1)
+z_index = 99
 offset_left = -33.0
 offset_top = -88.0
 offset_right = 38.0

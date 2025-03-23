@@ -35,8 +35,8 @@ public partial class IntroScene : Control
     private readonly Dictionary<int, Vector2> _cameraPositions = new Dictionary<int, Vector2>
     {
         { 7, new Vector2(5800, -6300) }, // Camera moves to position 1 on the 7th line
-        { 9, new Vector2(0, 0) }         // Camera moves back to default on the 9th line
-    };
+		{ 9, new Vector2(0, 0) }         // Camera moves back to default on the 9th line
+	};
 
     // Typing effect variables
     private int _currentLineIndex = 0; // Index of the current dialog line
@@ -187,6 +187,13 @@ public partial class IntroScene : Control
     {
         if (_label != null)
         {
+            if (_currentLineIndex < 0 || _currentLineIndex >= _dialogLines.Count)
+            {
+                GD.PrintErr($"FEHLER: Index {_currentLineIndex} ist außerhalb des gültigen Bereichs (0 bis {_dialogLines.Count - 1}).");
+                _typingTimer?.Stop();
+                return;
+            }
+
             string fullText = _dialogLines[_currentLineIndex];
 
             // Append the next character
@@ -203,6 +210,7 @@ public partial class IntroScene : Control
             }
         }
     }
+
 
     public override void _UnhandledInput(InputEvent @event)
     {
@@ -243,17 +251,16 @@ public partial class IntroScene : Control
 
     private void ShowNextLine()
     {
-        _currentLineIndex++;
-
-        if (_currentLineIndex >= _dialogLines.Count) // If all lines have been displayed
+        if (_currentLineIndex >= _dialogLines.Count - 1)
         {
             FinishDialog();
+            return;
         }
-        else
-        {
-            ShowCurrentLine(); // Display the next line
-        }
+
+        _currentLineIndex++;
+        ShowCurrentLine();
     }
+
 
     private void FinishDialog()
     {
@@ -281,10 +288,31 @@ public partial class IntroScene : Control
         _ally1ResponseField.Visible = true;
         _ally2ResponseField.Visible = true;
         _ally1Chat.Visible = true;
+
         // Resume the game
         GetTree().Paused = false;
         _introMusic.Stop();
+
+        // **Tutorial starten**
+        Node2D rootNode = GetTree().Root.GetNode<Node2D>("Node2D"); // `Node2D` in ExampleScene
+        if (rootNode != null)
+        {
+            Tutorial tutorial = rootNode.GetNodeOrNull<Tutorial>("Tutorial");
+            if (tutorial != null)
+            {
+                tutorial.StartTutorial();
+            }
+            else
+            {
+                GD.PrintErr("Tutorial wurde nicht gefunden! Stelle sicher, dass es in Node2D existiert.");
+            }
+        }
+        else
+        {
+            GD.PrintErr("Node2D wurde nicht gefunden! Ist ExampleScene wirklich aktiv?");
+        }
     }
+
 
     private void SetBlackoutAlpha(float alpha)
     {

@@ -1,0 +1,36 @@
+[gd_resource type="TileSet" load_steps=3 format=3 uid="uid://ctvb82jg20e6r"]
+
+[ext_resource type="Texture2D" uid="uid://cj3au0pie6d5n" path="res://assets/tilemaps/AlienTreesTileset.png" id="1_whih1"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_biv2b"]
+texture = ExtResource("1_whih1")
+texture_region_size = Vector2i(32, 32)
+0:0/size_in_atlas = Vector2i(2, 3)
+0:0/0 = 0
+0:0/0/texture_origin = Vector2i(-16, 32)
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-9.875, 2.375, 2.875, 16, 26.125, 14.125, 41.625, 7.375, 39.375, -3.375, 24.125, -5.625, 7.875, -5.125, -4.875, -5.125)
+2:0/size_in_atlas = Vector2i(1, 3)
+2:0/0 = 0
+2:0/0/texture_origin = Vector2i(0, 32)
+2:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8.625, 13.125, 4.375, 16, 9.125, 7.375, 2.375, 4.875, -4.875, 5.125, -9.125, 8.375)
+3:1/size_in_atlas = Vector2i(2, 2)
+3:1/0 = 0
+3:1/0/texture_origin = Vector2i(-16, 16)
+3:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(7.9375, 11.3125, 11.5625, 14.3125, 18.8125, 14.8125, 24.0625, 11.1875, 24.9375, 8.1875, 8.5625, 7.6875)
+5:1/size_in_atlas = Vector2i(2, 2)
+5:1/0 = 0
+5:1/0/texture_origin = Vector2i(-16, 16)
+5:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(9.0625, 11.6875, 13.6875, 16, 18.8125, 15.8125, 26.6875, 12.4375, 22.6875, 8.1875, 16, 7.3125)
+7:1/size_in_atlas = Vector2i(2, 2)
+7:1/0 = 0
+7:1/0/texture_origin = Vector2i(-16, 16)
+7:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(13.7532, 12.4169, 17.0941, 12.1942, 16, 4.51017, 21.66, 6.06925, 26.1145, 8.63058, 32.4621, 9.85557, 38.253, 15.8691, 39.2552, 6.29197, 35.3575, -0.50113, 28.5644, -3.842, 22.1054, -4.06472, 18.4305, -0.612493, 12.751, 0.167044, 9.7442, -0.389768, 2.28293, -1.61475, -3.39655, 1.28067, -5.06699, 5.6238, -4.62154, 11.8601, 0.612494, 12.4169, 6.73742, 9.52148, 9.52148, 5.84652, 12.8623, 5.28971, 13.0851, 7.62832)
+9:1/size_in_atlas = Vector2i(1, 2)
+9:1/0 = 0
+9:1/0/texture_origin = Vector2i(0, 16)
+9:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-13.5425, 10.7646, -9.67323, 14.7331, -3.81968, 14.8323, 6.39921, 16, 9.37559, 14.4354, 12.5504, 11.1614, 9.4748, 8.58189, 1.93464, 7.78819, -4.31575, 8.08583, -11.7567, 8.28425, -14.9315, 11.3598, -12.848, 12.0543)
+
+[resource]
+tile_size = Vector2i(32, 32)
+physics_layer_0/collision_layer = 1
+sources/0 = SubResource("TileSetAtlasSource_biv2b")
