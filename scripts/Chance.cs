@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Game.scripts;
+namespace Game.Scripts;
 
 public class Chance
 {
