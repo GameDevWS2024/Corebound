@@ -44,4 +44,9 @@ public class Itemstack
         Amount = material == Material.None ? 0 : amount;
         Stackable = material != Material.None && stackable;
     }
+
+    public void SetMaterial(Material newMat)
+    {
+        Material = newMat;
+    }
 }
