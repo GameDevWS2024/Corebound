@@ -15800,7 +15800,6 @@ ObjectDescription = "A massive tree that is surrounded by scrub and looks damage
 Interactable = false
 CustomOverrideMessage = "You've successfully removed the scrub from the tree and are now able to reach it"
 ShowWhileInRadius = true
-SceneToShow = null
 
 [node name="StaticBody2D" type="StaticBody2D" parent="Big Tree"]
 
@@ -15832,6 +15831,7 @@ ObjectDescription = "A big scar on the tree which could be the reason for the tr
 Interactable = false
 CustomOverrideMessage = "The tree seems to have recovered from the injurys and opens up to give the entrance to it's inside."
 ShowWhileInRadius = true
+
 [node name="Well" parent="." instance=ExtResource("13_05imv")]
 unique_name_in_owner = true
 position = Vector2(8577, -2210)
