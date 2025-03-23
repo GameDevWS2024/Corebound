@@ -25,6 +25,9 @@ public partial class Ally : CharacterBody2D
     protected Game.Scripts.Core _core = null!;
     public Inventory SsInventory = new Inventory(12);
     private AudioOutput _audioOutput = null!;
+    private AiNode _bigTree = null!;
+    private AiNode _caveEntrance = null!;
+    private AiNode _scar = null!;
 
 
     private RichTextLabel _ally1ResponseField = null!, _ally2ResponseField = null!;
@@ -71,6 +74,9 @@ public partial class Ally : CharacterBody2D
         // SsInventory.AddItem(new Itemstack(Items.Material.FestiveStaff, 1));
         //SsInventory.AddItem(new Itemstack(Items.Material.Copper, 1));
         _torch = GetNode<PointLight2D>("AllyTorch");
+        _bigTree = GetNode<AiNode>("%Big Tree");
+        _caveEntrance = GetNode<AiNode>("%CaveEntrance");
+        _scar = GetNode<AiNode>("%Scar");
 
         _ally1ResponseField = GetNode<RichTextLabel>("ResponseField");
         _ally2ResponseField = GetNode<RichTextLabel>("ResponseField");
@@ -244,6 +250,23 @@ public partial class Ally : CharacterBody2D
              GD.Print("Core position" + GetNode<Core>("%Core").GlobalPosition);
              GD.Print("Core position" + GetNode<PointLight2D>("%CoreLight").GlobalPosition);
              */
+        }
+
+        //Tree logic:
+        if (this.Name == "Ally2" && this.GlobalPosition.DistanceTo(_bigTree.GlobalPosition) < 300)
+        {
+            _bigTree.Interactable = true;
+            
+        }
+
+        //Cave entrance logic:
+        if (this.SsInventory.ContainsMaterial(Items.Material.Chipcard) && this.GlobalPosition.DistanceTo(_caveEntrance.GlobalPosition) < 300) {
+            _caveEntrance.Interactable = true;
+        }
+
+        //Tree entrance logic
+        if(this.SsInventory.ContainsMaterial(Items.Material.BucketWater) && this.GlobalPosition.DistanceTo(_scar.GlobalPosition) < 300) {
+            _scar.Interactable = true;
         }
     }//Node2D/Abandoned Village/HauntedForestVillage/Big House/Sprite2D/InsideBigHouse2/InsideBigHouse/Sprite2D/ChestInsideHouse
 

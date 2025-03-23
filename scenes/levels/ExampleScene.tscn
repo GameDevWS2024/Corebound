@@ -1,4 +1,4 @@
-[gd_scene load_steps=124 format=4 uid="uid://dfkwq6qwtxw25"]
+[gd_scene load_steps=129 format=4 uid="uid://dfkwq6qwtxw25"]
 
 [ext_resource type="Script" path="res://scripts/EnemyManager.cs" id="1_bmkfv"]
 [ext_resource type="Script" path="res://scripts/Map.cs" id="1_pa1ge"]
@@ -17,6 +17,7 @@
 [ext_resource type="Script" path="res://scripts/WalkOverSound.cs" id="16_yq8ar"]
 [ext_resource type="Texture2D" uid="uid://desfy4vbdj1ld" path="res://assets/tilemaps/TX Props.png" id="18_mna0q"]
 [ext_resource type="Texture2D" uid="uid://dtw1kjrq4qor4" path="res://assets/tilemaps/TX Tileset Grass.png" id="19_jd32h"]
+[ext_resource type="PackedScene" uid="uid://cth35h6b6wlx7" path="res://scenes/levels/HauntedForest/insideSmallHouse.tscn" id="19_qd0ov"]
 [ext_resource type="Texture2D" uid="uid://cmooytb3c0mki" path="res://assets/sprites/Pasted image.png" id="20_lgqcj"]
 [ext_resource type="Script" path="res://scripts/Interaction/ItemAdder.cs" id="21_2au4o"]
 [ext_resource type="Script" path="res://scripts/AI/AiNode.cs" id="22_8wkxe"]
@@ -45,7 +46,7 @@
 [ext_resource type="Texture2D" uid="uid://d1yvwy2drdwqd" path="res://assets/tilemaps/Reg tree wall.png" id="38_dsao3"]
 [ext_resource type="Texture2D" uid="uid://cn0pcaddy8lcv" path="res://assets/tilemaps/TX Struct.png" id="39_jhhw6"]
 [ext_resource type="Texture2D" uid="uid://bxo85wuubsbn2" path="res://assets/tilemaps/TX Tileset Wall.png" id="40_6y0o1"]
-[ext_resource type="Texture2D" uid="uid://dupi1mwbxnhef" path="res://assets/tilemaps/CaveTileset.png" id="44_3be5u"]
+[ext_resource type="Texture2D" uid="uid://doa646stnhnlu" path="res://assets/tilemaps/CaveTileset.png" id="44_3be5u"]
 [ext_resource type="TileSet" uid="uid://drgqbpyytiqxq" path="res://scenes/levels/CaveTileset.tres" id="44_njbx8"]
 [ext_resource type="TileSet" uid="uid://d2huqyd455jkj" path="res://assets/tilemaps/CratersTileset.tres" id="44_pqt0n"]
 [ext_resource type="Texture2D" uid="uid://cf35q1itw0rjk" path="res://assets/tilemaps/OtherTileset.png" id="44_ue1vq"]
@@ -14778,7 +14779,7 @@ texture_region_size = Vector2i(32, 32)
 0:0/size_in_atlas = Vector2i(7, 9)
 0:0/0 = 0
 0:0/0/texture_origin = Vector2i(0, 128)
-0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-5, 13, -4, 14, 8, 15, 16, 7, 31, -8, 38, -10, 56, -11, 81, -9, 85, -7, 95, -7, 98, -10, 86, -21, 65, -42, 64, -46, 87, -58, 100, -58, 101, -60, 89, -65, 69, -70, 63, -82, 61, -86, 61, -102, 60, -122, 60, -130, 61, -272, -61, -272, -59, -89, -60, -83, -61, -74, -61, -64, -66, -55, -73, -51, -85, -47, -86, -43, -79, -41, -59, -33, -59, -31, -62, -24, -69, -17, -80, -7, -89, -1, -86, 4, -78, 5, -63, 3, -49, -4, -33, -6, -17, -5, -8, 0, -3, 8)
+0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-59.2163, 3.3073, -84.4147, 3.62228, -88.6444, -2.89542, -77.5082, -11.8044, -63.6993, -25.1679, -58.7993, -34.5223, -83.7445, -41.6495, -86.4172, -49.2222, -72.6082, -51.8948, -61.472, -58.1311, -60.5811, -75.9491, -60.1357, -87.9762, -37.8632, -93.7671, 12.4726, -91.0944, 60.5811, -89.758, 61.9175, -75.5037, 74.8355, -67.0401, 99.3352, -61.6947, 100.226, -57.6857, 80.6263, -55.9039, 65.9265, -47.4404, 65.9265, -38.9768, 80.6263, -24.7224, 96.2171, -10.9135, 94.8807, -7.79536, 67.2629, -8.68626, 47.6631, -10.9135, 32.0724, -10.0226, 32.0724, -47.8858, 23.1634, -63.0311, 4.4545, -67.0401, -18.2634, -65.2583, -32.0723, -51.8948, -32.5178, -6.45901, -46.6171, -4.25223, -57.3264, 0.157501)
 
 [sub_resource type="TileSet" id="TileSet_tgxmg"]
 tile_size = Vector2i(32, 32)
@@ -14923,7 +14924,7 @@ texture_region_size = Vector2i(32, 32)
 12:1/size_in_atlas = Vector2i(5, 9)
 12:1/0 = 0
 12:1/0/texture_origin = Vector2i(0, 128)
-12:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-70, 15.25, 67.5, 16.25, 66.5059, -52.4751, 70.4345, -58.6486, 72.6794, -201.763, 0.841843, -246.1, -72.6794, -199.518, -73.8019, -55.2813, -69.8733, -53.5976)
+12:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-20.3293, 15.2028, -69.4733, 15.5564, -69.8268, -55.8614, -73.7159, -57.2757, -74.3901, -196.889, 0.793701, -247.635, 70.5, -198, 72.3855, -58.7993, 67.931, -54.7903, 67.4856, 15.5907, 16, 16, 16, -16, 53.5467, -15.119, 54.8066, -75.5952, 54.8066, -183.948, -4.40973, -224.266, -58.5863, -186.468, -58.5131, -78.8424, -57.4524, -17.3241, -20.6829, -16.9706)
 17:5/size_in_atlas = Vector2i(7, 5)
 17:5/0 = 0
 17:5/0/texture_origin = Vector2i(0, 64)
@@ -14947,25 +14948,27 @@ vertices = PackedVector2Array(14513, -10165, 14519, 6775.99, -14133, 6772, 13685
 polygons = Array[PackedInt32Array]([PackedInt32Array(0, 1, 2, 3), PackedInt32Array(3, 2, 4, 5)])
 outlines = Array[PackedVector2Array]([PackedVector2Array(-14143, 6782, -14143, -13823, 13696, -13824, 13695, -10176, 14523, -10175, 14529, 6786), PackedVector2Array(441.376, 2548.91, 716.14, 2538.64, 721.255, 2638.77, 461.107, 2617.72)])
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_g520r"]
+size = Vector2(190.043, 242.52)
+
+[sub_resource type="SegmentShape2D" id="SegmentShape2D_i54bb"]
+a = Vector2(-14, -120)
+b = Vector2(-14, 132)
+
 [node name="Node2D" type="Node2D"]
 position = Vector2(2595, 2509)
 script = ExtResource("1_pa1ge")
 _darknessCircleDamage = 1
 _allyHealthChangeIntervall = 5.0
 
-[node name="Tutorial" parent="." instance=ExtResource("48_3yv6f")]
-offset_left = 536.0
-offset_top = 898.0
-offset_right = 536.0
-offset_bottom = 898.0
-
-[node name="Ally" parent="." node_paths=PackedStringArray("_responseField", "_nameLabel", "Chat") instance=ExtResource("6_l8h37")]
+[node name="Ally" parent="." node_paths=PackedStringArray("_responseField", "_nameLabel", "Chat", "_animPlayer") instance=ExtResource("6_l8h37")]
 position = Vector2(923, 2052)
 _responseField = NodePath("ResponseField")
 _nameLabel = NodePath("Label")
 _visionRadius = 200
 _interactionRadius = 250
 Chat = NodePath("Ally1Cam/Ally1Chat")
+_animPlayer = NodePath("AnimationPlayer2")
 
 [node name="Ally1Cam" type="Camera2D" parent="Ally"]
 light_mask = 2
@@ -15059,12 +15062,13 @@ shadow_filter = 2
 shadow_filter_smooth = 2.3
 texture_scale = 14.0
 
-[node name="Ally2" parent="." node_paths=PackedStringArray("_responseField", "_nameLabel", "Chat") groups=["navigation"] instance=ExtResource("6_l8h37")]
+[node name="Ally2" parent="." node_paths=PackedStringArray("_responseField", "_nameLabel", "Chat", "_animPlayer") groups=["navigation"] instance=ExtResource("6_l8h37")]
 position = Vector2(289, 2015)
 _responseField = NodePath("ResponseField")
 _nameLabel = NodePath("Label")
 _visionRadius = 200
 Chat = NodePath("Ally2Cam/Ally2Chat")
+_animPlayer = NodePath("AnimationPlayer2")
 
 [node name="Ally2Cam" type="Camera2D" parent="Ally2"]
 light_mask = 2
@@ -15294,7 +15298,7 @@ scale = Vector2(4, 4)
 tile_set = ExtResource("24_igx6k")
 
 [node name="Big House" parent="Abandoned Village" instance=ExtResource("13_05imv")]
-position = Vector2(8601, -2333)
+position = Vector2(8387, -2364)
 scale = Vector2(3, 3)
 ObjectName = "Big House"
 ObjectDescription = "The biggest house in the village. It doesn't seem like anyone lived there, but more like the ghosts gathered there"
@@ -15303,7 +15307,7 @@ Interactable = false
 RemovedAfter = false
 
 [node name="Door_sound" type="Node2D" parent="Abandoned Village/Big House" node_paths=PackedStringArray("WalkingObject", "WalkingObject2", "Sound")]
-position = Vector2(0.333658, -0.333618)
+position = Vector2(0.666664, -1.33337)
 scale = Vector2(0.333333, 0.333333)
 script = ExtResource("16_yq8ar")
 InsideRadius = 10.0
@@ -15320,6 +15324,7 @@ position = Vector2(-221, -475.001)
 script = ExtResource("25_0y114")
 SceneToShow = ExtResource("26_vmw0c")
 Radius = 500
+NeedsToBeInInventoryName = 11
 
 [node name="InsideBigHouse2" parent="Abandoned Village/Sprite2D" instance=ExtResource("26_vmw0c")]
 z_index = 30
@@ -15329,6 +15334,21 @@ scale = Vector2(3.7, 3.7)
 [node name="VisibleForAI" type="Node2D" parent="Abandoned Village/Sprite2D"]
 script = ExtResource("6_7bcmx")
 NameForAi = "Big House"
+
+[node name="SmallHouse" parent="Abandoned Village/Sprite2D" instance=ExtResource("13_05imv")]
+position = Vector2(539.001, 1937)
+ObjectName = "Small House"
+
+[node name="InsideSmallHouse" parent="Abandoned Village/Sprite2D" instance=ExtResource("19_qd0ov")]
+z_index = 30
+position = Vector2(550.001, 1808)
+scale = Vector2(4, 5)
+
+[node name="ShowWhileInRadius" type="Node2D" parent="Abandoned Village/Sprite2D"]
+position = Vector2(540, 1479)
+script = ExtResource("25_0y114")
+SceneToShow = ExtResource("19_qd0ov")
+Radius = 500
 
 [node name="HauntedForestVillageAiNode" parent="Abandoned Village" instance=ExtResource("13_05imv")]
 position = Vector2(8649, -1315)
@@ -15504,6 +15524,7 @@ offset_top = 1955.0
 offset_right = 1457.0
 offset_bottom = 2618.0
 _ally = NodePath("../Ally")
+_enableIntroScene = false
 
 [node name="Landscape" type="Control" parent="."]
 visible = false
@@ -15748,3 +15769,66 @@ position = Vector2(516, 1737)
 ObjectName = "BEGINNING OF THE GAME"
 ObjectDescription = "Greet the commander in a friendly tone, ask for his name and tell him to move upwards."
 ObjectHint = "Keep explaining to the commander what our missions is for the first few messages but stop if he indicates he understood everything."
+
+[node name="Tutorial" parent="." instance=ExtResource("48_3yv6f")]
+offset_left = 536.0
+offset_top = 898.0
+offset_right = 536.0
+offset_bottom = 898.0
+_enableTutorial = false
+
+[node name="Tombstone" parent="." instance=ExtResource("13_05imv")]
+position = Vector2(3836, -1047)
+ObjectName = "Tombstone"
+RemovedAfter = false
+ItemAdderMessage = PackedStringArray("You picked up: Key, looks like it\'ll work on a chest")
+AddedMaterial = 11
+
+[node name="Sprite2D" type="Sprite2D" parent="Tombstone"]
+texture = ExtResource("18_mna0q")
+
+[node name="Anderes" type="TileMapLayer" parent="Tombstone"]
+y_sort_enabled = true
+tile_map_data = PackedByteArray("AAASACMAAAAFAAQAAAATACcAAAAFAAQAAAAWACgAAAAGAAUAAAAaACgAAAAFAAQAAAAdACQAAAAFAAQAAAAcACEAAAAGAAUAAAAaAB8AAAAFAAQAAAAUAB8AAAAFAAQAAAAUABIAAAADAAUAAAAWABMAAAAAAAEAAAAXABMAAAABAAEAAAArAAYAAAALAAIAAAArAAcAAAALAAIAAAArAAgAAAALAAIAAAArAAkAAAALAAIAAAArAAoAAAALAAIAAAAtAAwAAAAMAAMAAAAuAAwAAAAMAAMAAAAxAAwAAAAMAAMAAAAzAAwAAAAMAAMAAAA0AAwAAAAMAAMAAAA1AAwAAAAMAAMAAAA2AAwAAAANAAMAAAA2AAsAAAALAAEAAAA3AAsAAAANAAMAAAArAAsAAAALAAMAAAAsAAwAAAALAAMAAAAsAAsAAAANAAEAAAA3AAoAAAANAAIAAAA3AAkAAAANAAIAAAA3AAgAAAANAAIAAAA3AAcAAAANAAIAAAA3AAYAAAANAAIAAAArAAUAAAALAAEAAAAsAAUAAAANAAMAAAAsAAQAAAAOAAIAAAA2AAQAAAAOAAIAAAA2AAUAAAALAAMAAAA3AAUAAAANAAEAAAAtAAoAAAAHAAUAAAAvAAsAAAAHAAUAAAAxAAkAAAAHAAUAAAAuAAgAAAAHAAUAAAAwAAcAAAAHAAUAAAAtAAYAAAAHAAUAAAAzAAcAAAAHAAUAAAAyAAYAAAAHAAUAAAA1AAYAAAAHAAUAAAA1AAkAAAAHAAUAAAA0AAsAAAAHAAUAAAAvAAwAAAAMAAMAAAAwAAwAAAAMAAMAAAAyAAwAAAAMAAMAAAA1AAQAAAAFAAQAAAAtAAQAAAAFAAQAAABLAPf/AAADAAUAAABNAO//AAAGAAUAAAA7AOr/AAACAAUAAAA4AOf/AAACAAUAAAA1APL/AAAFAAQAAAAxAO3/AAAFAAQAAABDAPn/AAAGAAUAAAAyAPn/AAADAAUAAAAvAPT/AAAFAAQAAAA8AAAAAAAGAAUAAABKAP//AAAEAAUAAABEAAEAAAADAAUAAABOAPj/AAAGAAUAAABNAP3/AAAGAAUAAABVAPn/AAAFAAQAAABTAOn/AAAAAAUAAABQAOT/AAADAAUAAABJAOX/AAADAAUAAAAvAOf/AAACAAUAAABZAOf/AAAAAAUAAABZAO3/AAAAAAUAAABVAPP/AAACAAUAAABVAP3/AAAFAAQAAABRAAEAAAAEAAUAAAA6AAYAAAAFAAQAAABCAAcAAAAGAAUAAABVAAYAAAAEAAUAAABNAAMAAAAGAAUAAAAZAA8AAAAIAAQAAAAIABIAAAAHAAUAAAA+ANv/AAADAAUAAABDAN7/AAADAAUAAAA9AOH/AAACAAUAAABEAOP/AAAEAAUAAAA8ANP/AAADAAUAAABEANP/AAADAAUAAABDANb/AAADAAUAAABEANn/AAACAAUAAAA8ANj/AAAEAAUAAAD//wAAAAAHAAUAAAABAAAAAAAHAAUAAAACAAAAAAAHAAUAAAACAP//AAAHAAUAAAACAP7/AAAHAAUAAAADAP7/AAAHAAUAAAADAP3/AAAHAAUAAAD8/wAAAAAHAAUAAAD+/wAAAAAHAAUAAAAAAAAAAAAHAAUAAAAAAP//AAAHAAUAAAAAAP7/AAAHAAUAAAAAAP3/AAAHAAUAAAD///3/AAAHAAUAAAD///z/AAAHAAUAAAD///v/AAAHAAUAAAD///7/AAAHAAUAAAD+/wIAAAAHAAUAAAD/////AAAHAAUAAAD9////AAAHAAUAAAD+////AAAHAAUAAAABAP7/AAAHAAUAAAABAP//AAAHAAUAAAABAAEAAAAHAAUAAAABAAIAAAAHAAUAAAA=")
+tile_set = SubResource("TileSet_tur7q")
+
+[node name="Big Tree" parent="." instance=ExtResource("13_05imv")]
+unique_name_in_owner = true
+position = Vector2(5562, -7925)
+ObjectName = "Big Tree"
+ObjectDescription = "A massive tree that is surrounded by scrub and looks damaged"
+Interactable = false
+CustomOverrideMessage = "You've successfully removed the scrub from the tree and are now able to reach it"
+ShowWhileInRadius = true
+SceneToShow = null
+
+[node name="StaticBody2D" type="StaticBody2D" parent="Big Tree"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Big Tree/StaticBody2D"]
+z_index = 50
+position = Vector2(100, -141)
+rotation = -1.56722
+shape = SubResource("RectangleShape2D_g520r")
+
+[node name="CaveEntrance" parent="." instance=ExtResource("13_05imv")]
+unique_name_in_owner = true
+position = Vector2(2025, -8275)
+ObjectName = "Cave entrance"
+ObjectDescription = "Seems like a locked entracne with a small terminal next to it. Maybe there is some nfc device needed to enter."
+Interactable = false
+CustomOverrideMessage = "The door opens slowly and a big dark cave apperas behind it"
+
+[node name="StaticBody2D" type="StaticBody2D" parent="CaveEntrance"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CaveEntrance/StaticBody2D"]
+z_index = 1
+shape = SubResource("SegmentShape2D_i54bb")
+
+[node name="Scar" parent="." instance=ExtResource("13_05imv")]
+unique_name_in_owner = true
+position = Vector2(5655, -8113)
+ObjectName = "Scar"
+ObjectDescription = "A big scar on the tree which could be the reason for the tree looking dead"
+Interactable = false
+CustomOverrideMessage = "The tree seems to have recovered from the injurys and opens up to give the entrance to it's inside."
+ShowWhileInRadius = true
