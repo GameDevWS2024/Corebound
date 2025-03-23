@@ -9,8 +9,6 @@ using Game.Scenes.Levels;
 using Game.Scripts.AI;
 using Game.Scripts.Items;
 
-using GenerativeAI.Exceptions;
-
 using Godot;
 
 using Vector2 = Godot.Vector2;
@@ -26,26 +24,24 @@ public partial class Ally : CharacterBody2D
     private Health _health = null!;
     protected Game.Scripts.Core _core = null!;
     public Inventory SsInventory = new Inventory(12);
+    private AudioOutput _audioOutput = null!;
 
-    private RichTextLabel _ally1ResponseField = null!;
-    private RichTextLabel _ally2ResponseField = null!;
 
-    [Export] private int _visionRadius = 300;
-    [Export] private int _interactionRadius = 150;
+    private RichTextLabel _ally1ResponseField = null!, _ally2ResponseField = null!;
+
+    [Export] private int _visionRadius = 300, _interactionRadius = 150;
+
     private bool _interactOnArrival, _busy, _reached, _harvest, _returning;
+    public bool IsTextBoxReady = true, Lit;
+
 
     [Export] public Chat Chat = null!;
     public Map? Map;
     [Export] public VisibleForAI[] AlwaysVisible = [];
     private GenerativeAI.Methods.ChatSession? _chat;
     private GeminiService? _geminiService;
-    private readonly List<string> _interactionHistory = [];
-    AnimationPlayer _animPlayer = null!;
+    [Export] AnimationPlayer _animPlayer = null!;
     private PointLight2D _coreLight = null!;
-
-    public Boolean Lit = false;
-
-    [Export] private int _maxHistory = 5; // Number of interactions to keep
 
     private PointLight2D _torch = null!;
 
@@ -78,11 +74,12 @@ public partial class Ally : CharacterBody2D
 
         _ally1ResponseField = GetNode<RichTextLabel>("ResponseField");
         _ally2ResponseField = GetNode<RichTextLabel>("ResponseField");
+        _audioOutput = Chat.GetNode<AudioOutput>("Speech");
 
         _core = GetTree().GetNodesInGroup("Core").OfType<Core>().FirstOrDefault()!;
         Map = GetTree().Root.GetNode<Map>("Node2D");
 
-        //sorgt dafür dass die zwei allies am Anfang nicht weg rennen
+        //sorgt dafür dass die zwei allies am Anfang nicht wegrennen
         PathFindingMovement.TargetPosition = this.GlobalPosition;
 
         _geminiService = Chat.GeminiService;
@@ -178,7 +175,7 @@ public partial class Ally : CharacterBody2D
     public override void _PhysicsProcess(double delta)
     {
 
-        if (this.GlobalPosition.DistanceTo(_otherAlly.GlobalPosition) > 500)
+        if (this.GlobalPosition.DistanceTo(_otherAlly.GlobalPosition) > 1500)
         {
             _hasSeenOtherAlly = false;
         }
@@ -240,7 +237,7 @@ public partial class Ally : CharacterBody2D
             SsInventory.HardSwapItems(Items.Material.Torch, Items.Material.LightedTorch);
 
             // async func call to print response to torch lighting
-            Chat.SendSystemMessage("The torch has now been lit by the commander using the CORE. Tell the Commander what a genius idea it was to use the Core for that purpose and hint the commander back at the haunted forest village.");
+            Chat.SendSystemMessage("The torch has now been lit by the commander using the CORE. Tell the Commander what a genius idea it was to use the Core for that purpose and hint the commander back at the haunted forest village.", null);
 
             //GD.Print("homie hat die Fackel und ist am core");
             /* GD.Print("Distance to core" + GlobalPosition.DistanceTo(GetNode<Core>("%Core").GlobalPosition));
@@ -257,7 +254,6 @@ public partial class Ally : CharacterBody2D
             if (_returning)
             {
                 PointLight2D cl = _core.GetNode<PointLight2D>("CoreLight");
-                Vector2 targ = new Vector2(0, 500);// cl.GlobalPosition; Target = core
                 PathFindingMovement.TargetPosition = _core.GlobalPosition;
                 GD.Print("Target position (should be CORE): " + PathFindingMovement.TargetPosition.ToString());
             }
@@ -273,31 +269,71 @@ public partial class Ally : CharacterBody2D
 
 
     private List<(string, string)>? _matches;
-
     private readonly Queue<string> _responseQueue = new Queue<string>();
-    public async void HandleResponse(string response)
+    public Queue<String> GetResponseQueue()
     {
+        return _responseQueue;
+    }
+    public async void HandleResponse(string response, Ally? sender)
+    {
+        GD.Print($"{Name} received message from: {(sender == null ? "null" : sender.Name)}, Response: {response}"); // ADD THIS
+        if (sender == this)
+        {
+            return; // Ignore messages from myself to prevent infinite talking loops
+        }
+
+        // send text to AudioOutput Script
+        if (_audioOutput.Synthesize)
+        {
+            string spokenResponse = "couldn't extract";
+            foreach ((string op, string content) in ExtractRelevantLines(response))
+            {
+                if (op == "RESPONSE")
+                {
+                    spokenResponse = content.Replace("\"", "");
+                }
+            }
+
+            if (spokenResponse != "couldn't extract")
+            {
+                _audioOutput.GenerateAndPlaySpeech(spokenResponse);
+                GeminiService? geminiService = new(ProjectSettings.GlobalizePath("res://api_key.secret"), "You will get tasks of choosing an appropriate emotion for a text. Reply ONLY with the responding emotion, nothing else.");
+
+                _audioOutput.DefaultStyle = await geminiService.InternalSendMessage("Choose a correct emotion for the following text. \n" + spokenResponse + " \n The emotion options are: newscast, angry, cheerful, sad, excited, friendly, terrified, shouting, unfriendly, whispering, hopeful. Choose one and reply ONLY(!) with that emotion exactly as it is written here.\n");  // retrieve correct style from ai.
+                _audioOutput.DefaultStyle = _audioOutput!.DefaultStyle.Replace("\n", "").ToLower();
+                GD.Print("\n" + _audioOutput.DefaultStyle + " \n");
+            }
+            else
+            {
+                GD.Print("Couldn't extract the relevant part to be spoken.");
+            }
+        }
+        //
+
         _responseQueue.Enqueue(response);
         ProcessResponseQueue();
 
-        // probably not necesary here
-        // GD.Print("got response of length: " + response.Length + ". Waiting for: " + (int)(1000 * 0.009f * response.Length) + " ms.");
-        // await Task.Delay((int)(1000*0.01f * response.Length));
+        // probably not necessary here
+        GD.Print("got response of length: " + response.Length + ". Waiting for: " + (int)(1000 * 0.009f * response.Length) + " ms.");
+        await Task.Delay((int)(1000 * 0.015f * response.Length));
+
     }
 
     private async void ProcessResponseQueue()
     {
         while (_responseQueue.Count > 0)
         {
-            string response = _responseQueue.Dequeue(); // dequeue response
+            IsTextBoxReady = false;
+            string response = _responseQueue.Dequeue();
+            GD.Print($"{Name}: processing response: {response}");
 
-            /*
-            if (_hasSeenOtherAlly)
+
+
+            /*if (!_hasSeenOtherAlly)
             {
-                _otherAlly.Chat.SendSystemMessage("Hello, this is "+this.Name+", the other ally speaking to you. Before, I've said "+response+ ". What do you think about that?]");
-                // Hier Sprechblase einblenden für ms Anzahl: 1000*0.008f*response.Length
-            }
-            */
+                _otherAlly.Chat.SendSystemMessage("Hello, this is " + this.Name + ", the other ally speaking to you. Before, I've said " + response + ". What do you think about that?]", this);
+                _hasSeenOtherAlly = true;
+            }*/
 
             _matches = ExtractRelevantLines(response); // Split lines into tuples. Put command in first spot, args in second spot, keep only tuples with an allowed command
             string? richtext = "";
@@ -311,6 +347,7 @@ public partial class Ally : CharacterBody2D
             // formatted text with TypeWriter effect into response field
             ButtonControl buttonControl = GetTree().Root.GetNode<ButtonControl>("Node2D/UI");
             await buttonControl.TypeWriterEffect(richtext, _responseField);
+            IsTextBoxReady = true;
         }
     }
 

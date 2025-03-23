@@ -21,7 +21,7 @@ public partial class Interactable : Node2D
         if (!string.IsNullOrEmpty(SystemMessageForAlly) && caller.Name.ToString().Contains("Ally"))
         {
             Ally ally = (caller as Ally)!;
-            ally.Chat.SendSystemMessage(SystemMessageForAlly);
+            ally.Chat.SendSystemMessage(SystemMessageForAlly, ally);
         }
         EmitSignal(SignalName.Interact);
         EmitSignal(SignalName.InteractFromNode, caller);

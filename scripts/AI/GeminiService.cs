@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Transactions;
 
 using GenerativeAI.Exceptions;
 using GenerativeAI.Methods;
@@ -11,12 +13,12 @@ using GenerativeAI.Models;
 using GenerativeAI.Types;
 
 using Godot;
+using Godot.Collections;
 
 namespace Game.Scripts.AI;
 
-public class GeminiService
+public partial class GeminiService : Node
 {
-    public bool Busy = false;
     private readonly GenerativeModel _model;
     public ChatSession Chat;
     public GeminiService(string apiKeyFilePath, string systemPrompt) // Add systemPrompt parameter
@@ -37,15 +39,17 @@ public class GeminiService
             {
                 throw new InvalidOperationException("API key file is empty");
             }
-            _model = new GenerativeModel(apiKey: apiKey, model: "gemini-2.0-pro-exp-02-05");
-
-            _model.SafetySettings =
-            [
-                new SafetySetting { Category = HarmCategory.HARM_CATEGORY_HARASSMENT, Threshold = HarmBlockThreshold.BLOCK_NONE },
-                new SafetySetting { Category = HarmCategory.HARM_CATEGORY_HATE_SPEECH, Threshold = HarmBlockThreshold.BLOCK_NONE },
-                new SafetySetting { Category = HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, Threshold = HarmBlockThreshold.BLOCK_NONE },
-                new SafetySetting { Category = HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, Threshold = HarmBlockThreshold.BLOCK_NONE }
-            ];
+            _model = new GenerativeModel(apiKey: apiKey, model: "gemini-2.0-flash-lite")
+            {
+                // gemini-2.0-pro-exp-02-05
+                SafetySettings =
+                [
+                    new SafetySetting { Category = HarmCategory.HARM_CATEGORY_HARASSMENT, Threshold = HarmBlockThreshold.BLOCK_NONE },
+                    new SafetySetting { Category = HarmCategory.HARM_CATEGORY_HATE_SPEECH, Threshold = HarmBlockThreshold.BLOCK_NONE },
+                    new SafetySetting { Category = HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, Threshold = HarmBlockThreshold.BLOCK_NONE },
+                    new SafetySetting { Category = HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, Threshold = HarmBlockThreshold.BLOCK_NONE }
+                ]
+            };
 
             Chat = _model.StartChat(new StartChatParams());
 
@@ -63,6 +67,11 @@ public class GeminiService
 
     private readonly Queue<string> _queryQueue = new Queue<string>();
     private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
+
+    public bool IsBusy()
+    {
+        return _queryQueue.Count > 0;
+    }
 
     public async Task<string?> MakeQuery(string input)
     {
@@ -114,7 +123,7 @@ public class GeminiService
         }
     }
 
-    private async Task<string?> InternalSendMessage(string input)
+    public async Task<string?> InternalSendMessage(string input)
     {
         string? result = null;
         try

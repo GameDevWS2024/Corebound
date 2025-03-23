@@ -1,4 +1,7 @@
+using System;
+
 using Game.Scenes.Levels;
+using Game.Scripts;
 
 using Godot;
 
@@ -6,9 +9,12 @@ public partial class PathFindingMovement : Node
 {
     [Signal] public delegate void ReachedTargetEventHandler();
 
-    [Export] private int _minTargetDistance = 30;
+    [Export] private int _minTargetDistance = 40;
     [Export] private int _targetDistanceVariation = 50; // Not currently used, consider removing or implementing variation
-    [Export] private int _speed = 250; //was 250
+    [Export] private int _speed = 250;
+    [Export] int _minimumSpeed = 50;
+    private int _origMinimumSpeed;
+
     [Export] bool _debug = false;
 
     [Export] CharacterBody2D _character = null!;
@@ -36,6 +42,7 @@ public partial class PathFindingMovement : Node
 
     public override void _Ready()
     {
+        _origMinimumSpeed = _minimumSpeed;
         _currentTargetDistance = _minTargetDistance;
         this.CallDeferred("ActorSetup"); // Still good to defer setup
         _bumpSound = GetTree().Root.GetNode<AudioStreamPlayer>("Node2D/AudioManager/bump_sound");
@@ -56,6 +63,8 @@ public partial class PathFindingMovement : Node
 
     public override void _PhysicsProcess(double delta)
     {
+        _speed = 250;
+
         _agent.SetTargetPosition(TargetPosition); // Keep this for consistent target setting
 
         if (_debug)
@@ -69,9 +78,15 @@ public partial class PathFindingMovement : Node
         if (distanceToTarget > _currentTargetDistance)
         {
             _reachedTarget = false;
-            Vector2 currentLocation = _character.GlobalPosition;
-            Vector2 nextLocation = _agent.GetNextPathPosition();
-            Vector2 newVel = (nextLocation - currentLocation).Normalized() * _speed;
+            Vector2 currentLocation = _character.GlobalPosition, nextLocation = _agent.GetNextPathPosition();
+
+            Motivation motivation = GetParent().GetNode<Motivation>("Motivation");
+            double motivationFactor = (double)motivation.Amount / 10;
+            int modifiedSpeed = (int)(_minimumSpeed + (_speed - _minimumSpeed) * motivationFactor);
+            Ally ally = GetParent().GetParent().GetChild<Ally>(0);
+            Chat chat = ally.FindChild("Speech").GetParent() as Chat ?? throw new InvalidOperationException();
+            _minimumSpeed = (chat!.GeminiService.IsBusy() || ally!.GetResponseQueue().Count > 0 || !ally!.IsTextBoxReady) ? 0 : _origMinimumSpeed; // dont move while responding or if more than one response is being processed.
+            Vector2 newVel = (nextLocation - currentLocation).Normalized() * modifiedSpeed;
             if (nextLocation.X < currentLocation.X)
             {
                 CurrentDirection = WalkingState.Left;
@@ -96,7 +111,7 @@ public partial class PathFindingMovement : Node
                     if (_character.Name == "Ally" && _buttonControl.CurrentCamera == 1 || _character.Name == "Ally2" && _buttonControl.CurrentCamera == 2)
                     {
                         _lastCollider = collision.GetCollider(); // Aktualisieren
-                        _bumpSound.Play();
+                        _bumpSound!.Play();
                         _recentlyBumped = true;
                     }
                 }

@@ -1,5 +1,5 @@
 import argparse
-import azure.cognitiveservices.speech as speechsdk
+import azure.cognitiveservices.speech as speechsdk # type: ignore
 import sys
 
 def synthesize_speech(text_to_speak, vname, vstyle, intensity):
@@ -8,7 +8,7 @@ def synthesize_speech(text_to_speak, vname, vstyle, intensity):
     region = "westeurope"
 
     ##############################
-    audioOutput = "D:/CS Living Light/scripts/output.wav"
+    audioOutput = "D:/Corebound/scripts/output.wav"
     ##############################
 
     # Create a Speech Config object
@@ -22,7 +22,7 @@ def synthesize_speech(text_to_speak, vname, vstyle, intensity):
     <speak xmlns:mstts="http://www.w3.org/2001/mstts" version='1.0' xml:lang='en-US'>
         <voice name='{vname}'>
             <mstts:express-as style='{vstyle}' styledegree="2">
-                <prosody rate='+50%' pitch='medium' volume='+25%'>
+                <prosody rate='+0%' pitch='medium' volume='+0%'>
                     <s emotion='{vstyle}' level='{intensity}'>{text_to_speak}</s>
                 </prosody>
             </mstts:express-as>

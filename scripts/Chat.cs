@@ -12,7 +12,7 @@ namespace Game.Scripts
 {
     public partial class Chat : LineEdit
     {
-        [Signal] public delegate void ResponseReceivedEventHandler(string response);
+        [Signal] public delegate void ResponseReceivedEventHandler(string response, Ally? sender);
 
         [Export(PropertyHint.File, "ally_system_prompt.txt")]
         private string? _systemPromptFile;
@@ -20,19 +20,18 @@ namespace Game.Scripts
         //  [Export(PropertyHint.File, "introduction_ally_system_prompt.txt")]
         //  private string? _introductionSystemPromptFile;
 
-        private Scripts.Ally _ally = null!;
+        private Ally _ally = null!;
 
-        public string SystemPrompt = "";
+        private string _systemPrompt = "";
         //    private string _introductionSystemPrompt = "";
         public GeminiService? GeminiService;
         private readonly string _apiKeyPath = ProjectSettings.GlobalizePath("res://api_key.secret");
-        private const string ChatPlaceholder = "Type here to chat";
-        private const string EnterApiPlaceholder = "Enter API key";
+        private const string ChatPlaceholder = "Type here to chat", EnterApiPlaceholder = "Enter API key";
+
         private int _responseCount;
-        public List<VisibleForAI> AlreadySeen = [];
+        private readonly List<VisibleForAI> _alreadySeen = [];
         private Godot.Collections.Array<Node> _entityList = null!;
-        private VisibleForAI _ally1VisibleForAi = null!;
-        private VisibleForAI _ally2VisibleForAi = null!;
+        private VisibleForAI _ally1VisibleForAi = null!, _ally2VisibleForAi = null!;
 
         public override void _Ready()
         {
@@ -44,10 +43,10 @@ namespace Game.Scripts
             string systemPromptAbsolutePath = ProjectSettings.GlobalizePath(_systemPromptFile);
             //   string introductionSystemPromptAbsolutePath = ProjectSettings.GlobalizePath(_introductionSystemPromptFile);
 
-            SystemPrompt = File.ReadAllText(systemPromptAbsolutePath); // Load system prompt into SystemPrompt
-                                                                       // _introductionSystemPrompt = File.ReadAllText(introductionSystemPromptAbsolutePath); // Load intro prompt
+            _systemPrompt = File.ReadAllText(systemPromptAbsolutePath); // Load system prompt into SystemPrompt
+                                                                        // _introductionSystemPrompt = File.ReadAllText(introductionSystemPromptAbsolutePath); // Load intro prompt
 
-            InitializeGeminiService(SystemPrompt); // Pass system prompt to InitializeGeminiService
+            InitializeGeminiService(_systemPrompt); // Pass system prompt to InitializeGeminiService
             /* foreach (Ally ally in GetTree().GetNodesInGroup("Entities").OfType<Ally>())
              {
                  if (ally.GetName().ToString().Contains('2'))
@@ -74,16 +73,13 @@ namespace Game.Scripts
                 foreach (VisibleForAI item in visibleItems)
                 {
                     bool isContains = false;
-                    foreach (VisibleForAI vfai in AlreadySeen)
+                    foreach (VisibleForAI vfai in _alreadySeen)
                     {
-                        if (vfai != null)
-                        {
-                            if (vfai == item) { isContains = true; break; }
-                        }
+                        if (vfai == item) { isContains = true; break; }
                     }
                     if (!isContains && item.NameForAi.Trim() != "")
                     {
-                        AlreadySeen.Add(item);
+                        _alreadySeen.Add(item);
                         newItems.Add(item);
                     }
                 }
@@ -91,8 +87,8 @@ namespace Game.Scripts
             if (newItems.Count > 0)
             {
                 GD.Print("prompt");
-                string alreadySeenFormatted = string.Join<VisibleForAI>("\n", AlreadySeen);
-                string newItemsFormatted = string.Join<VisibleForAI>("\n", newItems);
+                string alreadySeenFormatted = string.Join("\n", _alreadySeen);
+                string newItemsFormatted = string.Join("\n", newItems);
                 string completeInput = $"New Objects:\n\n{newItemsFormatted}\n\n" + $"Already Seen:\n\n{alreadySeenFormatted}\n\n" + "Player: ";
 
                 GD.Print($"-------------------------\nInput:\n{completeInput}");
@@ -100,7 +96,8 @@ namespace Game.Scripts
                 string? response = await GeminiService!.MakeQuery(completeInput);
                 if (response != null)
                 {
-                    EmitSignal(SignalName.ResponseReceived, response);
+                    Ally dummy = new Ally();
+                    EmitSignal(SignalName.ResponseReceived, response, dummy);
                     GD.Print($"----------------\nResponse:\n{response}");
                 }
                 else
@@ -132,8 +129,9 @@ namespace Game.Scripts
             }
         }
 
-        public async void SendSystemMessage(string systemMessage)
+        public async void SendSystemMessage(string systemMessage, Ally? sender)
         {
+            GD.Print($"Sending message from: {sender!.Name}, Message: {systemMessage}"); // ADD THIS
             try
             {
                 string? txt = await GeminiService!.MakeQuery("[SYSTEM MESSAGE] " + systemMessage + " [SYSTEM MESSAGE END] \n"); GD.Print(txt); // put it into text box
@@ -141,22 +139,21 @@ namespace Game.Scripts
                 {
                     GD.Print("AI response is null.");
                 }
-                GetParent<Camera2D>().GetParent<Ally>().HandleResponse(txt!);
+                GetParent<Camera2D>().GetParent<Ally>().HandleResponse(txt!, sender);
             }
             catch (Exception e)
             {
-                throw new GenerativeAIException("AI query got an error.", "at system_message: " + systemMessage);
+                throw new GenerativeAIException("AI query got an error.", "at system_message: " + systemMessage + " with error message " + e.Message);
             }
         }
 
 
         private async void OnTextSubmitted(string input)
         {
-
             List<VisibleForAI> visibleItems = _ally.GetCurrentlyVisible().Concat(_ally.AlwaysVisible).ToList();
-            string visibleItemsFormatted = string.Join<VisibleForAI>("\n", visibleItems);
-            string alreadySeenFormatted = string.Join<VisibleForAI>("\n", AlreadySeen);
-            string completeInput = $"New Objects:\n\n\n\n" + $"Already Seen:\n\n{alreadySeenFormatted}\n\n" + $"Player: {input}";
+            string visibleItemsFormatted = string.Join("\n", visibleItems),
+                alreadySeenFormatted = string.Join("\n", _alreadySeen),
+                completeInput = $"New Objects:\n\n\n\n" + $"Already Seen:\n\n{alreadySeenFormatted}\n\n" + $"Player: {input}";
             GD.Print($"-------------------------\nInput:\n{completeInput}");
 
             if (GeminiService != null)
@@ -164,7 +161,8 @@ namespace Game.Scripts
                 string? response = await GeminiService.MakeQuery(completeInput);
                 if (response != null)
                 {
-                    EmitSignal(SignalName.ResponseReceived, response);
+                    Ally dummy = new Ally();
+                    EmitSignal(SignalName.ResponseReceived, response, dummy);
                     GD.Print($"----------------\nResponse:\n{response}");
                 }
 
@@ -176,7 +174,7 @@ namespace Game.Scripts
             else
             {
                 await File.WriteAllTextAsync(_apiKeyPath, input.Trim());
-                InitializeGeminiService(SystemPrompt);
+                InitializeGeminiService(_systemPrompt);
             }
 
             Clear();
