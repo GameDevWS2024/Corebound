@@ -192,7 +192,8 @@ public partial class Inventory
         {
             if (Items[i]!.Material == originalMat)
             {
-                Items[i] = new Itemstack(newMat, 1);
+                Items[i]!.SetMaterial(newMat);
+                return;
             }
         }
     }

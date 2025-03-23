@@ -47,6 +47,7 @@ public partial class Ally : CharacterBody2D
     private PointLight2D _coreLight = null!;
 
     private PointLight2D _torch = null!;
+    private AiNode _well = null!;
 
     //Enum with states for ally in darkness, in bigger or smaller circle for map damage system
     public enum AllyState
@@ -60,6 +61,7 @@ public partial class Ally : CharacterBody2D
     private Ally _otherAlly = null!;
     public override void _Ready()
     {
+        _well = GetNode<AiNode>("%Well");
         _coreLight = GetParent().GetNode<PointLight2D>("%Core/%CoreLight");
         foreach (Ally ally in GetTree().GetNodesInGroup("Entities").OfType<Ally>().ToList())
         {
@@ -270,6 +272,13 @@ public partial class Ally : CharacterBody2D
         {
             _scar.Interactable = true;
         }
+        //Well logic:
+        if (GlobalPosition.DistanceTo(_well.GlobalPosition) < 300 &&
+            SsInventory.ContainsMaterial(Game.Scripts.Items.Material.BucketEmpty))
+        {
+            _well.Interactable = true;
+        }
+
     }//Node2D/Abandoned Village/HauntedForestVillage/Big House/Sprite2D/InsideBigHouse2/InsideBigHouse/Sprite2D/ChestInsideHouse
 
     private void UpdateTarget()
