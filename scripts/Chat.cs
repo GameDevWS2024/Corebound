@@ -26,14 +26,12 @@ namespace Game.Scripts
         //    private string _introductionSystemPrompt = "";
         public GeminiService? GeminiService;
         private readonly string _apiKeyPath = ProjectSettings.GlobalizePath("res://api_key.secret");
-        private const string ChatPlaceholder = "Type here to chat";
-        private const string EnterApiPlaceholder = "Enter API key";
+        private const string ChatPlaceholder = "Type here to chat", EnterApiPlaceholder = "Enter API key";
 
         private int _responseCount;
         private readonly List<VisibleForAI> _alreadySeen = [];
         private Godot.Collections.Array<Node> _entityList = null!;
-        private VisibleForAI _ally1VisibleForAi = null!;
-        private VisibleForAI _ally2VisibleForAi = null!;
+        private VisibleForAI _ally1VisibleForAi = null!, _ally2VisibleForAi = null!;
 
         public override void _Ready()
         {
@@ -98,7 +96,8 @@ namespace Game.Scripts
                 string? response = await GeminiService!.MakeQuery(completeInput);
                 if (response != null)
                 {
-                    EmitSignal(SignalName.ResponseReceived, response);
+                    Ally dummy = new Ally();
+                    EmitSignal(SignalName.ResponseReceived, response, dummy);
                     GD.Print($"----------------\nResponse:\n{response}");
                 }
                 else
@@ -130,9 +129,9 @@ namespace Game.Scripts
             }
         }
 
-        public async void SendSystemMessage(string systemMessage, Ally sender)
+        public async void SendSystemMessage(string systemMessage, Ally? sender)
         {
-            GD.Print($"Sending message from: {sender.Name}, Message: {systemMessage}"); // ADD THIS
+            GD.Print($"Sending message from: {sender!.Name}, Message: {systemMessage}"); // ADD THIS
             try
             {
                 string? txt = await GeminiService!.MakeQuery("[SYSTEM MESSAGE] " + systemMessage + " [SYSTEM MESSAGE END] \n"); GD.Print(txt); // put it into text box

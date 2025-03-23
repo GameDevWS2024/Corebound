@@ -17579,14 +17579,13 @@ script = ExtResource("1_pa1ge")
 _darknessCircleDamage = 1
 _allyHealthChangeIntervall = 5.0
 
-[node name="Ally" parent="." node_paths=PackedStringArray("_responseField", "_nameLabel", "Chat", "_animPlayer") instance=ExtResource("6_l8h37")]
+[node name="Ally" parent="." node_paths=PackedStringArray("_responseField", "_nameLabel", "Chat") instance=ExtResource("6_l8h37")]
 position = Vector2(923, 2052)
 _responseField = NodePath("ResponseField")
 _nameLabel = NodePath("Label")
 _visionRadius = 200
 _interactionRadius = 250
 Chat = NodePath("Ally1Cam/Ally1Chat")
-_animPlayer = NodePath("AnimationPlayer2")
 
 [node name="Ally1Cam" type="Camera2D" parent="Ally"]
 light_mask = 2
@@ -17619,6 +17618,10 @@ metadata/_edit_use_anchors_ = true
 
 [node name="Speech" type="Node" parent="Ally/Ally1Cam/Ally1Chat"]
 script = ExtResource("4_4unt6")
+Synthesize = true
+
+[node name="AiNode" parent="Ally/Ally1Cam/Ally1Chat" instance=ExtResource("13_05imv")]
+position = Vector2(8604, -13033)
 
 [node name="SpriteAlly1" type="Sprite2D" parent="Ally"]
 scale = Vector2(3, 3)
@@ -17673,13 +17676,12 @@ shadow_filter = 2
 shadow_filter_smooth = 2.3
 texture_scale = 14.0
 
-[node name="Ally2" parent="." node_paths=PackedStringArray("_responseField", "_nameLabel", "Chat", "_animPlayer") groups=["navigation"] instance=ExtResource("6_l8h37")]
+[node name="Ally2" parent="." node_paths=PackedStringArray("_responseField", "_nameLabel", "Chat") groups=["navigation"] instance=ExtResource("6_l8h37")]
 position = Vector2(289, 2015)
 _responseField = NodePath("ResponseField")
 _nameLabel = NodePath("Label")
 _visionRadius = 200
 Chat = NodePath("Ally2Cam/Ally2Chat")
-_animPlayer = NodePath("AnimationPlayer2")
 
 [node name="Ally2Cam" type="Camera2D" parent="Ally2"]
 light_mask = 2
@@ -18011,7 +18013,8 @@ NameForAi = "Torch"
 position = Vector2(5631, -5569)
 ObjectName = "Torch"
 ObjectDescription = "An unlit Torch, engraved with ceremonial runes. It seems to important to just be burned, maybe it functions differently then a regular torch"
-ObjectHint = "Tell the commander about the object you just spotted. You may use the command [GOTO AND INTERACT]."
+ObjectHint = "Tell the commander about the object you just spotted. You may use the command  [INTERACT] or [GOTO AND INTERACT]."
+ItemAdderMessage = PackedStringArray("You picked up: ", "It could possibly be useful for seeing items that may have been out of sight for now if it is lit.")
 AddedMaterial = 7
 
 [node name="AudioManager" type="Node" parent="." node_paths=PackedStringArray("_menuMusic", "_gameMusic", "_gameOverMusic")]

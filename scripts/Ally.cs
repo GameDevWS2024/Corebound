@@ -240,7 +240,7 @@ public partial class Ally : CharacterBody2D
             SsInventory.HardSwapItems(Items.Material.Torch, Items.Material.LightedTorch);
 
             // async func call to print response to torch lighting
-            Chat.SendSystemMessage("The torch has now been lit by the commander using the CORE. Tell the Commander what a genius idea it was to use the Core for that purpose and hint the commander back at the haunted forest village.", this);
+            Chat.SendSystemMessage("The torch has now been lit by the commander using the CORE. Tell the Commander what a genius idea it was to use the Core for that purpose and hint the commander back at the haunted forest village.", null);
 
             //GD.Print("homie hat die Fackel und ist am core");
             /* GD.Print("Distance to core" + GlobalPosition.DistanceTo(GetNode<Core>("%Core").GlobalPosition));
@@ -272,15 +272,12 @@ public partial class Ally : CharacterBody2D
 
 
     private List<(string, string)>? _matches;
-
     private readonly Queue<string> _responseQueue = new Queue<string>();
-
     public Queue<String> GetResponseQueue()
     {
         return _responseQueue;
     }
-
-    public async void HandleResponse(string response, Ally sender)
+    public async void HandleResponse(string response, Ally? sender)
     {
         GD.Print($"{Name} received message from: {(sender == null ? "null" : sender.Name)}, Response: {response}"); // ADD THIS
         if (sender == this)
@@ -335,11 +332,11 @@ public partial class Ally : CharacterBody2D
 
 
 
-            if (!_hasSeenOtherAlly)
+            /*if (!_hasSeenOtherAlly)
             {
                 _otherAlly.Chat.SendSystemMessage("Hello, this is " + this.Name + ", the other ally speaking to you. Before, I've said " + response + ". What do you think about that?]", this);
                 _hasSeenOtherAlly = true;
-            }
+            }*/
 
             _matches = ExtractRelevantLines(response); // Split lines into tuples. Put command in first spot, args in second spot, keep only tuples with an allowed command
             string? richtext = "";

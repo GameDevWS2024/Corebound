@@ -19,7 +19,6 @@ namespace Game.Scripts.AI;
 
 public partial class GeminiService : Node
 {
-    public bool Busy = false;
     private readonly GenerativeModel _model;
     public ChatSession Chat;
     public GeminiService(string apiKeyFilePath, string systemPrompt) // Add systemPrompt parameter
