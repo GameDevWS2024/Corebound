@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Game.Scenes.Levels;
@@ -18,348 +19,392 @@ namespace Game.Scripts;
 
 public partial class Ally : CharacterBody2D
 {
-	[Export] RichTextLabel _responseField = null!;
-	[Export] public PathFindingMovement PathFindingMovement = null!;
-	[Export] private Label _nameLabel = null!;
-	private Motivation _motivation = null!;
-	private Health _health = null!;
-	protected Game.Scripts.Core _core = null!;
-	public Inventory SsInventory = new Inventory(12);
-	private AudioOutput _audioOutput = null!;
+    [Export] RichTextLabel _responseField = null!;
+    [Export] public PathFindingMovement PathFindingMovement = null!;
+    [Export] private Label _nameLabel = null!;
+    private Motivation _motivation = null!;
+    private Health _health = null!;
+    protected Game.Scripts.Core _core = null!;
+    public Inventory SsInventory = new Inventory(12);
+    private AudioOutput _audioOutput = null!;
 
 
-	private RichTextLabel _ally1ResponseField = null!, _ally2ResponseField = null!;
+    private RichTextLabel _ally1ResponseField = null!, _ally2ResponseField = null!;
 
-	[Export] private int _visionRadius = 300, _interactionRadius = 150;
+    [Export] private int _visionRadius = 300, _interactionRadius = 150;
 
-	private bool _interactOnArrival, _busy, _reached, _harvest, _returning;
-	public bool IsTextBoxReady = true, Lit;
+    private bool _interactOnArrival, _busy, _reached, _harvest, _returning;
+    public bool IsTextBoxReady = true, Lit;
 
-	public bool AnimationIsAlreadyPlaying = false;
+    public bool AnimationIsAlreadyPlaying = false;
 
-	[Export] public Chat Chat = null!;
-	public Map? Map;
-	[Export] public VisibleForAI[] AlwaysVisible = [];
-	private GenerativeAI.Methods.ChatSession? _chat;
-	private GeminiService? _geminiService;
-	[Export] public AnimationPlayer _animPlayer = null!;
-	private PointLight2D _coreLight = null!;
+    [Export] public Chat Chat = null!;
+    public Map? Map;
+    [Export] public VisibleForAI[] AlwaysVisible = [];
+    private GenerativeAI.Methods.ChatSession? _chat;
+    private GeminiService? _geminiService;
+    [Export] public AnimationPlayer _animPlayer = null!;
+    private PointLight2D _coreLight = null!;
 
-	private PointLight2D _torch = null!;
-	private AiNode _well = null!;
+    private PointLight2D _torch = null!;
+    private AiNode _well = null!;
 
-	//Enum with states for ally in darkness, in bigger or smaller circle for map damage system
-	public enum AllyState
-	{
-		Darkness,
-		SmallCircle,
-		BigCircle
-	}
-	public AllyState CurrentState { get; private set; } = AllyState.SmallCircle;
+    // --- Semaphore for Response Processing ---
+    private readonly SemaphoreSlim _responseSemaphore = new(1, 1);
 
-	private Ally _otherAlly = null!;
-	public override void _Ready()
-	{
-		_well = GetTree().Root.GetNode<AiNode>("Node2D/%Well");
-		_coreLight = GetParent().GetNode<PointLight2D>("%Core/%CoreLight");
-		foreach (Ally ally in GetTree().GetNodesInGroup("Entities").OfType<Ally>().ToList())
-		{
-			if (ally != this)
-			{
-				_otherAlly = ally;
-			}
-		}
-		/*
-		SsInventory.AddItem(new Itemstack(Game.Scripts.Items.Material.Torch));
-		lit = true; */
-		// SsInventory.AddItem(new Itemstack(Items.Material.FestiveStaff, 1));
-		// SsInventory.AddItem(new Itemstack(Items.Material.Copper, 1));
-		SsInventory.AddItem(new Itemstack(Items.Material.BucketWater, 1));
-		_torch = GetNode<PointLight2D>("AllyTorch");
-		_ally1ResponseField = GetNode<RichTextLabel>("ResponseField");
-		_ally2ResponseField = GetNode<RichTextLabel>("ResponseField");
-		_audioOutput = Chat.GetNode<AudioOutput>("Speech");
 
-		_core = GetTree().GetNodesInGroup("Core").OfType<Core>().FirstOrDefault()!;
-		Map = GetTree().Root.GetNode<Map>("Node2D");
+    //Enum with states for ally in darkness, in bigger or smaller circle for map damage system
+    public enum AllyState
+    {
+        Darkness,
+        SmallCircle,
+        BigCircle
+    }
 
-   
+    public AllyState CurrentState { get; private set; } = AllyState.SmallCircle;
 
-		_geminiService = Chat.GeminiService;
-		_chat = _geminiService!.Chat;
-		if (_chat == null)
-		{
-			GD.PrintErr("Chat node is not assigned in the editor!");
-			return;
-		}
-		if (_geminiService == null)
-		{
-			GD.PrintErr("Gemini node is not assigned in the editor!");
-			return;
-		}
-		base._Ready();
-		_motivation = GetNode<Motivation>("Motivation");
-		_health = GetNode<Health>("Health");
+    private Ally _otherAlly = null!;
 
-		GD.Print(GetTree().GetFirstNodeInGroup("Core").GetType());
+    public override void _Ready()
+    {
+        _well = GetTree().Root.GetNode<AiNode>("Node2D/%Well");
+        _coreLight = GetParent().GetNode<PointLight2D>("%Core/%CoreLight");
+        foreach (Ally ally in GetTree().GetNodesInGroup("Entities").OfType<Ally>().ToList())
+        {
+            if (ally != this)
+            {
+                _otherAlly = ally;
+            }
+        }
 
-		PathFindingMovement = GetNode<PathFindingMovement>("PathFindingMovement");
-		//sorgt dafür dass die zwei allies am Anfang nicht wegrennen
-		PathFindingMovement.TargetPosition = GlobalPosition;
+        /*
+        SsInventory.AddItem(new Itemstack(Game.Scripts.Items.Material.Torch));
+        lit = true; */
+        // SsInventory.AddItem(new Itemstack(Items.Material.FestiveStaff, 1));
+        // SsInventory.AddItem(new Itemstack(Items.Material.Copper, 1));
+        SsInventory.AddItem(new Itemstack(Items.Material.BucketWater, 1));
+        _torch = GetNode<PointLight2D>("AllyTorch");
+        _ally1ResponseField = GetNode<RichTextLabel>("ResponseField");
+        _ally2ResponseField = GetNode<RichTextLabel>("ResponseField");
+        _audioOutput = Chat.GetNode<AudioOutput>("Speech");
 
-		if (PathFindingMovement == null)
-		{
-			GD.Print("PathFindingMovement node is not assigned in the editor!");
-		}
-		Chat.Visible = false;
-		PathFindingMovement!.ReachedTarget += HandleTargetReached;
-		if (PathFindingMovement == null)
-		{
-			GD.PrintErr("PathFindingMovement node is not assigned in the editor!");
-		}
-		Chat.ResponseReceived += HandleResponse;
-		_animPlayer = GetNode<AnimationPlayer>("AnimationPlayer2");
-		_animPlayer.Play("Idle-Left");
-	}
-
-	private void HandleTargetReached()
-	{
-		GD.Print("HandleTargetReached");
-		if (_interactOnArrival)
-		{
-			GD.Print("interacting on arrival\n\n");
-			Interact();
-			_interactOnArrival = false;
-		}
-		else
-		{
-			GD.Print("interacting off but reached target. \n\n");
-		}
-	}
-
-	public List<VisibleForAI> GetCurrentlyVisible()
-	{
-		IEnumerable<VisibleForAI> visibleForAiNodes =
-			GetTree().GetNodesInGroup(VisibleForAI.GroupName).OfType<VisibleForAI>();
-		return visibleForAiNodes.Where(node => GlobalPosition.DistanceTo(node.GlobalPosition) <= _visionRadius).Where(node => node.GetParent() != this)
-			.ToList();
-	}
-
-	public List<Interactable> GetCurrentlyInteractables()
-	{
-		IEnumerable<Interactable> interactable =
-			GetTree().GetNodesInGroup(Interactable.GroupName).OfType<Interactable>();
-		return interactable.Where(node => GlobalPosition.DistanceTo(node.GlobalPosition) <= _interactionRadius)
-			.ToList();
-	}
-
-	public void SetAllyInDarkness()
-	{
-		// Berechne den Abstand zwischen Ally und Core
-		Vector2 distance = this.GlobalPosition - _coreLight.GlobalPosition;
-		float distanceLength = distance.Length(); // Berechne die Länge des Vektors
-
-		// If ally further away than big circle, he is in the darkness
-		if (distanceLength > Core.LightRadiusBiggerCircle)
-		{
-			CurrentState = AllyState.Darkness;
-		}
-		//if ally not in darkness and closer than the small Light Radius, he is in small circle
-		else if (distanceLength < Core.LightRadiusSmallerCircle)
-		{
-			CurrentState = AllyState.SmallCircle;
-		}
-		//if ally not in darkness and not in small circle, ally is in big circle
-		else
-		{
-			CurrentState = AllyState.BigCircle;
-		}
-
-	}
-
-	private void playPlayerAnimation(){
-		if (PathFindingMovement.CurrentDirection == PathFindingMovement.WalkingState.Left)
-		{
-			_animPlayer.Play("Walk-Left");
-		}
-		else if (PathFindingMovement.CurrentDirection == PathFindingMovement.WalkingState.Right)
-		{
-			_animPlayer.Play("Walk-Right");
-		}
-		else if (PathFindingMovement.CurrentDirection == PathFindingMovement.WalkingState.IdleLeft)
-		{
-			_animPlayer.Play("Idle-Left");
-		}
-		else { _animPlayer.Play("Idle-Right"); }
-	}
-
-	private bool _hasSeenOtherAlly = false;
-	public override void _PhysicsProcess(double delta)
-	{
-
-		if (GlobalPosition.DistanceTo(_otherAlly.GlobalPosition) > 1500)
-		{
-			_hasSeenOtherAlly = false;
-		}
-
-		if (!_torch.Enabled)
-		{
-			if (Lit)
-			{
-				_torch.Enabled = true;
-			}
-		}
-
-		if (!_hasSeenOtherAlly)
-		{
-			foreach (VisibleForAI vfai in GetCurrentlyVisible())
-			{
-				if (vfai.GetParent() != this && vfai.GetParent() is Ally)
-				{
-					_hasSeenOtherAlly = true;
-				}
-			}
-		}
+        _core = GetTree().GetNodesInGroup("Core").OfType<Core>().FirstOrDefault()!;
+        Map = GetTree().Root.GetNode<Map>("Node2D");
 
 
 
-		//Check where ally is (darkness, bigger, smaller)
-		SetAllyInDarkness();
+        _geminiService = Chat.GeminiService;
+        _chat = _geminiService!.Chat;
+        if (_chat == null)
+        {
+            GD.PrintErr("Chat node is not assigned in the editor!");
+            return;
+        }
 
-		UpdateTarget();
+        if (_geminiService == null)
+        {
+            GD.PrintErr("Gemini node is not assigned in the editor!");
+            return;
+        }
 
-		if(!AnimationIsAlreadyPlaying){
-			playPlayerAnimation();
-		}
-		else if(!_animPlayer.IsPlaying()){
-				AnimationIsAlreadyPlaying = false;
-		}
+        base._Ready();
+        _motivation = GetNode<Motivation>("Motivation");
+        _health = GetNode<Health>("Health");
 
-		_reached = GlobalPosition.DistanceTo(PathFindingMovement.TargetPosition) < 150;
+        GD.Print(GetTree().GetFirstNodeInGroup("Core").GetType());
+
+        PathFindingMovement = GetNode<PathFindingMovement>("PathFindingMovement");
+        //sorgt dafür dass die zwei allies am Anfang nicht wegrennen
+        PathFindingMovement.TargetPosition = GlobalPosition;
+
+        if (PathFindingMovement == null)
+        {
+            GD.Print("PathFindingMovement node is not assigned in the editor!");
+        }
+
+        Chat.Visible = false;
+        PathFindingMovement!.ReachedTarget += HandleTargetReached;
+        if (PathFindingMovement == null)
+        {
+            GD.PrintErr("PathFindingMovement node is not assigned in the editor!");
+        }
+
+        Chat.ResponseReceived += HandleResponse;
+        _animPlayer = GetNode<AnimationPlayer>("AnimationPlayer2");
+        _animPlayer.Play("Idle-Left");
+    }
+
+    private void HandleTargetReached()
+    {
+        GD.Print("HandleTargetReached");
+        if (_interactOnArrival)
+        {
+            GD.Print("interacting on arrival\n\n");
+            Interact();
+            _interactOnArrival = false;
+        }
+        else
+        {
+            GD.Print("interacting off but reached target. \n\n");
+        }
+    }
+
+    public List<VisibleForAI> GetCurrentlyVisible()
+    {
+        IEnumerable<VisibleForAI> visibleForAiNodes =
+            GetTree().GetNodesInGroup(VisibleForAI.GroupName).OfType<VisibleForAI>();
+        return visibleForAiNodes.Where(node => GlobalPosition.DistanceTo(node.GlobalPosition) <= _visionRadius)
+            .Where(node => node.GetParent() != this)
+            .ToList();
+    }
+
+    public List<Interactable> GetCurrentlyInteractables()
+    {
+        IEnumerable<Interactable> interactable =
+            GetTree().GetNodesInGroup(Interactable.GroupName).OfType<Interactable>();
+        return interactable.Where(node => GlobalPosition.DistanceTo(node.GlobalPosition) <= _interactionRadius)
+            .ToList();
+    }
+
+    public void SetAllyInDarkness()
+    {
+        // Berechne den Abstand zwischen Ally und Core
+        Vector2 distance = this.GlobalPosition - _coreLight.GlobalPosition;
+        float distanceLength = distance.Length(); // Berechne die Länge des Vektors
+
+        // If ally further away than big circle, he is in the darkness
+        if (distanceLength > Core.LightRadiusBiggerCircle)
+        {
+            CurrentState = AllyState.Darkness;
+        }
+        //if ally not in darkness and closer than the small Light Radius, he is in small circle
+        else if (distanceLength < Core.LightRadiusSmallerCircle)
+        {
+            CurrentState = AllyState.SmallCircle;
+        }
+        //if ally not in darkness and not in small circle, ally is in big circle
+        else
+        {
+            CurrentState = AllyState.BigCircle;
+        }
+
+    }
+
+    private void playPlayerAnimation()
+    {
+        if (PathFindingMovement.CurrentDirection == PathFindingMovement.WalkingState.Left)
+        {
+            _animPlayer.Play("Walk-Left");
+        }
+        else if (PathFindingMovement.CurrentDirection == PathFindingMovement.WalkingState.Right)
+        {
+            _animPlayer.Play("Walk-Right");
+        }
+        else if (PathFindingMovement.CurrentDirection == PathFindingMovement.WalkingState.IdleLeft)
+        {
+            _animPlayer.Play("Idle-Left");
+        }
+        else { _animPlayer.Play("Idle-Right"); }
+    }
+
+    private bool _hasSeenOtherAlly = false;
+
+    public override void _PhysicsProcess(double delta)
+    {
+
+        if (GlobalPosition.DistanceTo(_otherAlly.GlobalPosition) > 1500)
+        {
+            _hasSeenOtherAlly = false;
+        }
+
+        if (!_torch.Enabled)
+        {
+            if (Lit)
+            {
+                _torch.Enabled = true;
+            }
+        }
+
+        if (!_hasSeenOtherAlly)
+        {
+            foreach (VisibleForAI vfai in GetCurrentlyVisible())
+            {
+                if (vfai.GetParent() != this && vfai.GetParent() is Ally)
+                {
+                    _hasSeenOtherAlly = true;
+                }
+            }
+        }
 
 
-		if (_harvest && _reached) // Harvest logic
-		{
-			Harvest();
-		}
+
+        //Check where ally is (darkness, bigger, smaller)
+        SetAllyInDarkness();
+
+        UpdateTarget();
+
+        if (!AnimationIsAlreadyPlaying)
+        {
+            playPlayerAnimation();
+        }
+        else if (!_animPlayer.IsPlaying())
+        {
+            AnimationIsAlreadyPlaying = false;
+        }
+
+        _reached = GlobalPosition.DistanceTo(PathFindingMovement.TargetPosition) < 150;
 
 
-		//Torch logic:
-		if (SsInventory.ContainsMaterial(Game.Scripts.Items.Material.Torch) && GlobalPosition.DistanceTo(new Vector2(3095, 4475)) < 300)
-		{
-			Lit = true;
-			// remove unlit torch from inv and add lighted torch
-			SsInventory.HardSwapItems(Items.Material.Torch, Items.Material.LightedTorch);
-
-			// async func call to print response to torch lighting
-			Chat.SendSystemMessage("The torch has now been lit by the commander using the CORE. Tell the Commander what a genius idea it was to use the Core for that purpose and hint the commander back at the haunted forest village.", null);
-
-			//GD.Print("homie hat die Fackel und ist am core");
-			/* GD.Print("Distance to core" + GlobalPosition.DistanceTo(GetNode<Core>("%Core").GlobalPosition));
-			 GD.Print("Core position" + GetNode<Core>("%Core").GlobalPosition);
-			 GD.Print("Core position" + GetNode<PointLight2D>("%CoreLight").GlobalPosition);
-			 */
-		}
-
-	}//Node2D/Abandoned Village/HauntedForestVillage/Big House/Sprite2D/InsideBigHouse2/InsideBigHouse/Sprite2D/ChestInsideHouse
-
-	private void UpdateTarget()
-	{
-		if (_harvest)
-		{
-			if (_returning)
-			{
-				PointLight2D cl = _core.GetNode<PointLight2D>("CoreLight");
-				PathFindingMovement.TargetPosition = _core.GlobalPosition;
-				GD.Print("Target position (should be CORE): " + PathFindingMovement.TargetPosition.ToString());
-			}
-			else
-			{
-				Location nearestLocation = Map.GetNearestItemLocation(new Location(GlobalPosition))!;
-				//GD.Print("going to nearest loc("+nearestLocation.X +", "+nearestLocation.Y+") from "+ GlobalPosition.X + " " + GlobalPosition.Y);    //Target = nearest item
-				PathFindingMovement.TargetPosition = nearestLocation.ToVector2();
-
-			}
-		}
-	}
+        if (_harvest && _reached) // Harvest logic
+        {
+            Harvest();
+        }
 
 
-	private List<(string, string)>? _matches;
-	private readonly Queue<string> _responseQueue = new Queue<string>();
-	public Queue<String> GetResponseQueue()
-	{
-		return _responseQueue;
-	}
-	public async void HandleResponse(string response, Ally? sender)
-	{
-		GD.Print($"{Name} received message from: {(sender == null ? "null" : sender.Name)}, Response: {response}"); // ADD THIS
-		if (sender == this)
-		{
-			return; // Ignore messages from myself to prevent infinite talking loops
-		}
+        //Torch logic:
+        if (SsInventory.ContainsMaterial(Game.Scripts.Items.Material.Torch) &&
+            GlobalPosition.DistanceTo(new Vector2(3095, 4475)) < 300)
+        {
+            Lit = true;
+            // remove unlit torch from inv and add lighted torch
+            SsInventory.HardSwapItems(Items.Material.Torch, Items.Material.LightedTorch);
 
-		// send text to AudioOutput Script
-		if (_audioOutput.Synthesize)
-		{
-			string spokenResponse = "couldn't extract";
-			foreach ((string op, string content) in ExtractRelevantLines(response))
-			{
-				if (op == "RESPONSE")
-				{
-					spokenResponse = content.Replace("\"", "");
-				}
-			}
+            // async func call to print response to torch lighting
+            Chat.SendSystemMessage(
+                "The torch has now been lit by the commander using the CORE. Tell the Commander what a genius idea it was to use the Core for that purpose and hint the commander back at the haunted forest village.",
+                null);
 
-			if (spokenResponse != "couldn't extract")
-			{
-				_audioOutput.GenerateAndPlaySpeech(spokenResponse);
-				GeminiService? geminiService = new(ProjectSettings.GlobalizePath("res://api_key.secret"), "You will get tasks of choosing an appropriate emotion for a text. Reply ONLY with the responding emotion, nothing else.");
+            //GD.Print("homie hat die Fackel und ist am core");
+            /* GD.Print("Distance to core" + GlobalPosition.DistanceTo(GetNode<Core>("%Core").GlobalPosition));
+             GD.Print("Core position" + GetNode<Core>("%Core").GlobalPosition);
+             GD.Print("Core position" + GetNode<PointLight2D>("%CoreLight").GlobalPosition);
+             */
+        }
 
-				_audioOutput.DefaultStyle = await geminiService.InternalSendMessage("Choose a correct emotion for the following text. \n" + spokenResponse + " \n The emotion options are: newscast, angry, cheerful, sad, excited, friendly, terrified, shouting, unfriendly, whispering, hopeful. Choose one and reply ONLY(!) with that emotion exactly as it is written here.\n");  // retrieve correct style from ai.
-				_audioOutput.DefaultStyle = _audioOutput!.DefaultStyle.Replace("\n", "").ToLower();
-				GD.Print("\n" + _audioOutput.DefaultStyle + " \n");
-			}
-			else
-			{
-				GD.Print("Couldn't extract the relevant part to be spoken.");
-			}
-		}
+    } //Node2D/Abandoned Village/HauntedForestVillage/Big House/Sprite2D/InsideBigHouse2/InsideBigHouse/Sprite2D/ChestInsideHouse
+
+    private void UpdateTarget()
+    {
+        if (_harvest)
+        {
+            if (_returning)
+            {
+                PointLight2D cl = _core.GetNode<PointLight2D>("CoreLight");
+                PathFindingMovement.TargetPosition = _core.GlobalPosition;
+                GD.Print("Target position (should be CORE): " + PathFindingMovement.TargetPosition.ToString());
+            }
+            else
+            {
+                Location nearestLocation = Map.GetNearestItemLocation(new Location(GlobalPosition))!;
+                //GD.Print("going to nearest loc("+nearestLocation.X +", "+nearestLocation.Y+") from "+ GlobalPosition.X + " " + GlobalPosition.Y);    //Target = nearest item
+                PathFindingMovement.TargetPosition = nearestLocation.ToVector2();
+
+            }
+        }
+    }
 
 
-		_responseQueue.Enqueue(response);
-		ProcessResponseQueue();
+    private List<(string, string)>? _matches;
+    private readonly Queue<string> _responseQueue = new Queue<string>();
 
-	}
+    public Queue<String> GetResponseQueue()
+    {
+        return _responseQueue;
+    }
 
-	private async void ProcessResponseQueue() // Changed to async Task
-{
-	while (_responseQueue.Count > 0)
-	{
-		IsTextBoxReady = false; // Consider removing this; see below
-		string response = _responseQueue.Dequeue();
-		GD.Print($"{Name}: processing response: {response}");
+    public async void HandleResponse(string response, Ally? sender)
+    {
+        GD.Print(
+            $"{Name} received message from: {(sender == null ? "null" : sender.Name)}, Response: {response}"); // ADD THIS
+        if (sender == this)
+        {
+            return; // Ignore messages from myself to prevent infinite talking loops
+        }
 
-		_matches = ExtractRelevantLines(response);
+        // --- Semaphore Usage ---
+        await _responseSemaphore.WaitAsync(); // Acquire the semaphore
+        try
+        {
+            // --- Critical Section ---
 
-		// Use a StringBuilder for efficiency
-		StringBuilder richtextBuilder = new StringBuilder();
-		foreach ((string op, string content) in _matches!)
-		{
-			richtextBuilder.Append(FormatPart(op, content));
-			DecideWhatCommandToDo(op, content);
-		}
-		string richtext = richtextBuilder.ToString();
+            // send text to AudioOutput Script
+            if (_audioOutput.Synthesize)
+            {
+                string spokenResponse = "couldn't extract";
+                foreach ((string op, string content) in ExtractRelevantLines(response))
+                {
+                    if (op == "RESPONSE")
+                    {
+                        spokenResponse = content.Replace("\"", "");
+                    }
+                }
 
-		// Get the ButtonControl (consider caching this)
-		ButtonControl buttonControl = GetTree().Root.GetNode<ButtonControl>("Node2D/UI");
+                if (spokenResponse != "couldn't extract")
+                {
+                    _audioOutput.GenerateAndPlaySpeech(spokenResponse);
+                    GeminiService? geminiService = new(ProjectSettings.GlobalizePath("res://api_key.secret"),
+                        "You will get tasks of choosing an appropriate emotion for a text. Reply ONLY with the responding emotion, nothing else.");
 
-		await buttonControl.TypeWriterEffect(richtext, _responseField);
+                    _audioOutput.DefaultStyle = await geminiService.InternalSendMessage(
+                        "Choose a correct emotion for the following text. \n" + spokenResponse +
+                        " \n The emotion options are: newscast, angry, cheerful, sad, excited, friendly, terrified, shouting, unfriendly, whispering, hopeful. Choose one and reply ONLY(!) with that emotion exactly as it is written here.\n"); // retrieve correct style from ai.
+                    _audioOutput.DefaultStyle = _audioOutput!.DefaultStyle.Replace("\n", "").ToLower();
+                    GD.Print("\n" + _audioOutput.DefaultStyle + " \n");
+                }
+                else
+                {
+                    GD.Print("Couldn't extract the relevant part to be spoken.");
+                }
+            }
+        }
+        finally
+        {
+            _responseSemaphore.Release(); // *Always* release the semaphore
+        }
 
-		IsTextBoxReady = true; // Consider removing this; see below
-	}
-}
+        _responseQueue.Enqueue(response);
+        await ProcessResponseQueue();
 
-	private void DecideWhatCommandToDo(string command, string content)
+    }
+
+    private async Task ProcessResponseQueue()
+    {
+        try
+        {
+            while (_responseQueue.Count > 0)
+            {
+                IsTextBoxReady = false; // Consider removing this; see below
+                string response = _responseQueue.Dequeue();
+                GD.Print($"{Name}: processing response: {response}");
+
+                _matches = ExtractRelevantLines(response);
+
+                // Use a StringBuilder for efficiency
+                StringBuilder richtextBuilder = new();
+                foreach ((string op, string content) in _matches!)
+                {
+                    richtextBuilder.Append(FormatPart(op, content));
+                    DecideWhatCommandToDo(op, content);
+                }
+
+                string richtext = richtextBuilder.ToString();
+
+                // Get the ButtonControl (consider caching this)
+                ButtonControl buttonControl = GetTree().Root.GetNode<ButtonControl>("Node2D/UI");
+
+                await buttonControl.TypeWriterEffect(richtext, _responseField);
+
+                IsTextBoxReady = true; // Consider removing this; see below
+            }
+        }
+        catch (Exception e)
+        {
+            throw new Exception("Response Queue Exception"); 
+        }
+    }
+
+
+private void DecideWhatCommandToDo(string command, string content)
 	{
 		// differentiate what to do based on command op
 		switch (command)

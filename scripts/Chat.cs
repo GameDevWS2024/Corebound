@@ -2,13 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection.PortableExecutable;
+using System.Text;
 using System.Threading.Tasks;
-
 using Game.Scripts.AI;
-
 using GenerativeAI.Exceptions;
-
 using Godot;
 
 namespace Game.Scripts
@@ -21,13 +18,13 @@ namespace Game.Scripts
         private string? _systemPromptFile;
 
         private Ally _ally = null!;
-
         private string _systemPrompt = "";
         public GeminiService? GeminiService;
         private readonly string _apiKeyPath = ProjectSettings.GlobalizePath("res://api_key.secret");
         private const string ChatPlaceholder = "Type here to chat", EnterApiPlaceholder = "Enter API key";
 
-        private readonly List<VisibleForAI> _alreadySeen = [];
+        private readonly HashSet<VisibleForAI> _alreadySeen = [];
+        private Timer _seenItemsTimer = null!;
 
         public override void _Ready()
         {
@@ -39,61 +36,91 @@ namespace Game.Scripts
 
             InitializeGeminiService(_systemPrompt);
 
-            // Create a Timer to control SeenItems frequency
-            Timer timer = new()
-            {
-                WaitTime = 1.0f, // Adjust as needed (e.g., 1 second)
-                OneShot = false
-            };
-            timer.Timeout += OnTimerTimeout;
-            AddChild(timer);
-            timer.Start();
+            _seenItemsTimer = new Timer();
+            _seenItemsTimer.WaitTime = 1.0f;
+            _seenItemsTimer.OneShot = false;
+            _seenItemsTimer.Timeout += OnSeenItemsTimeout;
+            AddChild(_seenItemsTimer);
+            _seenItemsTimer.Start();
         }
 
-        private async void OnTimerTimeout() => SeenItems();
-
-        public async Task SeenItems()
+        private void OnSeenItemsTimeout()
         {
-            List<VisibleForAI> newItems = [], visibleItems = _ally.GetCurrentlyVisible();
+            List<VisibleForAI> visibleItems = _ally.GetCurrentlyVisible(), newItems = [];
+            Task.Run(() => Task.FromResult(ProcessSeenItems(visibleItems)));
+        }
+        
+         private async Task ProcessSeenItems(List<VisibleForAI> visibleItems)
+        {
+            // Diese Methode läuft jetzt in einem HINTERGRUNDTHREAD.
 
-            if (visibleItems.Count > 0)
+            // 1. Sammle die Daten (im Hintergrundthread).
+            List<VisibleForAI> newItems = [];
+            HashSet<string> alreadySeenNames = []; // Verwende HashSet<string> für effizienten Vergleich
+
+            // Baue das HashSet der bereits gesehenen Namen AUßERHALB der Schleife auf.
+            foreach (VisibleForAI item in _alreadySeen)
             {
-                foreach (VisibleForAI item in visibleItems)
-                {
-                    bool isContains = _alreadySeen.Contains(item);
-                    if (!isContains && !string.IsNullOrWhiteSpace(item.NameForAi))
-                    {
-                        _alreadySeen.Add(item);
-                        newItems.Add(item);
-                    }
-                }
+                alreadySeenNames.Add(item.NameForAi);
             }
 
-            if (newItems.Count > 0)
+            newItems.AddRange(visibleItems.Where(item => !alreadySeenNames.Contains(item.NameForAi) && !string.IsNullOrWhiteSpace(item.NameForAi)));
+
+            if (newItems.Count == 0)
             {
-                string alreadySeenFormatted = string.Join("\n", _alreadySeen.Select(v => v.NameForAi));
-                string newItemsFormatted = string.Join("\n", newItems.Select(v => v.NameForAi));
-                string completeInput = $"New Objects:\n\n{newItemsFormatted}\n\nAlready Seen:\n\n{alreadySeenFormatted}\n\nPlayer: ";
+                return; // Keine neuen Items, frühzeitiger Abbruch.
+            }
 
-                GD.Print($"-------------------------\nInput:\n{completeInput}");
+            // 2. Baue den String (immer noch im Hintergrundthread).
+            StringBuilder sb = new();
+            sb.AppendLine("New Objects:");
+            foreach (VisibleForAI item in newItems)
+            {
+                sb.AppendLine(item.NameForAi);
+            }
+            sb.AppendLine();
 
-                if (GeminiService != null)
-                {
-                    string? response = await GeminiService.MakeQuery(completeInput); // Run on background thread
-                    if (response != null)
-                    {
-                        Ally dummy = new();
-                        EmitSignal(SignalName.ResponseReceived, response, dummy);
-                        GD.Print($"----------------\nResponse:\n{response}");
-                    }
-                    else
-                    {
-                        GD.Print("No response");
-                    }
-                }
-                newItems.Clear();
+            sb.AppendLine("Already Seen:");
+            foreach (VisibleForAI item in _alreadySeen) // Gehe durch das Original-_alreadySeen
+            {
+                sb.AppendLine(item.NameForAi);
+            }
+            sb.AppendLine();
+            sb.Append("Player: "); // Kein Input hier.
+
+            string completeInput = sb.ToString();
+
+            // 3. Sende die Anfrage und warte auf die Antwort (immer noch im Hintergrundthread).
+            if (GeminiService != null)
+            {
+                string? response = await GeminiService.MakeQuery(completeInput);
+
+                // 4. Wechsle ZURÜCK zum Hauptthread, um die UI zu aktualisieren.  WICHTIG!
+                CallDeferred(nameof(HandleSeenItemsResponse), response);
+            }
+            //Füge die neuen Items zum _alreadySeen HashSet hinzu, NACHDEM du den String erstellt hast
+           foreach(VisibleForAI item in newItems)
+            {
+                _alreadySeen.Add(item);
             }
         }
+
+        private void HandleSeenItemsResponse(string response)
+        {
+            // Diese Methode läuft im HAUPTTHREAD.  Hier kannst du die UI sicher aktualisieren.
+
+            if (!string.IsNullOrEmpty(response))
+            {
+                EmitSignal(SignalName.ResponseReceived, response, new Ally()); //Verwende new Ally(), _ally kann im falschen Kontext sein
+                GD.Print($"----------------\nResponse:\n{response}");
+            }
+            else
+            {
+                GD.Print("No response");
+            }
+        }
+
+
 
         private void InitializeGeminiService(string systemPrompt)
         {
@@ -109,57 +136,69 @@ namespace Game.Scripts
             }
         }
 
-        public async void SendSystemMessage(string systemMessage, Ally? sender)
+        public async Task SendSystemMessage(string systemMessage, Ally? sender = null)
         {
-            GD.Print($"Sending message from: {sender!.Name}, Message: {systemMessage}");
-            try
+            if (sender is not null)
             {
-                string? txt = await Task.Run(() => GeminiService!.MakeQuery("[SYSTEM MESSAGE] " + systemMessage + " [SYSTEM MESSAGE END] \n"));
-                GD.Print(txt);
-                if (txt == null)
-                {
-                    GD.Print("AI response is null.");
-                }
-                GetParent<Camera2D>().GetParent<Ally>().HandleResponse(txt!, sender);
-            }
-            catch (Exception e)
-            {
-                throw new GenerativeAIException("AI query got an error.", "at system_message: " + systemMessage + " with error message " + e.Message);
-            }
-        }
-
-        private void OnTextSubmitted(string input)
-        {
-            Task.Run(() => HandleInputAsync(input));
-        }
-
-        private async Task HandleInputAsync(string input)
-        {
-            List<VisibleForAI> visibleItems = _ally.GetCurrentlyVisible().Concat(_ally.AlwaysVisible).ToList();
-            string alreadySeenFormatted = string.Join("\n", _alreadySeen.Select(v => v.NameForAi));
-            string completeInput = $"New Objects:\n\n\n\nAlready Seen:\n\n{alreadySeenFormatted}\n\nPlayer: {input}";
-
-            GD.Print($"-------------------------\nInput:\n{completeInput}");
-
-            if (GeminiService == null)
-            {
-                await File.WriteAllTextAsync(_apiKeyPath, input.Trim());
-                InitializeGeminiService(_systemPrompt);
+                await SendAiQuery($"[SYSTEM MESSAGE FROM {sender.Name}] " + systemMessage);
             }
             else
             {
-                string? response = await GeminiService.MakeQuery(completeInput); //Run on background thread
-                if (response != null || response == "")
+                await SendAiQuery("[SYSTEM MESSAGE] " + systemMessage);
+            }
+        }
+
+        private async Task SendAiQuery(string playerInput = "")
+        {
+            StringBuilder sb = new();
+
+            sb.AppendLine("New Objects:");
+            foreach (VisibleForAI item in _ally.GetCurrentlyVisible().Where(item => !_alreadySeen.Contains(item)))
+            {
+                sb.AppendLine(item.NameForAi);
+            }
+            sb.AppendLine();
+
+            sb.AppendLine("Already Seen:");
+            foreach (VisibleForAI item in _alreadySeen)
+            {
+                sb.AppendLine(item.NameForAi);
+            }
+            sb.AppendLine();
+            sb.Append("Player: ");
+            sb.AppendLine(playerInput);
+
+            string completeInput = sb.ToString();
+            GD.Print("SendAIQuery: Input = ", completeInput); // DEBUG: Zeige den vollständigen Input
+            
+            if (GeminiService != null)
+            {
+                GD.Print("SendAIQuery: GeminiService ist initialisiert."); // DEBUG
+                // Hier nutzen wir die Queue des GeminiService.
+                string? response = await GeminiService.MakeQuery(completeInput); //WICHTIG: await
+                GD.Print("SendAIQuery: Antwort von GeminiService erhalten: ", response); // DEBUG: Zeige die Antwort
+                if (!string.IsNullOrEmpty(response))
                 {
                     EmitSignal(SignalName.ResponseReceived, response, new Ally());
-                    GD.Print($"----------------\nResponse:\n{response}");
+                    GD.Print($"----------------\nResponse:\n{response}"); // Debug-Ausgabe
                 }
                 else
                 {
                     GD.Print("No response");
                 }
             }
-            Clear();
+            else if (!string.IsNullOrWhiteSpace(playerInput)) //API Key handling
+            {
+                await File.WriteAllTextAsync(_apiKeyPath, playerInput.Trim());
+                InitializeGeminiService(_systemPrompt);
+            }
+        }
+
+
+        private void OnTextSubmitted(string input)
+        {
+            _ = SendAiQuery(input); // Fire and forget.  Die GeminiService-Queue kümmert sich um die Reihenfolge.
+            Clear(); // Sofort clearen.
         }
     }
 }

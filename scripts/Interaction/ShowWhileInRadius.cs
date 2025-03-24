@@ -201,12 +201,12 @@ public partial class ShowWhileInRadius : Node2D
             }
         }
         //GD.Print(Interactable.TreeCured);
-        if (GetParent().Name == "Big Tree") {
+        /*if (GetParent().Name == "Big Tree") {
             Sprite2D? sprite = GetParent<Sprite2D>();
             {
                 SetShowSceneState(sprite, Interactable.TreeCured);
             }
-        } 
+        } */
 
 
     }
