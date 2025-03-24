@@ -1,4 +1,4 @@
-[gd_scene load_steps=126 format=4 uid="uid://dfkwq6qwtxw25"]
+[gd_scene load_steps=136 format=4 uid="uid://dfkwq6qwtxw25"]
 
 [ext_resource type="Script" path="res://scripts/EnemyManager.cs" id="1_bmkfv"]
 [ext_resource type="Script" path="res://scripts/Map.cs" id="1_pa1ge"]
@@ -56,6 +56,11 @@
 [ext_resource type="PackedScene" uid="uid://dr53bjmurlnut" path="res://scenes/Tutorial.tscn" id="48_3yv6f"]
 [ext_resource type="Script" path="res://scripts/Interaction/CodeInput.cs" id="48_x4dce"]
 [ext_resource type="Texture2D" uid="uid://b1n85g1blpu64" path="res://assets/tilemaps/Houses.png" id="49_pb6br"]
+[ext_resource type="Texture2D" uid="uid://btbhhgudfvdfi" path="res://assets/tilemaps/Bunny.png" id="52_pdfwa"]
+[ext_resource type="Texture2D" uid="uid://bcr2mau2uaa4b" path="res://assets/tilemaps/Flag.png" id="53_kkfhx"]
+[ext_resource type="Texture2D" uid="uid://cw7fmij4lq0tv" path="res://assets/tilemaps/Lantern.png" id="54_iwdtk"]
+[ext_resource type="Texture2D" uid="uid://bkx0vn2mex861" path="res://assets/tilemaps/Pile-of-stones.png" id="55_5e2xr"]
+[ext_resource type="Texture2D" uid="uid://c7xbk2ba3a0sb" path="res://assets/tilemaps/Pile-of-stones-color.png" id="56_8a5hh"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qwcva"]
 bg_color = Color(0.6, 0.6, 0.6, 0.654902)
@@ -14908,10 +14913,36 @@ texture_region_size = Vector2i(32, 32)
 4:2/0 = 0
 4:2/0/physics_layer_0/polygon_0/points = PackedVector2Array(-15.75, 31.5, -5, 31.5, -4.88219, 16, -16, 16)
 
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_j5sys"]
+texture = ExtResource("52_pdfwa")
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_voxev"]
+texture = ExtResource("53_kkfhx")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_fo6dc"]
+texture = ExtResource("54_iwdtk")
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_7xtww"]
+texture = ExtResource("55_5e2xr")
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ncroc"]
+texture = ExtResource("56_8a5hh")
+0:0/0 = 0
+
 [sub_resource type="TileSet" id="TileSet_tur7q"]
 tile_size = Vector2i(32, 32)
 physics_layer_0/collision_layer = 1
 sources/0 = SubResource("TileSetAtlasSource_gps7i")
+sources/1 = SubResource("TileSetAtlasSource_j5sys")
+sources/2 = SubResource("TileSetAtlasSource_voxev")
+sources/3 = SubResource("TileSetAtlasSource_fo6dc")
+sources/4 = SubResource("TileSetAtlasSource_7xtww")
+sources/5 = SubResource("TileSetAtlasSource_ncroc")
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_jtv04"]
 texture = ExtResource("49_pb6br")
@@ -15506,7 +15537,6 @@ offset_bottom = 2618.0
 _ally = NodePath("../Ally")
 
 [node name="Landscape" type="Control" parent="."]
-visible = false
 layout_mode = 3
 anchors_preset = 0
 offset_left = 1515.0
@@ -15515,7 +15545,6 @@ offset_right = 1555.0
 offset_bottom = -408.0
 
 [node name="VillageObjects" type="Control" parent="Landscape"]
-visible = false
 z_index = 2
 layout_mode = 3
 anchors_preset = 0
@@ -15525,7 +15554,6 @@ offset_right = -10685.0
 offset_bottom = 4334.0
 
 [node name="Fence" type="TileMapLayer" parent="Landscape"]
-visible = false
 z_index = 4
 position = Vector2(-10725, 4294)
 scale = Vector2(3, 3)
@@ -15637,7 +15665,7 @@ tile_set = SubResource("TileSet_l5ibe")
 
 [node name="Anderes" type="TileMapLayer" parent="Tilemaps/AlienTrees/RegularTrees"]
 y_sort_enabled = true
-tile_map_data = PackedByteArray("AAASACMAAAAFAAQAAAATACcAAAAFAAQAAAAWACgAAAAGAAUAAAAaACgAAAAFAAQAAAAdACQAAAAFAAQAAAAcACEAAAAGAAUAAAAaAB8AAAAFAAQAAAAUAB8AAAAFAAQAAAAUABIAAAADAAUAAAAWABMAAAAAAAEAAAAXABMAAAABAAEAAAArAAYAAAALAAIAAAArAAcAAAALAAIAAAArAAgAAAALAAIAAAArAAkAAAALAAIAAAArAAoAAAALAAIAAAAtAAwAAAAMAAMAAAAuAAwAAAAMAAMAAAAxAAwAAAAMAAMAAAAzAAwAAAAMAAMAAAA0AAwAAAAMAAMAAAA1AAwAAAAMAAMAAAA2AAwAAAANAAMAAAA2AAsAAAALAAEAAAA3AAsAAAANAAMAAAArAAsAAAALAAMAAAAsAAwAAAALAAMAAAAsAAsAAAANAAEAAAA3AAoAAAANAAIAAAA3AAkAAAANAAIAAAA3AAgAAAANAAIAAAA3AAcAAAANAAIAAAA3AAYAAAANAAIAAAArAAUAAAALAAEAAAAsAAUAAAANAAMAAAAsAAQAAAAOAAIAAAA2AAQAAAAOAAIAAAA2AAUAAAALAAMAAAA3AAUAAAANAAEAAAAtAAoAAAAHAAUAAAAvAAsAAAAHAAUAAAAxAAkAAAAHAAUAAAAuAAgAAAAHAAUAAAAwAAcAAAAHAAUAAAAtAAYAAAAHAAUAAAAzAAcAAAAHAAUAAAAyAAYAAAAHAAUAAAA1AAYAAAAHAAUAAAA1AAkAAAAHAAUAAAA0AAsAAAAHAAUAAAAvAAwAAAAMAAMAAAAwAAwAAAAMAAMAAAAyAAwAAAAMAAMAAAA1AAQAAAAFAAQAAAAtAAQAAAAFAAQAAABLAPf/AAADAAUAAABNAO//AAAGAAUAAAA7AOr/AAACAAUAAAA4AOf/AAACAAUAAAA1APL/AAAFAAQAAAAxAO3/AAAFAAQAAABDAPn/AAAGAAUAAAAyAPn/AAADAAUAAAAvAPT/AAAFAAQAAAA8AAAAAAAGAAUAAABKAP//AAAEAAUAAABEAAEAAAADAAUAAABOAPj/AAAGAAUAAABNAP3/AAAGAAUAAABVAPn/AAAFAAQAAABTAOn/AAAAAAUAAABQAOT/AAADAAUAAABJAOX/AAADAAUAAAAvAOf/AAACAAUAAABZAOf/AAAAAAUAAABZAO3/AAAAAAUAAABVAPP/AAACAAUAAABVAP3/AAAFAAQAAABRAAEAAAAEAAUAAAA6AAYAAAAFAAQAAABCAAcAAAAGAAUAAABVAAYAAAAEAAUAAABNAAMAAAAGAAUAAAAZAA8AAAAIAAQAAAAIABIAAAAHAAUAAAA+ANv/AAADAAUAAABDAN7/AAADAAUAAAA9AOH/AAACAAUAAABEAOP/AAAEAAUAAAA8ANP/AAADAAUAAABEANP/AAADAAUAAABDANb/AAADAAUAAABEANn/AAACAAUAAAA8ANj/AAAEAAUAAAA=")
+tile_map_data = PackedByteArray("AAASACMAAAAFAAQAAAATACcAAAAFAAQAAAAWACgAAAAGAAUAAAAaACgAAAAFAAQAAAAdACQAAAAFAAQAAAAcACEAAAAGAAUAAAAaAB8AAAAFAAQAAAAUAB8AAAAFAAQAAAAUABIAAAADAAUAAAAWABMAAAAAAAEAAAAXABMAAAABAAEAAAArAAYAAAALAAIAAAArAAcAAAALAAIAAAArAAgAAAALAAIAAAArAAkAAAALAAIAAAArAAoAAAALAAIAAAAtAAwAAAAMAAMAAAAuAAwAAAAMAAMAAAAxAAwAAAAMAAMAAAAzAAwAAAAMAAMAAAA0AAwAAAAMAAMAAAA1AAwAAAAMAAMAAAA2AAwAAAANAAMAAAA2AAsAAAALAAEAAAA3AAsAAAANAAMAAAArAAsAAAALAAMAAAAsAAwAAAALAAMAAAAsAAsAAAANAAEAAAA3AAoAAAANAAIAAAA3AAkAAAANAAIAAAA3AAgAAAANAAIAAAA3AAcAAAANAAIAAAA3AAYAAAANAAIAAAArAAUAAAALAAEAAAAsAAUAAAANAAMAAAAsAAQAAAAOAAIAAAA2AAQAAAAOAAIAAAA2AAUAAAALAAMAAAA3AAUAAAANAAEAAAAtAAoAAAAHAAUAAAAvAAsAAAAHAAUAAAAxAAkAAAAHAAUAAAAuAAgAAAAHAAUAAAAwAAcAAAAHAAUAAAAtAAYAAAAHAAUAAAAzAAcAAAAHAAUAAAAyAAYAAAAHAAUAAAA1AAYAAAAHAAUAAAA1AAkAAAAHAAUAAAA0AAsAAAAHAAUAAAAvAAwAAAAMAAMAAAAwAAwAAAAMAAMAAAAyAAwAAAAMAAMAAAA1AAQAAAAFAAQAAAAtAAQAAAAFAAQAAABLAPf/AAADAAUAAABNAO//AAAGAAUAAAA7AOr/AAACAAUAAAA4AOf/AAACAAUAAAA1APL/AAAFAAQAAAAxAO3/AAAFAAQAAABDAPn/AAAGAAUAAAAyAPn/AAADAAUAAAAvAPT/AAAFAAQAAAA8AAAAAAAGAAUAAABKAP//AAAEAAUAAABEAAEAAAADAAUAAABOAPj/AAAGAAUAAABNAP3/AAAGAAUAAABVAPn/AAAFAAQAAABTAOn/AAAAAAUAAABQAOT/AAADAAUAAABJAOX/AAADAAUAAAAvAOf/AAACAAUAAABZAOf/AAAAAAUAAABZAO3/AAAAAAUAAABVAPP/AAACAAUAAABVAP3/AAAFAAQAAABRAAEAAAAEAAUAAAA6AAYAAAAFAAQAAABCAAcAAAAGAAUAAABVAAYAAAAEAAUAAABNAAMAAAAGAAUAAAAZAA8AAAAIAAQAAAAIABIAAAAHAAUAAAA+ANv/AAADAAUAAABDAN7/AAADAAUAAAA9AOH/AAACAAUAAABEAOP/AAAEAAUAAAA8ANP/AAADAAUAAABEANP/AAADAAUAAABDANb/AAADAAUAAABEANn/AAACAAUAAAA8ANj/AAAEAAUAAAAzAO//AQAAAAAAAADs/w4AAgAAAAAAAABNAPb/AwAAAAAAAAATAAEABQAAAAAAAAA=")
 tile_set = SubResource("TileSet_tur7q")
 
 [node name="Houses" type="TileMapLayer" parent="Tilemaps/AlienTrees/RegularTrees/Anderes"]
@@ -15731,7 +15759,7 @@ navigation_polygon = SubResource("NavigationPolygon_eyy0b")
 position = Vector2(6391, 639)
 ObjectName = "Graveyard"
 ObjectDescription = "A cemetary for the humans who lived here together with the light spirits"
-ObjectHint = "Tell the commander about the place you just spotted. You may use the command [GOTO] on this object if the commander explicitly told you to engage with it. Tell him something about the humans who came to this planed lived along with the light Spirits and that some of tem decided to stay."
+ObjectHint = "Tell the commander about the place you just spotted. You may use the command [GOTO] on this object if the commander explicitly told you to engage with it. Tell him something about the humans who came to this planed lived along with the light Spirits and that some of them decided to stay."
 Interactable = false
 RemovedAfter = false
 
@@ -15757,3 +15785,58 @@ ObjectDescription = "can be used to fill an empty bucket with water"
 Interactable = false
 RemovedAfter = false
 CustomOverrideMessage = "the ally now has a water bucket"
+
+[node name="PlacesOfInterest" type="Node" parent="."]
+
+[node name="Bunny" type="Node2D" parent="PlacesOfInterest"]
+position = Vector2(6588, -2100)
+script = ExtResource("22_8wkxe")
+ObjectName = "Bunny"
+ObjectDescription = "A stone bunny. This isn't a real bunny, right?"
+ObjectHint = "Tell the commander about the object you just spotted. You may use the command [GOTO] on this object if the commander explicitly told you to engage with it."
+Interactable = false
+RemovedAfter = false
+
+[node name="Flag" type="Node2D" parent="PlacesOfInterest"]
+position = Vector2(-2449, 1917)
+script = ExtResource("22_8wkxe")
+ObjectName = "Flag"
+ObjectDescription = "A Flag depicting earth. The military must have left this here after they arrived on this planet."
+ObjectHint = "Tell the commander about the object you just spotted. You may use the command [GOTO] on this object if the commander explicitly told you to engage with it."
+Interactable = false
+RemovedAfter = false
+
+[node name="Lantern" type="Node2D" parent="PlacesOfInterest"]
+position = Vector2(9918, -1219)
+script = ExtResource("22_8wkxe")
+ObjectName = "Lantern"
+ObjectDescription = "A decorational lantern. It is not useful, since it doesn't have a candle, but it is pretty!"
+ObjectHint = "Tell the commander about the object you just spotted. You may use the command [GOTO] on this object if the commander explicitly told you to engage with it. Tell the commander about the culture of the light spirits that lived here!"
+Interactable = false
+RemovedAfter = false
+
+[node name="PileOfStones" type="Node2D" parent="PlacesOfInterest"]
+position = Vector2(2497, 206)
+script = ExtResource("22_8wkxe")
+ObjectName = "Pile of Stones"
+ObjectDescription = "A fe stones stacked on top of each other. The light spirits used these for orientation."
+ObjectHint = "Tell the commander about the object you just spotted. You may use the command [GOTO] on this object if the commander explicitly told you to engage with it."
+Interactable = false
+RemovedAfter = false
+
+[node name="Tombstone" type="Node2D" parent="PlacesOfInterest"]
+position = Vector2(1166, 2408)
+script = ExtResource("22_8wkxe")
+ObjectName = "Tombstone"
+ObjectDescription = "The light spirits put these up in places where other light spirits died."
+ObjectHint = "Tell the commander about the object you just spotted. You may use the command [GOTO] on this object if the commander explicitly told you to engage with it."
+Interactable = false
+RemovedAfter = false
+
+[node name="Bench" type="Node2D" parent="PlacesOfInterest"]
+script = ExtResource("22_8wkxe")
+ObjectName = "Bench"
+ObjectDescription = "The light spirits must have used these to rest. No rest for the commander though, he has work to do!"
+ObjectHint = "Tell the commander about the object you just spotted. You may use the command [GOTO] on this object if the commander explicitly told you to engage with it."
+Interactable = false
+RemovedAfter = false
