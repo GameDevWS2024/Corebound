@@ -1,4 +1,4 @@
-[gd_scene load_steps=137 format=4 uid="uid://dfkwq6qwtxw25"]
+[gd_scene load_steps=139 format=4 uid="uid://dfkwq6qwtxw25"]
 
 [ext_resource type="Script" path="res://scripts/EnemyManager.cs" id="1_bmkfv"]
 [ext_resource type="Script" path="res://scripts/Map.cs" id="1_pa1ge"]
@@ -56,6 +56,7 @@
 [ext_resource type="PackedScene" uid="uid://dr53bjmurlnut" path="res://scenes/Tutorial.tscn" id="48_3yv6f"]
 [ext_resource type="Script" path="res://scripts/Interaction/CodeInput.cs" id="48_x4dce"]
 [ext_resource type="Texture2D" uid="uid://b1n85g1blpu64" path="res://assets/tilemaps/Houses.png" id="49_pb6br"]
+[ext_resource type="Texture2D" uid="uid://bhv8adq4ph4x7" path="res://assets/obstacles/well.png" id="57_t5x8p"]
 [ext_resource type="Texture2D" uid="uid://cmy47y4t8sx0w" path="res://assets/sprites/BigTree.ShrubberyAnimation.png" id="58_5gqqc"]
 [ext_resource type="PackedScene" uid="uid://xy3d46bjniyg" path="res://scenes/levels/BigTree/insideBigTree.tscn" id="58_llp75"]
 [ext_resource type="PackedScene" path="res://scenes/prefabs/teleport.tscn" id="59_8fv5o"]
@@ -14980,6 +14981,10 @@ height = 625.975
 a = Vector2(-14, -120)
 b = Vector2(-14, 132)
 
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_630vn"]
+radius = 29.0054
+height = 148.018
+
 [sub_resource type="SegmentShape2D" id="SegmentShape2D_k0qre"]
 a = Vector2(-11, -257)
 b = Vector2(-11, -7)
@@ -15926,11 +15931,25 @@ ShowWhileInRadius = true
 
 [node name="Well" parent="." instance=ExtResource("13_05imv")]
 unique_name_in_owner = true
+z_index = 100
 position = Vector2(8577, -2210)
 ObjectName = "Well"
 ObjectDescription = "can be used to fill an empty bucket with water"
 RemovedAfter = false
 CustomOverrideMessage = "the ally now has a water bucket"
+
+[node name="Sprite2D" type="Sprite2D" parent="Well"]
+z_index = 70
+position = Vector2(1, -36)
+texture = ExtResource("57_t5x8p")
+
+[node name="StaticBody2D" type="StaticBody2D" parent="Well"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Well/StaticBody2D"]
+z_index = 71
+position = Vector2(0, 16)
+rotation = -1.56804
+shape = SubResource("CapsuleShape2D_630vn")
 
 [node name="DoorOpener" parent="." instance=ExtResource("13_05imv")]
 position = Vector2(-1917, -7812)
