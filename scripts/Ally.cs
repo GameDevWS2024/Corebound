@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Game.Scenes.Levels;
@@ -34,17 +36,22 @@ public partial class Ally : CharacterBody2D
     private bool _interactOnArrival, _busy, _reached, _harvest, _returning;
     public bool IsTextBoxReady = true, Lit;
 
+    public bool AnimationIsAlreadyPlaying = false;
 
     [Export] public Chat Chat = null!;
     public Map? Map;
     [Export] public VisibleForAI[] AlwaysVisible = [];
     private GenerativeAI.Methods.ChatSession? _chat;
     private GeminiService? _geminiService;
-    [Export] AnimationPlayer _animPlayer = null!;
+    [Export] public AnimationPlayer _animPlayer = null!;
     private PointLight2D _coreLight = null!;
 
     private PointLight2D _torch = null!;
     private AiNode _well = null!;
+
+    // --- Semaphore for Response Processing ---
+    private readonly SemaphoreSlim _responseSemaphore = new(1, 1);
+
 
     //Enum with states for ally in darkness, in bigger or smaller circle for map damage system
     public enum AllyState
@@ -53,12 +60,14 @@ public partial class Ally : CharacterBody2D
         SmallCircle,
         BigCircle
     }
+
     public AllyState CurrentState { get; private set; } = AllyState.SmallCircle;
 
     private Ally _otherAlly = null!;
+
     public override void _Ready()
     {
-        _well = GetNode<AiNode>("%Well");
+        _well = GetTree().Root.GetNode<AiNode>("Node2D/%Well");
         _coreLight = GetParent().GetNode<PointLight2D>("%Core/%CoreLight");
         foreach (Ally ally in GetTree().GetNodesInGroup("Entities").OfType<Ally>().ToList())
         {
@@ -67,13 +76,14 @@ public partial class Ally : CharacterBody2D
                 _otherAlly = ally;
             }
         }
+
         /*
         SsInventory.AddItem(new Itemstack(Game.Scripts.Items.Material.Torch));
         lit = true; */
         // SsInventory.AddItem(new Itemstack(Items.Material.FestiveStaff, 1));
-        //SsInventory.AddItem(new Itemstack(Items.Material.Copper, 1));
+        // SsInventory.AddItem(new Itemstack(Items.Material.Copper, 1));
+        SsInventory.AddItem(new Itemstack(Items.Material.BucketWater, 1));
         _torch = GetNode<PointLight2D>("AllyTorch");
-
         _ally1ResponseField = GetNode<RichTextLabel>("ResponseField");
         _ally2ResponseField = GetNode<RichTextLabel>("ResponseField");
         _audioOutput = Chat.GetNode<AudioOutput>("Speech");
@@ -81,8 +91,7 @@ public partial class Ally : CharacterBody2D
         _core = GetTree().GetNodesInGroup("Core").OfType<Core>().FirstOrDefault()!;
         Map = GetTree().Root.GetNode<Map>("Node2D");
 
-        //sorgt dafür dass die zwei allies am Anfang nicht wegrennen
-        PathFindingMovement.TargetPosition = this.GlobalPosition;
+
 
         _geminiService = Chat.GeminiService;
         _chat = _geminiService!.Chat;
@@ -91,11 +100,13 @@ public partial class Ally : CharacterBody2D
             GD.PrintErr("Chat node is not assigned in the editor!");
             return;
         }
+
         if (_geminiService == null)
         {
             GD.PrintErr("Gemini node is not assigned in the editor!");
             return;
         }
+
         base._Ready();
         _motivation = GetNode<Motivation>("Motivation");
         _health = GetNode<Health>("Health");
@@ -103,16 +114,21 @@ public partial class Ally : CharacterBody2D
         GD.Print(GetTree().GetFirstNodeInGroup("Core").GetType());
 
         PathFindingMovement = GetNode<PathFindingMovement>("PathFindingMovement");
+        //sorgt dafür dass die zwei allies am Anfang nicht wegrennen
+        PathFindingMovement.TargetPosition = GlobalPosition;
+
         if (PathFindingMovement == null)
         {
             GD.Print("PathFindingMovement node is not assigned in the editor!");
         }
+
         Chat.Visible = false;
         PathFindingMovement!.ReachedTarget += HandleTargetReached;
         if (PathFindingMovement == null)
         {
             GD.PrintErr("PathFindingMovement node is not assigned in the editor!");
         }
+
         Chat.ResponseReceived += HandleResponse;
         _animPlayer = GetNode<AnimationPlayer>("AnimationPlayer2");
         _animPlayer.Play("Idle-Left");
@@ -137,7 +153,8 @@ public partial class Ally : CharacterBody2D
     {
         IEnumerable<VisibleForAI> visibleForAiNodes =
             GetTree().GetNodesInGroup(VisibleForAI.GroupName).OfType<VisibleForAI>();
-        return visibleForAiNodes.Where(node => GlobalPosition.DistanceTo(node.GlobalPosition) <= _visionRadius).Where(node => node.GetParent() != this)
+        return visibleForAiNodes.Where(node => GlobalPosition.DistanceTo(node.GlobalPosition) <= _visionRadius)
+            .Where(node => node.GetParent() != this)
             .ToList();
     }
 
@@ -173,11 +190,29 @@ public partial class Ally : CharacterBody2D
 
     }
 
+    private void playPlayerAnimation()
+    {
+        if (PathFindingMovement.CurrentDirection == PathFindingMovement.WalkingState.Left)
+        {
+            _animPlayer.Play("Walk-Left");
+        }
+        else if (PathFindingMovement.CurrentDirection == PathFindingMovement.WalkingState.Right)
+        {
+            _animPlayer.Play("Walk-Right");
+        }
+        else if (PathFindingMovement.CurrentDirection == PathFindingMovement.WalkingState.IdleLeft)
+        {
+            _animPlayer.Play("Idle-Left");
+        }
+        else { _animPlayer.Play("Idle-Right"); }
+    }
+
     private bool _hasSeenOtherAlly = false;
+
     public override void _PhysicsProcess(double delta)
     {
 
-        if (this.GlobalPosition.DistanceTo(_otherAlly.GlobalPosition) > 1500)
+        if (GlobalPosition.DistanceTo(_otherAlly.GlobalPosition) > 1500)
         {
             _hasSeenOtherAlly = false;
         }
@@ -208,19 +243,14 @@ public partial class Ally : CharacterBody2D
 
         UpdateTarget();
 
-        if (PathFindingMovement.CurrentDirection == PathFindingMovement.WalkingState.Left)
+        if (!AnimationIsAlreadyPlaying)
         {
-            _animPlayer.Play("Walk-Left");
+            playPlayerAnimation();
         }
-        else if (PathFindingMovement.CurrentDirection == PathFindingMovement.WalkingState.Right)
+        else if (!_animPlayer.IsPlaying())
         {
-            _animPlayer.Play("Walk-Right");
+            AnimationIsAlreadyPlaying = false;
         }
-        else if (PathFindingMovement.CurrentDirection == PathFindingMovement.WalkingState.IdleLeft)
-        {
-            _animPlayer.Play("Idle-Left");
-        }
-        else { _animPlayer.Play("Idle-Right"); }
 
         _reached = GlobalPosition.DistanceTo(PathFindingMovement.TargetPosition) < 150;
 
@@ -232,14 +262,17 @@ public partial class Ally : CharacterBody2D
 
 
         //Torch logic:
-        if (SsInventory.ContainsMaterial(Game.Scripts.Items.Material.Torch) && GlobalPosition.DistanceTo(new Vector2(3095, 4475)) < 300)
+        if (SsInventory.ContainsMaterial(Game.Scripts.Items.Material.Torch) &&
+            GlobalPosition.DistanceTo(new Vector2(3095, 4475)) < 300)
         {
             Lit = true;
             // remove unlit torch from inv and add lighted torch
             SsInventory.HardSwapItems(Items.Material.Torch, Items.Material.LightedTorch);
 
             // async func call to print response to torch lighting
-            Chat.SendSystemMessage("The torch has now been lit by the commander using the CORE. Tell the Commander what a genius idea it was to use the Core for that purpose and hint the commander back at the haunted forest village.", null);
+            Chat.SendSystemMessage(
+                "The torch has now been lit by the commander using the CORE. Tell the Commander what a genius idea it was to use the Core for that purpose and hint the commander back at the haunted forest village.",
+                null);
 
             //GD.Print("homie hat die Fackel und ist am core");
             /* GD.Print("Distance to core" + GlobalPosition.DistanceTo(GetNode<Core>("%Core").GlobalPosition));
@@ -248,14 +281,7 @@ public partial class Ally : CharacterBody2D
              */
         }
 
-        //Well logic:
-        if (GlobalPosition.DistanceTo(_well.GlobalPosition) < 300 &&
-            SsInventory.ContainsMaterial(Game.Scripts.Items.Material.BucketEmpty))
-        {
-            _well.Interactable = true;
-        }
-
-    }//Node2D/Abandoned Village/HauntedForestVillage/Big House/Sprite2D/InsideBigHouse2/InsideBigHouse/Sprite2D/ChestInsideHouse
+    } //Node2D/Abandoned Village/HauntedForestVillage/Big House/Sprite2D/InsideBigHouse2/InsideBigHouse/Sprite2D/ChestInsideHouse
 
     private void UpdateTarget()
     {
@@ -280,270 +306,287 @@ public partial class Ally : CharacterBody2D
 
     private List<(string, string)>? _matches;
     private readonly Queue<string> _responseQueue = new Queue<string>();
+
     public Queue<String> GetResponseQueue()
     {
         return _responseQueue;
     }
+
     public async void HandleResponse(string response, Ally? sender)
     {
-        GD.Print($"{Name} received message from: {(sender == null ? "null" : sender.Name)}, Response: {response}"); // ADD THIS
+        GD.Print(
+            $"{Name} received message from: {(sender == null ? "null" : sender.Name)}, Response: {response}"); // ADD THIS
         if (sender == this)
         {
             return; // Ignore messages from myself to prevent infinite talking loops
         }
 
-        // send text to AudioOutput Script
-        if (_audioOutput.Synthesize)
+        // --- Semaphore Usage ---
+        await _responseSemaphore.WaitAsync(); // Acquire the semaphore
+        try
         {
-            string spokenResponse = "couldn't extract";
-            foreach ((string op, string content) in ExtractRelevantLines(response))
+            // --- Critical Section ---
+
+            // send text to AudioOutput Script
+            if (_audioOutput.Synthesize)
             {
-                if (op == "RESPONSE")
+                string spokenResponse = "couldn't extract";
+                foreach ((string op, string content) in ExtractRelevantLines(response))
                 {
-                    spokenResponse = content.Replace("\"", "");
+                    if (op == "RESPONSE")
+                    {
+                        spokenResponse = content.Replace("\"", "");
+                    }
+                }
+
+                if (spokenResponse != "couldn't extract")
+                {
+                    _audioOutput.GenerateAndPlaySpeech(spokenResponse);
+                    GeminiService? geminiService = new(ProjectSettings.GlobalizePath("res://api_key.secret"),
+                        "You will get tasks of choosing an appropriate emotion for a text. Reply ONLY with the responding emotion, nothing else.");
+
+                    _audioOutput.DefaultStyle = await geminiService.InternalSendMessage(
+                        "Choose a correct emotion for the following text. \n" + spokenResponse +
+                        " \n The emotion options are: newscast, angry, cheerful, sad, excited, friendly, terrified, shouting, unfriendly, whispering, hopeful. Choose one and reply ONLY(!) with that emotion exactly as it is written here.\n"); // retrieve correct style from ai.
+                    _audioOutput.DefaultStyle = _audioOutput!.DefaultStyle.Replace("\n", "").ToLower();
+                    GD.Print("\n" + _audioOutput.DefaultStyle + " \n");
+                }
+                else
+                {
+                    GD.Print("Couldn't extract the relevant part to be spoken.");
                 }
             }
-
-            if (spokenResponse != "couldn't extract")
-            {
-                _audioOutput.GenerateAndPlaySpeech(spokenResponse);
-                GeminiService? geminiService = new(ProjectSettings.GlobalizePath("res://api_key.secret"), "You will get tasks of choosing an appropriate emotion for a text. Reply ONLY with the responding emotion, nothing else.");
-
-                _audioOutput.DefaultStyle = await geminiService.InternalSendMessage("Choose a correct emotion for the following text. \n" + spokenResponse + " \n The emotion options are: newscast, angry, cheerful, sad, excited, friendly, terrified, shouting, unfriendly, whispering, hopeful. Choose one and reply ONLY(!) with that emotion exactly as it is written here.\n");  // retrieve correct style from ai.
-                _audioOutput.DefaultStyle = _audioOutput!.DefaultStyle.Replace("\n", "").ToLower();
-                GD.Print("\n" + _audioOutput.DefaultStyle + " \n");
-            }
-            else
-            {
-                GD.Print("Couldn't extract the relevant part to be spoken.");
-            }
         }
-        //
+        finally
+        {
+            _responseSemaphore.Release(); // *Always* release the semaphore
+        }
 
         _responseQueue.Enqueue(response);
-        ProcessResponseQueue();
-
-        // probably not necessary here
-        GD.Print("got response of length: " + response.Length + ". Waiting for: " + (int)(1000 * 0.009f * response.Length) + " ms.");
-        await Task.Delay((int)(1000 * 0.015f * response.Length));
+        await ProcessResponseQueue();
 
     }
 
-    private async void ProcessResponseQueue()
+    private async Task ProcessResponseQueue()
     {
-        while (_responseQueue.Count > 0)
+        try
         {
-            IsTextBoxReady = false;
-            string response = _responseQueue.Dequeue();
-            GD.Print($"{Name}: processing response: {response}");
-
-
-
-            /*if (!_hasSeenOtherAlly)
+            while (_responseQueue.Count > 0)
             {
-                _otherAlly.Chat.SendSystemMessage("Hello, this is " + this.Name + ", the other ally speaking to you. Before, I've said " + response + ". What do you think about that?]", this);
-                _hasSeenOtherAlly = true;
-            }*/
+                IsTextBoxReady = false; // Consider removing this; see below
+                string response = _responseQueue.Dequeue();
+                GD.Print($"{Name}: processing response: {response}");
 
-            _matches = ExtractRelevantLines(response); // Split lines into tuples. Put command in first spot, args in second spot, keep only tuples with an allowed command
-            string? richtext = "";
-            foreach ((string op, string content) in _matches!) // foreach command-content-tuple
-            {
-                richtext += FormatPart(op, content);
+                _matches = ExtractRelevantLines(response);
 
-                DecideWhatCommandToDo(op, content);
-            }
-
-            // formatted text with TypeWriter effect into response field
-            ButtonControl buttonControl = GetTree().Root.GetNode<ButtonControl>("Node2D/UI");
-            await buttonControl.TypeWriterEffect(richtext, _responseField);
-            IsTextBoxReady = true;
-        }
-    }
-
-    private void DecideWhatCommandToDo(string command, string content)
-    {
-        // differentiate what to do based on command op
-        switch (command)
-        {
-            case "MOTIVATION": // set motivation from output
-                _motivation.SetMotivation(content.ToInt());
-                break;
-            case "INTERACT":
-                Interact();
-                break;
-
-            case "GOTO AND INTERACT":
-                SetInteractOnArrival(true);
-                Goto(content);
-                break;
-            case "GOTO": // goto (x, y) location
-                GD.Print("DEBUG: GOTO Match");
-                Goto(content);
-                break;
-            case "HARVEST"
-                when !_busy && Map.Items.Count > 0
-                : // if harvest command and not walking somewhere and items on map
-                GD.Print("harvesting");
-                Harvest();
-                break;
-            case "STOP": // stop command stops ally from doing anything
-                _harvest = false;
-                _busy = false;
-                break;
-        }
-    }
-
-    private void SetInteractOnArrival(bool interactOnArrival)
-    {
-        _interactOnArrival = interactOnArrival;
-    }
-
-    private void Goto(String content)
-    {
-        Vector2 gotoLoc = GlobalPosition;
-
-        // try matching if in form GOTO (300, 300)
-        const string goToPattern = @"^\s*\(\s*(-?\d+)\s*,\s*(-?\d+)\s*\)\s*$";
-        Match goToMatch = Regex.Match(content.Trim(), goToPattern);
-        if (goToMatch.Success)
-        {
-            gotoLoc = new Vector2(int.Parse(goToMatch.Groups[1].Value), int.Parse(goToMatch.Groups[2].Value));
-        }
-        else
-        {
-            // try matching if in form GOTO 300 300
-            const string goToPattern2 = @"^\s*(-?\d+)\s+(-?\d+)\s*$";
-            Match goToMatch2 = Regex.Match(content.Trim(), goToPattern2);
-            if (goToMatch2.Success)
-            {
-                gotoLoc = new Vector2(int.Parse(goToMatch2.Groups[1].Value), int.Parse(goToMatch2.Groups[2].Value));
-            }
-            else
-            {
-                // Handle the case where neither pattern matches
-                GD.PrintErr("Invalid GOTO format.");
-            }
-        }
-        PathFindingMovement.GoTo(gotoLoc);
-    }
-
-    private static string FormatPart(string op, string content)
-    {
-        return op switch // format response based on different ops or response types
-        {
-            "MOTIVATION" => "",
-            "THOUGHT" => "[i]" + content + "[/i]\n",
-            "RESPONSE" or "COMMAND" or "STOP" => "[b]" + content + "[/b]\n",
-            _ => content + "\n"
-        };
-    }
-
-    private void Interact()
-    {
-        Interactable? interactable = GetCurrentlyInteractables().FirstOrDefault();
-        interactable?.Trigger(this);
-        _interactOnArrival = false;
-        if (interactable == null)
-        {
-            GD.Print("Interactable null");
-        }
-        /*GD.Print("Interacted");
-        List<VisibleForAI> visibleItems = GetCurrentlyVisible().Concat(AlwaysVisible).ToList();
-        string visibleItemsFormatted = string.Join<VisibleForAI>("\n", visibleItems);
-        string completeInput = $"Currently Visible:\n\n{visibleItemsFormatted}\n\n";
-
-        string originalSystemPrompt = Chat.SystemPrompt;
-        Chat.SystemPrompt =
-            "[System Message] In the following you'll get a list of things you see with coordinates. Respond by telling the commander just what might be important or ask clarifying questions on what to do next. \n";
-        string? arrivalResponse = await _geminiService!.MakeQuery(completeInput + "[System Message End] \n");
-        RichTextLabel label = GetNode<RichTextLabel>("ResponseField");
-        label.Text += "\n" + arrivalResponse;
-
-        Chat.SystemPrompt = originalSystemPrompt;*/
-        GD.Print("DEBUG: INTERACT Match");
-    }
-
-    private static List<(string, string)>? ExtractRelevantLines(string response)
-    {
-        string[] lines = response.Split('\n').Where(line => line.Length > 0).ToArray();
-        List<(string, string)>? matches = [];
-
-        // Add commands to be extracted here
-        List<String> ops =
-        [
-            "MOTIVATION",
-            "THOUGHT",
-            "RESPONSE",
-            "REMEMBER",
-            "GOTO AND INTERACT",
-            "GOTO",
-            "INTERACT",
-            // "HARVEST",
-            "FOLLOW",
-            "STOP"
-        ];
-
-        foreach (string line in lines)
-        {
-            foreach (string op in ops)
-            {
-                string pattern = op + @"[\s:]+.*"; // \b matcht eine Wortgrenze
-                Regex regex = new Regex(pattern, RegexOptions.IgnoreCase);
-                Match match = regex.Match(line);
-                if (!match.Success)
+                // Use a StringBuilder for efficiency
+                StringBuilder richtextBuilder = new();
+                foreach ((string op, string content) in _matches!)
                 {
-                    continue;
+                    richtextBuilder.Append(FormatPart(op, content));
+                    DecideWhatCommandToDo(op, content);
                 }
 
-                matches.Add((op, match.Value[(op.Length + 1)..].Trim())); // Extract the operand
-                break;
+                string richtext = richtextBuilder.ToString();
+
+                // Get the ButtonControl (consider caching this)
+                ButtonControl buttonControl = GetTree().Root.GetNode<ButtonControl>("Node2D/UI");
+
+                await buttonControl.TypeWriterEffect(richtext, _responseField);
+
+                IsTextBoxReady = true; // Consider removing this; see below
             }
         }
-
-        response = "";
-        return matches;
+        catch (Exception e)
+        {
+            throw new Exception("Response Queue Exception"); 
+        }
     }
 
-    private void Harvest()
-    {
-        if (!_returning)
-        {
-            // extract the nearest item and add to inventory (pickup)
-            if (SsInventory.HasSpace()) // if inventory has space
-            {
-                GD.Print("harvesting...");
-                Itemstack item = Map.ExtractNearestItemAtLocation(new Location(GlobalPosition));
-                GD.Print(item.Material + " amount: " + item.Amount);
-                SsInventory.AddItem(item); // add item to inventory
-                SsInventory.Print();
-            } // if inventory has no space don't harvest it
-            else
-            {
-                GD.Print("No space");
-            }
 
-            _returning = true;
-        }
-        else
-        {
-            // Empty inventory into the core
+private void DecideWhatCommandToDo(string command, string content)
+	{
+		// differentiate what to do based on command op
+		switch (command)
+		{
+			case "MOTIVATION": // set motivation from output
+				_motivation.SetMotivation(content.ToInt());
+				break;
+			case "INTERACT":
+				Interact();
+				break;
 
-            foreach (Itemstack item in SsInventory.GetItems())
-            {
-                if (item.Material == Game.Scripts.Items.Material.None)
-                {
-                    continue;
-                }
+			case "GOTO AND INTERACT":
+				SetInteractOnArrival(true);
+				Goto(content);
+				break;
+			case "GOTO": // goto (x, y) location
+				GD.Print("DEBUG: GOTO Match");
+				Goto(content);
+				break;
+			case "HARVEST"
+				when !_busy && Map.Items.Count > 0
+				: // if harvest command and not walking somewhere and items on map
+				GD.Print("harvesting");
+				Harvest();
+				break;
+			case "STOP": // stop command stops ally from doing anything
+				_harvest = false;
+				_busy = false;
+				break;
+		}
+	}
 
-                Core.IncreaseScale();
-                GD.Print("Increased scale");
-            }
+	private void SetInteractOnArrival(bool interactOnArrival)
+	{
+		_interactOnArrival = interactOnArrival;
+	}
 
-            SsInventory.Clear();
-            _busy = false; // Change busy state  
-            _harvest = false; // Change harvest state
-            _returning = false; // Change returning state
-        }
-    }
+	private void Goto(String content)
+	{
+		Vector2 gotoLoc = GlobalPosition;
+
+		// try matching if in form GOTO (300, 300)
+		const string goToPattern = @"^\s*\(\s*(-?\d+)\s*,\s*(-?\d+)\s*\)\s*$";
+		Match goToMatch = Regex.Match(content.Trim(), goToPattern);
+		if (goToMatch.Success)
+		{
+			gotoLoc = new Vector2(int.Parse(goToMatch.Groups[1].Value), int.Parse(goToMatch.Groups[2].Value));
+		}
+		else
+		{
+			// try matching if in form GOTO 300 300
+			const string goToPattern2 = @"^\s*(-?\d+)\s+(-?\d+)\s*$";
+			Match goToMatch2 = Regex.Match(content.Trim(), goToPattern2);
+			if (goToMatch2.Success)
+			{
+				gotoLoc = new Vector2(int.Parse(goToMatch2.Groups[1].Value), int.Parse(goToMatch2.Groups[2].Value));
+			}
+			else
+			{
+				// Handle the case where neither pattern matches
+				GD.PrintErr("Invalid GOTO format.");
+			}
+		}
+		PathFindingMovement.GoTo(gotoLoc);
+	}
+
+	private static string FormatPart(string op, string content)
+	{
+		return op switch // format response based on different ops or response types
+		{
+			"MOTIVATION" => "",
+			"THOUGHT" => "[i]" + content + "[/i]\n",
+			"RESPONSE" or "COMMAND" or "STOP" => "[b]" + content + "[/b]\n",
+			_ => content + "\n"
+		};
+	}
+
+	private void Interact()
+	{
+		Interactable? interactable = GetCurrentlyInteractables().FirstOrDefault();
+		interactable?.Trigger(this);
+		_interactOnArrival = false;
+		if (interactable == null)
+		{
+			GD.Print("Interactable null");
+		}
+		/*GD.Print("Interacted");
+		List<VisibleForAI> visibleItems = GetCurrentlyVisible().Concat(AlwaysVisible).ToList();
+		string visibleItemsFormatted = string.Join<VisibleForAI>("\n", visibleItems);
+		string completeInput = $"Currently Visible:\n\n{visibleItemsFormatted}\n\n";
+
+		string originalSystemPrompt = Chat.SystemPrompt;
+		Chat.SystemPrompt =
+			"[System Message] In the following you'll get a list of things you see with coordinates. Respond by telling the commander just what might be important or ask clarifying questions on what to do next. \n";
+		string? arrivalResponse = await _geminiService!.MakeQuery(completeInput + "[System Message End] \n");
+		RichTextLabel label = GetNode<RichTextLabel>("ResponseField");
+		label.Text += "\n" + arrivalResponse;
+
+		Chat.SystemPrompt = originalSystemPrompt;*/
+		GD.Print("DEBUG: INTERACT Match");
+	}
+
+	private static List<(string, string)>? ExtractRelevantLines(string response)
+	{
+		string[] lines = response.Split('\n').Where(line => line.Length > 0).ToArray();
+		List<(string, string)>? matches = [];
+
+		// Add commands to be extracted here
+		List<String> ops =
+		[
+			"MOTIVATION",
+			"THOUGHT",
+			"RESPONSE",
+			"REMEMBER",
+			"GOTO AND INTERACT",
+			"GOTO",
+			"INTERACT",
+			// "HARVEST",
+			"FOLLOW",
+			"STOP"
+		];
+
+		foreach (string line in lines)
+		{
+			foreach (string op in ops)
+			{
+				string pattern = op + @"[\s:]+.*"; // \b matcht eine Wortgrenze
+				Regex regex = new Regex(pattern, RegexOptions.IgnoreCase);
+				Match match = regex.Match(line);
+				if (!match.Success)
+				{
+					continue;
+				}
+
+				matches.Add((op, match.Value[(op.Length + 1)..].Trim())); // Extract the operand
+				break;
+			}
+		}
+
+		response = "";
+		return matches;
+	}
+
+	private void Harvest()
+	{
+		if (!_returning)
+		{
+			// extract the nearest item and add to inventory (pickup)
+			if (SsInventory.HasSpace()) // if inventory has space
+			{
+				GD.Print("harvesting...");
+				Itemstack item = Map.ExtractNearestItemAtLocation(new Location(GlobalPosition));
+				GD.Print(item.Material + " amount: " + item.Amount);
+				SsInventory.AddItem(item); // add item to inventory
+				SsInventory.Print();
+			} // if inventory has no space don't harvest it
+			else
+			{
+				GD.Print("No space");
+			}
+
+			_returning = true;
+		}
+		else
+		{
+			// Empty inventory into the core
+
+			foreach (Itemstack item in SsInventory.GetItems())
+			{
+				if (item.Material == Game.Scripts.Items.Material.None)
+				{
+					continue;
+				}
+
+				Core.IncreaseScale();
+				GD.Print("Increased scale");
+			}
+
+			SsInventory.Clear();
+			_busy = false; // Change busy state  
+			_harvest = false; // Change harvest state
+			_returning = false; // Change returning state
+		}
+	}
 }

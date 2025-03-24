@@ -93,9 +93,8 @@ public partial class GeminiService : Node
 
             string? result = null;
             int tryCount = 0;
-            while (result is null && tryCount <= 3) // try to get a response 3 times
+            while (result is null && tryCount++ <= 3) // try to get a response 3 times
             {
-                tryCount++;
                 result = await InternalSendMessage(input);
                 if (result == null)
                 {
@@ -108,13 +107,7 @@ public partial class GeminiService : Node
             {
                 GD.Print("tried 3 times but didn't get a response. Giving up now.");
             }
-            else
-            {
-                int waitingTimeInMs = (int)(1000 * 0.01f * result!.Length);
-                GD.Print("got response of length: " + result!.Length + ". Waiting for: " +
-                         waitingTimeInMs + " ms.");
-                await Task.Delay(waitingTimeInMs);
-            }
+        
             return result;
         }
         finally

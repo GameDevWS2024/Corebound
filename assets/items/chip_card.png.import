@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dupi1mwbxnhef"
-path="res://.godot/imported/CaveTileset.png-063f0d3e26693c42e4733c3c96bff0dc.ctex"
+uid="uid://bowpgw34oftui"
+path="res://.godot/imported/chip_card.png-d90570b4758ff75c363c38b51c1a4064.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/tilemaps/CaveTileset.png"
-dest_files=["res://.godot/imported/CaveTileset.png-063f0d3e26693c42e4733c3c96bff0dc.ctex"]
+source_file="res://assets/items/chip_card.png"
+dest_files=["res://.godot/imported/chip_card.png-d90570b4758ff75c363c38b51c1a4064.ctex"]
 
 [params]
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -22,7 +22,7 @@ public partial class ShowWhileInRadius : Node2D
     [Export] public Material NeedsToBeInInventoryName { get; set; }
     [Export] public bool ItemActivationStatus { get; set; } = true;
     private bool _debugOnce = false;
-
+    private bool _treeShow = false;
     Core? _core = null;
     private Area2D? _insideArea;
     Godot.Collections.Array<Node> _entities = null!;
@@ -63,8 +63,7 @@ public partial class ShowWhileInRadius : Node2D
         }
         base._PhysicsProcess(delta);
         Array<Node> entities = GetTree().GetNodesInGroup("Entities");
-        bool show = false;
-        int smallest = int.MaxValue;
+        bool villageShow = false;
         if (delta % delta * 2000 == 0)
         {
             entities = GetTree().GetNodesInGroup("Entities");
@@ -94,7 +93,7 @@ public partial class ShowWhileInRadius : Node2D
                 if (body.GlobalPosition.DistanceTo(GlobalPosition) < Radius
                          && (NeedsToBeInInventoryName == Game.Scripts.Items.Material.None || (_nearestAlly.SsInventory.ContainsMaterial(NeedsToBeInInventoryName) && _nearestAlly.Lit)))
                 {
-                    show = true;
+                    villageShow = true;
 
                     //creates the festive staff when the chest is spawned 
                     if (this.Name == "ChestInsideHouse" && !_festiveStaffCollected)
@@ -144,12 +143,14 @@ public partial class ShowWhileInRadius : Node2D
                        aiNode.FromChosenMaterial = Game.Scripts.Items.Material.FestiveStaff;
                    }
                    */
-
+                    if(Interactable.TreeCured) {
+                        _treeShow = true;
+                    }
                 }
 
                 if (entity is Ally allyinv)
                 {
-                    Node2D parentNode = this.GetParent<Node2D>();
+                    Node2D parentNode = GetParent<Node2D>();
                     //GD.Print("Parent Node Name: ", parentNode.Name);
                     //GD.Print("Distance to RuneHolder: ", allyinv.GlobalPosition.DistanceTo(parentNode.GlobalPosition));
                     //GD.Print("Ally has FestiveStaff: ", allyinv.SsInventory.ContainsMaterial(Game.Scripts.Items.Material.FestiveStaff));
@@ -172,9 +173,11 @@ public partial class ShowWhileInRadius : Node2D
                         GD.Print("Notebook spawned");
                         _notebookspawned = true;
                         _notebookCode.Visible = true;
-                        VisibleForAI instance = new VisibleForAI();
-                        instance.NameForAi = "Notebook";
-                        instance.DescriptionForAi = "A Notebook that contains the code for the runeholder which is 1234";
+                        VisibleForAI instance = new VisibleForAI
+                        {
+                            NameForAi = "Notebook",
+                            DescriptionForAi = "A Notebook that contains the code for the runeholder which is 1234"
+                        };
                         _notebookCode.AddChild(instance);
                         _notebookCode.ObjectName = "Notebook";
                         _notebookCode.ObjectDescription = "A Notebook that contains the code for the runeholder";
@@ -183,18 +186,27 @@ public partial class ShowWhileInRadius : Node2D
                 }
             }
         }
-        if (this.GetParent().Name == "Sprite2D")
+        
+        if (GetParent().Name == "Sprite2D")
         {
             Sprite2D? sprite = GetParent<Sprite2D>();
+            
             if (sprite != null)
             {
-                SetShowSceneState(sprite, show);
+                SetShowSceneState(sprite, villageShow);
             }
             else
             {
                 GD.Print("Sprite2D is null. Can't show chest right now!");
             }
         }
+        //GD.Print(Interactable.TreeCured);
+        /*if (GetParent().Name == "Big Tree") {
+            Sprite2D? sprite = GetParent<Sprite2D>();
+            {
+                SetShowSceneState(sprite, Interactable.TreeCured);
+            }
+        } */
 
 
     }

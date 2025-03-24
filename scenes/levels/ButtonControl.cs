@@ -236,10 +236,10 @@ public partial class ButtonControl : Control
         await TypeWriterEffect(response, label);
     }
 
-    private void HandleResponse(string response)
+    private void HandleResponse(string response, object ally)
     {
         // Handle the response received from the chat
         int activeAlly = CurrentCamera;
-        //DisplayResponse(response, activeAlly);
+        DisplayResponse(response, activeAlly);
     }
 }

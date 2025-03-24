@@ -1,0 +1,36 @@
+[gd_scene load_steps=4 format=4 uid="uid://cth35h6b6wlx7"]
+
+[ext_resource type="TileSet" uid="uid://b57mlmhoqye7c" path="res://assets/hauntedForestVillage/Interior.tres" id="1_3g5np"]
+[ext_resource type="PackedScene" uid="uid://d0natjkfu7hhd" path="res://scenes/prefabs/ai_node.tscn" id="2_3n5hg"]
+[ext_resource type="Texture2D" uid="uid://dc2h5ioqelopi" path="res://assets/items/bucket_empty.png" id="3_bobym"]
+
+[node name="StaticBody2D" type="StaticBody2D"]
+
+[node name="InsideBigHouse" type="Node2D" parent="."]
+
+[node name="FloorWalls" type="TileMapLayer" parent="InsideBigHouse"]
+tile_map_data = PackedByteArray("AAD8//v/AAATAAYAAAD8//z/AAATAAYAAAD8//3/AAATAAYAAAD8//7/AAATAAYAAAD8////AAASAAYAAAD9//v/AAASAAYAAAD9//z/AAASAAYAAAD9//3/AAASAAYAAAD9//7/AAASAAYAAAD9////AAATAAYAAAD+//v/AAATAAYAAAD+//z/AAATAAYAAAD+//3/AAATAAYAAAD+//7/AAATAAYAAAD+////AAASAAYAAAD///v/AAASAAYAAAD///z/AAASAAYAAAD///3/AAASAAYAAAD///7/AAASAAYAAAD/////AAATAAYAAAAAAPv/AAATAAYAAAAAAPz/AAATAAYAAAAAAP3/AAATAAYAAAAAAP7/AAATAAYAAAAAAP//AAASAAYAAAABAPv/AAASAAYAAAABAPz/AAASAAYAAAABAP3/AAASAAYAAAABAP7/AAASAAYAAAABAP//AAATAAYAAAACAPv/AAATAAYAAAACAPz/AAATAAYAAAACAP3/AAATAAYAAAACAP7/AAATAAYAAAACAP//AAASAAYAAAADAPv/AAASAAYAAAADAPz/AAASAAYAAAADAP3/AAASAAYAAAADAP7/AAASAAYAAAADAP//AAATAAYAAAD8//j/AAATAAYAAAD8//n/AAATAAYAAAD8//r/AAATAAYAAAD9//j/AAASAAYAAAD9//n/AAASAAYAAAD9//r/AAASAAYAAAD+//j/AAATAAYAAAD+//n/AAATAAYAAAD+//r/AAATAAYAAAD///j/AAASAAUAAAD///n/AAASAAYAAAD///r/AAASAAYAAAAAAPj/AAATAAUAAAAAAPn/AAATAAYAAAAAAPr/AAATAAYAAAABAPj/AAASAAUAAAABAPn/AAASAAYAAAABAPr/AAASAAYAAAACAPj/AAATAAUAAAACAPn/AAATAAYAAAACAPr/AAATAAYAAAADAPj/AAASAAYAAAADAPn/AAASAAYAAAADAPr/AAASAAYAAAD8//f/AAARAAAAAAD9//f/AAARAAAAAAD+//f/AAARAAAAAAD///f/AAARAAAAAAAAAPf/AAARAAAAAAABAPf/AAARAAAAAAACAPf/AAARAAAAAAD8/wAAAAAZAAgAAAD9/wAAAAAZAAgAAAD+/wAAAAAZAAgAAAABAAAAAAAZAAgAAAACAAAAAAAZAAgAAAADAAAAAAAZAAgAAAD7//j/AAAQAAUAAAD7//n/AAAQAAUAAAD7//r/AAAQAAUAAAD7//v/AAAQAAUAAAD7//z/AAAQAAUAAAD7//3/AAAQAAUAAAD7//7/AAAQAAUAAAD7////AAAQAAUAAAAEAP//AAAhAAUAAAAEAP7/AAAhAAUAAAAEAP3/AAAhAAUAAAAEAPz/AAAhAAUAAAAEAPv/AAAhAAUAAAAEAPr/AAAhAAUAAAAEAPn/AAAhAAUAAAAEAPj/AAAhAAUAAAADAPf/AAAgAAAAAAAEAPf/AAAhAAAAAAD7//f/AAAQAAAAAAD7/wAAAAAQAAgAAAAEAAAAAAAhAAgAAAA=")
+tile_set = ExtResource("1_3g5np")
+rendering_quadrant_size = 32
+
+[node name="TileMapLayer" type="TileMapLayer" parent="InsideBigHouse"]
+scale = Vector2(1.5, 0.75)
+tile_set = ExtResource("1_3g5np")
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+scale = Vector2(1, 0.5)
+build_mode = 1
+polygon = PackedVector2Array(-20, 0, -66, 2, -66, -258, 65, -258, 66, 0, 18, -1, 66, 0, 65, -258, 2, -258, -66, -258, -66, 2)
+
+[node name="EmptyBucket" parent="." instance=ExtResource("2_3n5hg")]
+position = Vector2(-44, -110)
+ObjectName = "Empty Bucket"
+ObjectDescription = "Its an empty bucket"
+CustomOverrideMessage = "Maybe fill it with something"
+AddedMaterial = 1
+
+[node name="Sprite2D" type="Sprite2D" parent="EmptyBucket"]
+position = Vector2(-0.484364, -1.5069)
+rotation = 1.2598
+scale = Vector2(0.802146, 1)
+texture = ExtResource("3_bobym")

@@ -22,7 +22,7 @@ public partial class PathFindingMovement : Node
     [Export] Sprite2D _sprite = null!;
 
     public Vector2 TargetPosition { get; set; }
-    private object _lastCollider = null; // Speichert den letzten Kollisionspartner
+    private object? _lastCollider = null; // Speichert den letzten Kollisionspartner
     private bool _recentlyBumped = false; // Verhindert Dauersound
     private bool _reachedTarget;
     private int _currentTargetDistance;
@@ -81,20 +81,13 @@ public partial class PathFindingMovement : Node
             Vector2 currentLocation = _character.GlobalPosition, nextLocation = _agent.GetNextPathPosition();
 
             Motivation motivation = GetParent().GetNode<Motivation>("Motivation");
-            double motivationFactor = (double)motivation.Amount / 10;
+            double motivationFactor = (double) motivation.Amount / 10;
             int modifiedSpeed = (int)(_minimumSpeed + (_speed - _minimumSpeed) * motivationFactor);
-            Ally ally = GetParent().GetParent().GetChild<Ally>(0);
-            Chat chat = ally.FindChild("Speech").GetParent() as Chat ?? throw new InvalidOperationException();
-            _minimumSpeed = (chat!.GeminiService.IsBusy() || ally!.GetResponseQueue().Count > 0 || !ally!.IsTextBoxReady) ? 0 : _origMinimumSpeed; // dont move while responding or if more than one response is being processed.
+            Ally? ally = GetParent() as Ally;
+            Chat chat = ally!.FindChild("Speech").GetParent() as Chat ?? throw new InvalidOperationException();
+            _minimumSpeed = (ally!.GetResponseQueue().Count > 0 || !ally!.IsTextBoxReady) ? 0 : _origMinimumSpeed; // dont move while responding or if more than one response is being processed.
             Vector2 newVel = (nextLocation - currentLocation).Normalized() * modifiedSpeed;
-            if (nextLocation.X < currentLocation.X)
-            {
-                CurrentDirection = WalkingState.Left;
-            }
-            else
-            {
-                CurrentDirection = WalkingState.Right;
-            }
+            CurrentDirection = nextLocation.X < currentLocation.X ? WalkingState.Left : WalkingState.Right;
 
             if (newVel.X != 0 && distanceToTarget > 50)
             {

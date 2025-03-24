@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://dkj8strm3dfar"]
+
+[ext_resource type="Script" path="res://scripts/Teleport.cs" id="1_dwwji"]
+
+[node name="Teleport" type="Node2D"]
+script = ExtResource("1_dwwji")
