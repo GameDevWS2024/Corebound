@@ -145,7 +145,7 @@ namespace Game.Scripts
             else
             {
                 string? response = await GeminiService.MakeQuery(completeInput); //Run on background thread
-                if (response != null || response == "")
+                if (response is not null or "")
                 {
                     EmitSignal(SignalName.ResponseReceived, response, new Ally());
                     GD.Print($"----------------\nResponse:\n{response}");
