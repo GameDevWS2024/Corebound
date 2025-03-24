@@ -1,4 +1,4 @@
-[gd_scene load_steps=135 format=4 uid="uid://dfkwq6qwtxw25"]
+[gd_scene load_steps=136 format=4 uid="uid://dfkwq6qwtxw25"]
 
 [ext_resource type="Script" path="res://scripts/EnemyManager.cs" id="1_bmkfv"]
 [ext_resource type="Script" path="res://scripts/Map.cs" id="1_pa1ge"]
@@ -58,6 +58,7 @@
 [ext_resource type="Texture2D" uid="uid://b1n85g1blpu64" path="res://assets/tilemaps/Houses.png" id="49_pb6br"]
 [ext_resource type="Texture2D" uid="uid://cmy47y4t8sx0w" path="res://assets/sprites/BigTree.ShrubberyAnimation.png" id="58_5gqqc"]
 [ext_resource type="PackedScene" uid="uid://xy3d46bjniyg" path="res://scenes/levels/BigTree/insideBigTree.tscn" id="58_llp75"]
+[ext_resource type="PackedScene" uid="uid://dkj8strm3dfar" path="res://scenes/prefabs/teleport.tscn" id="59_8fv5o"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qwcva"]
 bg_color = Color(0.6, 0.6, 0.6, 0.654902)
@@ -14970,8 +14971,9 @@ vertices = PackedVector2Array(14513, -10165, 14519, 6775.99, -14133, 6772, 13685
 polygons = Array[PackedInt32Array]([PackedInt32Array(0, 1, 2, 3), PackedInt32Array(3, 2, 4, 5)])
 outlines = Array[PackedVector2Array]([PackedVector2Array(-14143, 6782, -14143, -13823, 13696, -13824, 13695, -10176, 14523, -10175, 14529, 6786), PackedVector2Array(441.376, 2548.91, 716.14, 2538.64, 721.255, 2638.77, 461.107, 2617.72)])
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_g520r"]
-size = Vector2(190.043, 242.52)
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_6rxiw"]
+radius = 198.002
+height = 625.975
 
 [sub_resource type="SegmentShape2D" id="SegmentShape2D_i54bb"]
 a = Vector2(-14, -120)
@@ -15895,9 +15897,9 @@ ShowWhileInRadius = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Big Tree/StaticBody2D"]
 z_index = 50
-position = Vector2(95, -200)
+position = Vector2(94, -259)
 rotation = -1.56722
-shape = SubResource("RectangleShape2D_g520r")
+shape = SubResource("CapsuleShape2D_6rxiw")
 
 [node name="CaveEntranceTerminal" parent="." instance=ExtResource("13_05imv")]
 unique_name_in_owner = true
@@ -15914,7 +15916,7 @@ position = Vector2(-60, 114)
 shape = SubResource("SegmentShape2D_i54bb")
 
 [node name="Scar" parent="." instance=ExtResource("13_05imv")]
-position = Vector2(5613, -8059)
+position = Vector2(5647, -8048)
 ObjectName = "Scar"
 ObjectDescription = "A big scar on the tree which could be the reason for the tree looking dead. It is not reachable because of the scrub"
 CustomOverrideMessage = "The tree seems to have recovered from the injurys and opens up to give the entrance to it's inside."
@@ -15954,17 +15956,6 @@ shape = SubResource("SegmentShape2D_k0qre")
 [node name="Big Tree" type="Sprite2D" parent="Node2D"]
 position = Vector2(5613, -8059)
 
-[node name="InsideBigTree" parent="Node2D/Big Tree" instance=ExtResource("58_llp75")]
-z_index = 30
-position = Vector2(114, 58)
-scale = Vector2(2.5, 2.5)
-
-[node name="ShowWhileInRadius" type="Node2D" parent="Node2D/Big Tree"]
-scale = Vector2(2.5, 2.5)
-script = ExtResource("25_0y114")
-SceneToShow = ExtResource("58_llp75")
-Radius = 500
-
 [node name="AnimationPlayer" type="AnimationPlayer" parent="Node2D"]
 root_node = NodePath("../TreeScrub")
 libraries = {
@@ -15977,3 +15968,13 @@ position = Vector2(5655, -8388)
 scale = Vector2(3.5, 3.5)
 texture = ExtResource("58_5gqqc")
 hframes = 17
+
+[node name="Teleport" parent="." instance=ExtResource("59_8fv5o")]
+position = Vector2(5994, -7764)
+X = 9641
+Y = -8454
+Length = 100
+Width = 20
+
+[node name="InsideBigTree" parent="." instance=ExtResource("58_llp75")]
+position = Vector2(9641, -8454)

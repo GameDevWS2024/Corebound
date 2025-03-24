@@ -72,6 +72,13 @@ public partial class Interactable : Node2D
             //Tree is now cured (for story progression)
             GD.Print("Tree cured");
             TreeCured = true;
+
+            GD.Print("Teleport spawned");
+            PackedScene scene = (PackedScene)ResourceLoader.Load("res://scenes/prefabs/teleport.tscn");
+            Teleport instance = scene.Instantiate<Teleport>();
+            instance.Position += new Vector2(0, 100);
+            
+
         }
         //Cave entrance
         if(GetParent<AiNode>().Name.Equals("CaveEntranceTerminal") && caller.Name.ToString().Contains("Ally")) {

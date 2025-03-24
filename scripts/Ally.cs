@@ -351,7 +351,7 @@ public partial class Ally : CharacterBody2D
         // Get the ButtonControl (consider caching this)
         ButtonControl buttonControl = GetTree().Root.GetNode<ButtonControl>("Node2D/UI");
 
-        buttonControl.TypeWriterEffect(richtext, _responseField);
+        await buttonControl.TypeWriterEffect(richtext, _responseField);
 
         IsTextBoxReady = true; // Consider removing this; see below
     }
