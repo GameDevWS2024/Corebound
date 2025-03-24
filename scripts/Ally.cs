@@ -25,8 +25,6 @@ public partial class Ally : CharacterBody2D
     protected Game.Scripts.Core _core = null!;
     public Inventory SsInventory = new Inventory(12);
     private AudioOutput _audioOutput = null!;
-    private AiNode _caveEntrance = null!;
-    private AiNode _scar = null!;
 
 
     private RichTextLabel _ally1ResponseField = null!, _ally2ResponseField = null!;
@@ -36,6 +34,7 @@ public partial class Ally : CharacterBody2D
     private bool _interactOnArrival, _busy, _reached, _harvest, _returning;
     public bool IsTextBoxReady = true, Lit;
 
+    public bool AnimationIsAlreadyPlaying = false;
 
     [Export] public Chat Chat = null!;
     public Map? Map;
@@ -76,9 +75,6 @@ public partial class Ally : CharacterBody2D
         // SsInventory.AddItem(new Itemstack(Items.Material.Copper, 1));
         SsInventory.AddItem(new Itemstack(Items.Material.BucketWater, 1));
         _torch = GetNode<PointLight2D>("AllyTorch");
-        _caveEntrance = GetNode<AiNode>("%CaveEntrance");
-        _scar = GetNode<AiNode>("%Scar");
-
         _ally1ResponseField = GetNode<RichTextLabel>("ResponseField");
         _ally2ResponseField = GetNode<RichTextLabel>("ResponseField");
         _audioOutput = Chat.GetNode<AudioOutput>("Speech");
@@ -178,6 +174,22 @@ public partial class Ally : CharacterBody2D
 
     }
 
+    private void playPlayerAnimation(){
+        if (PathFindingMovement.CurrentDirection == PathFindingMovement.WalkingState.Left)
+        {
+            _animPlayer.Play("Walk-Left");
+        }
+        else if (PathFindingMovement.CurrentDirection == PathFindingMovement.WalkingState.Right)
+        {
+            _animPlayer.Play("Walk-Right");
+        }
+        else if (PathFindingMovement.CurrentDirection == PathFindingMovement.WalkingState.IdleLeft)
+        {
+            _animPlayer.Play("Idle-Left");
+        }
+        else { _animPlayer.Play("Idle-Right"); }
+    }
+
     private bool _hasSeenOtherAlly = false;
     public override void _PhysicsProcess(double delta)
     {
@@ -213,19 +225,12 @@ public partial class Ally : CharacterBody2D
 
         UpdateTarget();
 
-        if (PathFindingMovement.CurrentDirection == PathFindingMovement.WalkingState.Left)
-        {
-            _animPlayer.Play("Walk-Left");
+        if(!AnimationIsAlreadyPlaying){
+            playPlayerAnimation();
         }
-        else if (PathFindingMovement.CurrentDirection == PathFindingMovement.WalkingState.Right)
-        {
-            _animPlayer.Play("Walk-Right");
+        else if(!_animPlayer.IsPlaying()){
+                AnimationIsAlreadyPlaying = false;
         }
-        else if (PathFindingMovement.CurrentDirection == PathFindingMovement.WalkingState.IdleLeft)
-        {
-            _animPlayer.Play("Idle-Left");
-        }
-        else { _animPlayer.Play("Idle-Right"); }
 
         _reached = GlobalPosition.DistanceTo(PathFindingMovement.TargetPosition) < 150;
 
@@ -251,18 +256,6 @@ public partial class Ally : CharacterBody2D
              GD.Print("Core position" + GetNode<Core>("%Core").GlobalPosition);
              GD.Print("Core position" + GetNode<PointLight2D>("%CoreLight").GlobalPosition);
              */
-        }
-
-        //Cave entrance logic:
-        if (this.SsInventory.ContainsMaterial(Items.Material.Chipcard) && this.GlobalPosition.DistanceTo(_caveEntrance.GlobalPosition) < 300)
-        {
-            _caveEntrance.Interactable = true;
-        }
-        //Well logic:
-        if (GlobalPosition.DistanceTo(_well.GlobalPosition) < 300 &&
-            SsInventory.ContainsMaterial(Game.Scripts.Items.Material.BucketEmpty))
-        {
-            _well.Interactable = true;
         }
 
     }//Node2D/Abandoned Village/HauntedForestVillage/Big House/Sprite2D/InsideBigHouse2/InsideBigHouse/Sprite2D/ChestInsideHouse

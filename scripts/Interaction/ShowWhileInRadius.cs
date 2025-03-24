@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -22,7 +22,7 @@ public partial class ShowWhileInRadius : Node2D
     [Export] public Material NeedsToBeInInventoryName { get; set; }
     [Export] public bool ItemActivationStatus { get; set; } = true;
     private bool _debugOnce = false;
-
+    private bool _treeShow = false;
     Core? _core = null;
     private Area2D? _insideArea;
     Godot.Collections.Array<Node> _entities = null!;
@@ -56,7 +56,6 @@ public partial class ShowWhileInRadius : Node2D
 
     public override void _PhysicsProcess(double delta)
     {
-        GD.Print(Interactable.TreeCured);
         if (ItemActivationStatus == true && !_debugOnce)
         {
             GD.Print("ItemActivationStatus = true");
@@ -64,7 +63,7 @@ public partial class ShowWhileInRadius : Node2D
         }
         base._PhysicsProcess(delta);
         Array<Node> entities = GetTree().GetNodesInGroup("Entities");
-        bool show = false;
+        bool villageShow = false;
         int smallest = int.MaxValue;
         if (delta % delta * 2000 == 0)
         {
@@ -95,7 +94,7 @@ public partial class ShowWhileInRadius : Node2D
                 if (body.GlobalPosition.DistanceTo(GlobalPosition) < Radius
                          && (NeedsToBeInInventoryName == Game.Scripts.Items.Material.None || (_nearestAlly.SsInventory.ContainsMaterial(NeedsToBeInInventoryName) && _nearestAlly.Lit)))
                 {
-                    show = true;
+                    villageShow = true;
 
                     //creates the festive staff when the chest is spawned 
                     if (this.Name == "ChestInsideHouse" && !_festiveStaffCollected)
@@ -145,12 +144,10 @@ public partial class ShowWhileInRadius : Node2D
                        aiNode.FromChosenMaterial = Game.Scripts.Items.Material.FestiveStaff;
                    }
                    */
+                    if(Interactable.TreeCured) {
+                        _treeShow = true;
+                    }
                 }
-                //For insideBigTree only
-                if(body.GlobalPosition.DistanceTo(GlobalPosition) < Radius && Interactable.TreeCured) {
-                    show = true;
-                }
-
 
                 if (entity is Ally allyinv)
                 {
@@ -193,7 +190,8 @@ public partial class ShowWhileInRadius : Node2D
             Sprite2D? sprite = GetParent<Sprite2D>();
             if (sprite != null)
             {
-                SetShowSceneState(sprite, show);
+                SetShowSceneState(sprite, villageShow);
+                SetShowSceneState(sprite, _treeShow);
             }
             else
             {

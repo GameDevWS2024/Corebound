@@ -1,4 +1,4 @@
-[gd_scene load_steps=132 format=4 uid="uid://dfkwq6qwtxw25"]
+[gd_scene load_steps=133 format=4 uid="uid://dfkwq6qwtxw25"]
 
 [ext_resource type="Script" path="res://scripts/EnemyManager.cs" id="1_bmkfv"]
 [ext_resource type="Script" path="res://scripts/Map.cs" id="1_pa1ge"]
@@ -14990,6 +14990,10 @@ size = Vector2(190.043, 242.52)
 a = Vector2(-14, -120)
 b = Vector2(-14, 132)
 
+[sub_resource type="SegmentShape2D" id="SegmentShape2D_k0qre"]
+a = Vector2(-11, -257)
+b = Vector2(-11, -7)
+
 [node name="Node2D" type="Node2D"]
 position = Vector2(2595, 2509)
 script = ExtResource("1_pa1ge")
@@ -14997,7 +15001,7 @@ _darknessCircleDamage = 1
 _allyHealthChangeIntervall = 5.0
 
 [node name="Ally" parent="." node_paths=PackedStringArray("_responseField", "_nameLabel", "Chat", "_animPlayer") instance=ExtResource("6_l8h37")]
-position = Vector2(923, 2052)
+position = Vector2(5780, -4309)
 _responseField = NodePath("ResponseField")
 _nameLabel = NodePath("Label")
 _visionRadius = 200
@@ -15098,10 +15102,11 @@ shadow_filter_smooth = 2.3
 texture_scale = 14.0
 
 [node name="Ally2" parent="." node_paths=PackedStringArray("_responseField", "_nameLabel", "Chat", "_animPlayer") groups=["navigation"] instance=ExtResource("6_l8h37")]
-position = Vector2(289, 2015)
+position = Vector2(7410, -6307)
 _responseField = NodePath("ResponseField")
 _nameLabel = NodePath("Label")
 _visionRadius = 200
+_interactionRadius = 250
 Chat = NodePath("Ally2Cam/Ally2Chat")
 _animPlayer = NodePath("AnimationPlayer2")
 
@@ -15355,16 +15360,17 @@ position = Vector2(8600, -2333)
 scale = Vector2(0.999999, 0.999999)
 
 [node name="InsideBigHouse" type="Node2D" parent="Abandoned Village/Sprite2D"]
+z_index = 2
 position = Vector2(-221, -475.001)
 script = ExtResource("25_0y114")
 SceneToShow = ExtResource("26_vmw0c")
 Radius = 500
-NeedsToBeInInventoryName = 11
+ItemActivationStatus = false
 
 [node name="InsideBigHouse2" parent="Abandoned Village/Sprite2D" instance=ExtResource("26_vmw0c")]
 z_index = 30
 position = Vector2(-222, -200.001)
-scale = Vector2(3.7, 3.7)
+scale = Vector2(3.7, 6.5)
 
 [node name="VisibleForAI" type="Node2D" parent="Abandoned Village/Sprite2D"]
 script = ExtResource("6_7bcmx")
@@ -15383,17 +15389,6 @@ WalkingObject = NodePath("../../../../Ally")
 WalkingObject2 = NodePath("../../../../Ally2")
 Sound = NodePath("../../../../AudioManager/door_sound")
 
-[node name="InsideSmallHouse" parent="Abandoned Village/Sprite2D" instance=ExtResource("19_qd0ov")]
-z_index = 30
-position = Vector2(550.001, 1808)
-scale = Vector2(4, 5)
-
-[node name="ShowWhileInRadius" type="Node2D" parent="Abandoned Village/Sprite2D"]
-position = Vector2(540, 1479)
-script = ExtResource("25_0y114")
-SceneToShow = ExtResource("19_qd0ov")
-Radius = 500
-
 [node name="HauntedForestVillageAiNode" parent="Abandoned Village" instance=ExtResource("13_05imv")]
 position = Vector2(8649, -1315)
 scale = Vector2(3, 3)
@@ -15410,6 +15405,22 @@ scale = Vector2(3, 3)
 script = ExtResource("24_sabha")
 MusicPlayer1 = NodePath("../../AudioManager/game_music")
 MusicPlayer2 = NodePath("../../AudioManager/creepy_music")
+
+[node name="Node2D" type="Node2D" parent="Abandoned Village"]
+
+[node name="Sprite2D" type="Sprite2D" parent="Abandoned Village/Node2D"]
+
+[node name="InsideSmallHouse" parent="Abandoned Village/Node2D/Sprite2D" instance=ExtResource("19_qd0ov")]
+z_index = 30
+position = Vector2(9150, -525.002)
+scale = Vector2(4, 4.99999)
+
+[node name="InsideSmallHouse2" type="Node2D" parent="Abandoned Village/Node2D/Sprite2D"]
+position = Vector2(9140, -854.001)
+scale = Vector2(0.999999, 0.999999)
+script = ExtResource("25_0y114")
+SceneToShow = ExtResource("19_qd0ov")
+Radius = 500
 
 [node name="Spaceport" type="Node" parent="."]
 
@@ -15838,37 +15849,35 @@ tile_map_data = PackedByteArray("AAASACMAAAAFAAQAAAATACcAAAAFAAQAAAAWACgAAAAGAAU
 tile_set = SubResource("TileSet_tur7q")
 
 [node name="Big Tree" parent="." instance=ExtResource("13_05imv")]
-unique_name_in_owner = true
-position = Vector2(5562, -7925)
+position = Vector2(5567, -7879)
 ObjectName = "Big Tree"
 ObjectDescription = "A massive tree that is surrounded by scrub and looks damaged"
-CustomOverrideMessage = "You've successfully removed the scrub from the tree and are now able to reach it"
+CustomOverrideMessage = "You've successfully removed the scrub from the tree and a big hideous scar appears underneath it"
 ShowWhileInRadius = true
 
 [node name="StaticBody2D" type="StaticBody2D" parent="Big Tree"]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Big Tree/StaticBody2D"]
 z_index = 50
-position = Vector2(100, -141)
+position = Vector2(95, -200)
 rotation = -1.56722
 shape = SubResource("RectangleShape2D_g520r")
 
-[node name="CaveEntrance" parent="." instance=ExtResource("13_05imv")]
+[node name="CaveEntranceTerminal" parent="." instance=ExtResource("13_05imv")]
 unique_name_in_owner = true
-position = Vector2(2025, -8275)
-ObjectName = "Cave entrance"
+position = Vector2(2086, -8391)
+ObjectName = "Cave entrance terminal"
 ObjectDescription = "Seems like a locked entracne with a small terminal next to it. Maybe there is some nfc device needed to enter."
-Interactable = false
 CustomOverrideMessage = "The door opens slowly and a big dark cave apperas behind it"
 
-[node name="StaticBody2D" type="StaticBody2D" parent="CaveEntrance"]
+[node name="StaticBody2D" type="StaticBody2D" parent="CaveEntranceTerminal"]
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="CaveEntrance/StaticBody2D"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CaveEntranceTerminal/StaticBody2D"]
 z_index = 1
+position = Vector2(-60, 114)
 shape = SubResource("SegmentShape2D_i54bb")
 
 [node name="Scar" parent="." instance=ExtResource("13_05imv")]
-unique_name_in_owner = true
 position = Vector2(5613, -8059)
 ObjectName = "Scar"
 ObjectDescription = "A big scar on the tree which could be the reason for the tree looking dead. It is not reachable because of the scrub"
@@ -15883,17 +15892,39 @@ ObjectDescription = "can be used to fill an empty bucket with water"
 RemovedAfter = false
 CustomOverrideMessage = "the ally now has a water bucket"
 
-[node name="InsideBigTree" type="Node2D" parent="."]
+[node name="DoorOpener" parent="." instance=ExtResource("13_05imv")]
+position = Vector2(-1917, -7812)
+ObjectName = "Door opener"
+ObjectDescription = "Seems like a door can be opened through interacting. There is a timer that starts when the door opens, so there is only a limited amount of time to pass it."
+RemovedAfter = false
+CustomOverrideMessage = "Door is now open for 5 seconds"
+
+[node name="StaticBody2D" type="StaticBody2D" parent="DoorOpener"]
+
+[node name="CaveEntrance1" type="CollisionShape2D" parent="DoorOpener/StaticBody2D"]
+z_index = 2
+position = Vector2(-25, -835)
+shape = SubResource("SegmentShape2D_k0qre")
+
+[node name="StaticBody2D2" type="StaticBody2D" parent="DoorOpener"]
+
+[node name="CaveEntrance2" type="CollisionShape2D" parent="DoorOpener/StaticBody2D2"]
+z_index = 2
+position = Vector2(-541, -834)
+shape = SubResource("SegmentShape2D_k0qre")
+
+[node name="Node2D" type="Node2D" parent="."]
+
+[node name="Sprite2D" type="Sprite2D" parent="Node2D"]
 position = Vector2(5613, -8059)
 
-[node name="InsideBigTree" parent="InsideBigTree" instance=ExtResource("58_llp75")]
+[node name="InsideBigTree" parent="Node2D/Sprite2D" instance=ExtResource("58_llp75")]
 z_index = 30
 position = Vector2(114, 58)
 scale = Vector2(2.5, 2.5)
 
-[node name="ShowWhileInRadius" type="Node2D" parent="InsideBigTree"]
+[node name="ShowWhileInRadius" type="Node2D" parent="Node2D/Sprite2D"]
 scale = Vector2(2.5, 2.5)
 script = ExtResource("25_0y114")
 SceneToShow = ExtResource("58_llp75")
-Radius = 100
-ItemActivationStatus = false
+Radius = 500
