@@ -17,12 +17,14 @@ public partial class Interactable : Node2D
     private CollisionShape2D _caveEntrance2 = null!;
     private float _doorDuration = 5.0f;
     private AiNode _scar = null!;
+    private AnimationPlayer _animTree = null!;
 
     public override void _Ready()
     {
         AddToGroup(GroupName);
         _caveEntrance1 = GetTree().Root.GetNode<CollisionShape2D>("Node2D/DoorOpener/StaticBody2D/CaveEntrance1");
         _caveEntrance2 = GetTree().Root.GetNode<CollisionShape2D>("Node2D/DoorOpener/StaticBody2D2/CaveEntrance2");
+        _animTree = GetTree().Root.GetNode<AnimationPlayer>("Node2D/Node2D/AnimationPlayer");
         _scar = GetTree().Root.GetNode<AiNode>("Node2D/Scar");
         if(GetParent().Equals(_scar)) {
             _scar.GetNode<VisibleForAI>("VisibleForAI").QueueFree();
@@ -39,44 +41,47 @@ public partial class Interactable : Node2D
         }
 
         //Fill bucket with water
-        if(this.GetParent<AiNode>().Name.Equals("Well") && caller.Name.ToString().Contains("Ally")) {
+        if(GetParent<AiNode>().Name.Equals("Well") && caller.Name.ToString().Contains("Ally")) {
             Ally ally = (caller as Ally)!;
             ally.SsInventory.HardSwapItems(Game.Scripts.Items.Material.BucketEmpty, Game.Scripts.Items.Material.BucketWater);
             ally.AnimationIsAlreadyPlaying = true;
             ally._animPlayer.Play("Fill-Bucket");
         }
         //Remove scrub with Jones
-        if(this.GetParent<AiNode>().Name.Equals("Big Tree") && caller.Name.ToString().Contains("Ally2")) {
+        if(GetParent<AiNode>().Name.Equals("Big Tree") && caller.Name.ToString().Contains("Ally")) {
+            _animTree.Play("TreeAnimation");
+            GD.Print("Scrub removed!");
             VisibleForAI scarVisibileForAI = new VisibleForAI();
             scarVisibileForAI.NameForAi = "Scar";
             scarVisibileForAI.DescriptionForAi = "A big scar on the tree which could be the reason for the tree looking dead. It is not reachable because of the scrub";
-            _scar.AddChild(scarVisibileForAI, true, InternalMode.Disabled);
+            _scar.AddChild(scarVisibileForAI, false);
             GD.Print("Scar VFAI added");
             EmitSignal(SignalName.Interact);
             EmitSignal(SignalName.InteractFromNode, caller);
         }
         //Water on scar
-        if(this.GetParent<AiNode>().Name.Equals("Scar") && caller.Name.ToString().Contains("Ally")) {
+        if(GetParent<AiNode>().Name.Equals("Scar") && caller.Name.ToString().Contains("Ally")) {
             Ally ally = (caller as Ally)!;
             if(!ally.SsInventory.ContainsMaterial(Game.Scripts.Items.Material.BucketWater)) {
                 return;
             }
             ally.AnimationIsAlreadyPlaying = true;
             ally._animPlayer.Play("Empty-Bucket");
+            _animTree.Play("TreeOpens");
             ally.SsInventory.HardSwapItems(Game.Scripts.Items.Material.BucketWater, Game.Scripts.Items.Material.BucketEmpty);
             //Tree is now cured (for story progression)
             GD.Print("Tree cured");
             TreeCured = true;
         }
         //Cave entrance
-        if(this.GetParent<AiNode>().Name.Equals("CaveEntranceTerminal") && caller.Name.ToString().Contains("Ally")) {
+        if(GetParent<AiNode>().Name.Equals("CaveEntranceTerminal") && caller.Name.ToString().Contains("Ally")) {
             Ally ally = (caller as Ally)!;
             if(!ally.SsInventory.ContainsMaterial(Game.Scripts.Items.Material.Chipcard)) {
                 return;
             }
         }
         //Door opener
-        if(this.GetParent<AiNode>().Name.Equals("DoorOpener") && caller.Name.ToString().Contains("Ally")) {
+        if(GetParent<AiNode>().Name.Equals("DoorOpener") && caller.Name.ToString().Contains("Ally")) {
             Ally ally = (caller as Ally)!;
             if(!ally.SsInventory.ContainsMaterial(Game.Scripts.Items.Material.Chipcard)) {
                 return;
@@ -84,9 +89,14 @@ public partial class Interactable : Node2D
     	    TemporarilyDisable();
         }
 
-        if(this.GetParent<AiNode>().Name.Equals("EmptyBucket") && caller.Name.ToString().Contains("Ally2")) {
+        if(GetParent<AiNode>().Name.Equals("EmptyBucket") && caller.Name.ToString().Contains("Ally2")) {
             GD.Print("Jones already has his machine gun, so he can't carry the bucket");
             //Nachricht an Ally 2, dass ers nich aufheben kann
+            Ally? jones = caller as Ally;
+            Chat jonesChat = jones!.GetChild(0).GetChild<Chat>(0);
+            jonesChat.SendSystemMessage("You're already carrying a machine gun, so you can't carry the bucket. Tell the commander another ally might be beneficial for this task.", new Ally());
+            
+
             return;
         }
         

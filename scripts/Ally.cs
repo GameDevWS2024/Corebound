@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -321,48 +322,40 @@ public partial class Ally : CharacterBody2D
                 GD.Print("Couldn't extract the relevant part to be spoken.");
             }
         }
-        //
+
 
         _responseQueue.Enqueue(response);
         ProcessResponseQueue();
 
-        // probably not necessary here
-        GD.Print("got response of length: " + response.Length + ". Waiting for: " + (int)(1000 * 0.009f * response.Length) + " ms.");
-        await Task.Delay((int)(1000 * 0.015f * response.Length));
-
     }
 
-    private async void ProcessResponseQueue()
+    private async void ProcessResponseQueue() // Changed to async Task
+{
+    while (_responseQueue.Count > 0)
     {
-        while (_responseQueue.Count > 0)
+        IsTextBoxReady = false; // Consider removing this; see below
+        string response = _responseQueue.Dequeue();
+        GD.Print($"{Name}: processing response: {response}");
+
+        _matches = ExtractRelevantLines(response);
+
+        // Use a StringBuilder for efficiency
+        StringBuilder richtextBuilder = new StringBuilder();
+        foreach ((string op, string content) in _matches!)
         {
-            IsTextBoxReady = false;
-            string response = _responseQueue.Dequeue();
-            GD.Print($"{Name}: processing response: {response}");
-
-
-
-            /*if (!_hasSeenOtherAlly)
-            {
-                _otherAlly.Chat.SendSystemMessage("Hello, this is " + this.Name + ", the other ally speaking to you. Before, I've said " + response + ". What do you think about that?]", this);
-                _hasSeenOtherAlly = true;
-            }*/
-
-            _matches = ExtractRelevantLines(response); // Split lines into tuples. Put command in first spot, args in second spot, keep only tuples with an allowed command
-            string? richtext = "";
-            foreach ((string op, string content) in _matches!) // foreach command-content-tuple
-            {
-                richtext += FormatPart(op, content);
-
-                DecideWhatCommandToDo(op, content);
-            }
-
-            // formatted text with TypeWriter effect into response field
-            ButtonControl buttonControl = GetTree().Root.GetNode<ButtonControl>("Node2D/UI");
-            await buttonControl.TypeWriterEffect(richtext, _responseField);
-            IsTextBoxReady = true;
+            richtextBuilder.Append(FormatPart(op, content));
+            DecideWhatCommandToDo(op, content);
         }
+        string richtext = richtextBuilder.ToString();
+
+        // Get the ButtonControl (consider caching this)
+        ButtonControl buttonControl = GetTree().Root.GetNode<ButtonControl>("Node2D/UI");
+
+        buttonControl.TypeWriterEffect(richtext, _responseField);
+
+        IsTextBoxReady = true; // Consider removing this; see below
     }
+}
 
     private void DecideWhatCommandToDo(string command, string content)
     {

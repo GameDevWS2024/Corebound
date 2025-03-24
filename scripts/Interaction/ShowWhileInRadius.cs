@@ -64,7 +64,6 @@ public partial class ShowWhileInRadius : Node2D
         base._PhysicsProcess(delta);
         Array<Node> entities = GetTree().GetNodesInGroup("Entities");
         bool villageShow = false;
-        int smallest = int.MaxValue;
         if (delta % delta * 2000 == 0)
         {
             entities = GetTree().GetNodesInGroup("Entities");
@@ -151,7 +150,7 @@ public partial class ShowWhileInRadius : Node2D
 
                 if (entity is Ally allyinv)
                 {
-                    Node2D parentNode = this.GetParent<Node2D>();
+                    Node2D parentNode = GetParent<Node2D>();
                     //GD.Print("Parent Node Name: ", parentNode.Name);
                     //GD.Print("Distance to RuneHolder: ", allyinv.GlobalPosition.DistanceTo(parentNode.GlobalPosition));
                     //GD.Print("Ally has FestiveStaff: ", allyinv.SsInventory.ContainsMaterial(Game.Scripts.Items.Material.FestiveStaff));
@@ -174,9 +173,11 @@ public partial class ShowWhileInRadius : Node2D
                         GD.Print("Notebook spawned");
                         _notebookspawned = true;
                         _notebookCode.Visible = true;
-                        VisibleForAI instance = new VisibleForAI();
-                        instance.NameForAi = "Notebook";
-                        instance.DescriptionForAi = "A Notebook that contains the code for the runeholder which is 1234";
+                        VisibleForAI instance = new VisibleForAI
+                        {
+                            NameForAi = "Notebook",
+                            DescriptionForAi = "A Notebook that contains the code for the runeholder which is 1234"
+                        };
                         _notebookCode.AddChild(instance);
                         _notebookCode.ObjectName = "Notebook";
                         _notebookCode.ObjectDescription = "A Notebook that contains the code for the runeholder";
@@ -185,19 +186,27 @@ public partial class ShowWhileInRadius : Node2D
                 }
             }
         }
-        if (this.GetParent().Name == "Sprite2D")
+        
+        if (GetParent().Name == "Sprite2D")
         {
             Sprite2D? sprite = GetParent<Sprite2D>();
+            
             if (sprite != null)
             {
                 SetShowSceneState(sprite, villageShow);
-                SetShowSceneState(sprite, _treeShow);
             }
             else
             {
                 GD.Print("Sprite2D is null. Can't show chest right now!");
             }
         }
+        GD.Print(Interactable.TreeCured);
+        if (GetParent().Name == "Big Tree") {
+            Sprite2D? sprite = GetParent<Sprite2D>();
+            {
+                SetShowSceneState(sprite, Interactable.TreeCured);
+            }
+        } 
 
 
     }

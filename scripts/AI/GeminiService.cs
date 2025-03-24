@@ -1,19 +1,14 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Transactions;
 
-using GenerativeAI.Exceptions;
 using GenerativeAI.Methods;
 using GenerativeAI.Models;
 using GenerativeAI.Types;
 
 using Godot;
-using Godot.Collections;
 
 namespace Game.Scripts.AI;
 
@@ -65,13 +60,10 @@ public partial class GeminiService : Node
         }
     }
 
-    private readonly Queue<string> _queryQueue = new Queue<string>();
-    private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
+    private readonly Queue<string> _queryQueue = new();
+    private readonly SemaphoreSlim _semaphore = new(1, 1);
 
-    public bool IsBusy()
-    {
-        return _queryQueue.Count > 0;
-    }
+    public bool IsBusy() => _queryQueue.Count > 0;
 
     public async Task<string?> MakeQuery(string input)
     {
@@ -108,13 +100,7 @@ public partial class GeminiService : Node
             {
                 GD.Print("tried 3 times but didn't get a response. Giving up now.");
             }
-            else
-            {
-                int waitingTimeInMs = (int)(1000 * 0.01f * result!.Length);
-                GD.Print("got response of length: " + result!.Length + ". Waiting for: " +
-                         waitingTimeInMs + " ms.");
-                await Task.Delay(waitingTimeInMs);
-            }
+    
             return result;
         }
         finally

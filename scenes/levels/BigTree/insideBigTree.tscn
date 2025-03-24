@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=4 uid="uid://xy3d46bjniyg"]
+[gd_scene load_steps=3 format=4 uid="uid://xy3d46bjniyg"]
 
 [ext_resource type="TileSet" uid="uid://b57mlmhoqye7c" path="res://assets/hauntedForestVillage/Interior.tres" id="1_wfbfv"]
+[ext_resource type="PackedScene" uid="uid://d0natjkfu7hhd" path="res://scenes/prefabs/ai_node.tscn" id="2_xymdw"]
 
 [node name="StaticBody2D" type="StaticBody2D"]
 
@@ -25,3 +26,10 @@ position = Vector2(-17, 31)
 scale = Vector2(1, 0.5)
 build_mode = 1
 polygon = PackedVector2Array(19, -90, 19, -120, 50, -124, 51, -152, 67, -156, 67, -290, 50, -290, 50, -322, 18, -322, 18, -356, -33, -356, -34, -324, -65, -324, -65, -290, -81, -290, -80, -156, -65, -150, -64, -124, -33, -124, -33, -96, -34, -94, -33, -122, -66, -122, -66, -152, -81, -158, -82, -290, -66, -288, -66, -318, -34, -322, -32, -356, 18, -354, 19, -320, 50, -322, 50, -290, 67, -290, 67, -156, 51, -152, 49, -122, 20, -120, 19, -88)
+
+[node name="Unconscious man" parent="." instance=ExtResource("2_xymdw")]
+position = Vector2(-43, -103)
+ObjectName = "Unconscious man"
+ObjectDescription = "An unconscious man that doesn't seem to react to anything and can obviously not wake up. Maybe loot"
+RemovedAfter = false
+CustomOverrideMessage = "You've found a Chipcard. Seems to work like a key to some door. "

@@ -15,7 +15,7 @@ public partial class EnemyManager : Node2D
     [Export] private float _maxSpawnInterval = 60;
     [Export] private int _maxEnemies = 10;
     [Export] private float _baseInterval = 10f;
-    [Export] private float _decayFactor = -3f; // -1.6f for regular game   // higher negative number means longer and longer duration between spawning
+    [Export] private float _decayFactor = -1.6f; // -1.6f for regular game   // higher negative number means longer and longer duration between spawning
 
     private double _timeSinceLastSpawn = 0;
     private bool _isSpawnOnHarvested = true;
