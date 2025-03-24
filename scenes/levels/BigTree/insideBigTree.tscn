@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=4 uid="uid://xy3d46bjniyg"]
+[gd_scene load_steps=4 format=4 uid="uid://xy3d46bjniyg"]
 
 [ext_resource type="TileSet" uid="uid://b57mlmhoqye7c" path="res://assets/hauntedForestVillage/Interior.tres" id="1_wfbfv"]
 [ext_resource type="PackedScene" uid="uid://d0natjkfu7hhd" path="res://scenes/prefabs/ai_node.tscn" id="2_xymdw"]
+[ext_resource type="Texture2D" uid="uid://bd3coeghrdgny" path="res://assets/sprites/Unconscious.png" id="3_7m0hj"]
 
 [node name="StaticBody2D" type="StaticBody2D"]
 
@@ -13,7 +14,7 @@ tile_set = ExtResource("1_wfbfv")
 rendering_quadrant_size = 32
 
 [node name="FloorWalls2" type="TileMapLayer" parent="InsideBigHouse"]
-tile_map_data = PackedByteArray("AAD7//7/AAAfAAgAAAD8//7/AAAfAAgAAAAAAP7/AAAfAAgAAAABAP7/AAAfAAgAAAD9////AAAfAAgAAAD+////AAAfAAgAAAD/////AAAfAAgAAAACAP3/AAAfAAgAAAD6//3/AAAfAAgAAAD6//j/AAASAAAAAAD7//f/AAASAAAAAAD8//f/AAASAAAAAAD9//b/AAASAAAAAAD+//b/AAASAAAAAAD///b/AAASAAAAAAAAAPf/AAASAAAAAAABAPf/AAASAAAAAAACAPj/AAASAAAAAAADAPj/AAAhAAAAAAAAAPb/AAAhAAAAAAACAPf/AAAhAAAAAAADAP3/AAAhAAgAAAACAP7/AAAhAAgAAAAAAP//AAAhAAgAAAD8////AAAQAAgAAAD6//7/AAAQAAgAAAD5//3/AAAQAAgAAAD5//j/AAAQAAAAAAD6//f/AAAQAAAAAAD8//b/AAAQAAAAAAA=")
+tile_map_data = PackedByteArray("AAD7//7/AAAfAAgAAAD8//7/AAAfAAgAAAAAAP7/AAAfAAgAAAABAP7/AAAfAAgAAAACAP3/AAAfAAgAAAD6//3/AAAfAAgAAAD6//j/AAASAAAAAAD7//f/AAASAAAAAAD8//f/AAASAAAAAAD9//b/AAASAAAAAAD+//b/AAASAAAAAAD///b/AAASAAAAAAAAAPf/AAASAAAAAAABAPf/AAASAAAAAAACAPj/AAASAAAAAAADAPj/AAAhAAAAAAAAAPb/AAAhAAAAAAACAPf/AAAhAAAAAAADAP3/AAAhAAgAAAACAP7/AAAhAAgAAAAAAP//AAAhAAgAAAD8////AAAQAAgAAAD6//7/AAAQAAgAAAD5//3/AAAQAAgAAAD5//j/AAAQAAAAAAD6//f/AAAQAAAAAAD8//b/AAAQAAAAAAD9////AAASAAgAAAD/////AAATAAgAAAA=")
 tile_set = ExtResource("1_wfbfv")
 rendering_quadrant_size = 32
 
@@ -33,3 +34,9 @@ ObjectName = "Unconscious man"
 ObjectDescription = "An unconscious man that doesn't seem to react to anything and can obviously not wake up. Maybe loot"
 RemovedAfter = false
 CustomOverrideMessage = "You've found a Chipcard. Seems to work like a key to some door. "
+
+[node name="Sprite2D" type="Sprite2D" parent="Unconscious man"]
+position = Vector2(0, -1)
+rotation = -1.54128
+scale = Vector2(0.53125, 0.53125)
+texture = ExtResource("3_7m0hj")

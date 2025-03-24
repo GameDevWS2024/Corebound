@@ -200,7 +200,7 @@ public partial class ShowWhileInRadius : Node2D
                 GD.Print("Sprite2D is null. Can't show chest right now!");
             }
         }
-        GD.Print(Interactable.TreeCured);
+        //GD.Print(Interactable.TreeCured);
         if (GetParent().Name == "Big Tree") {
             Sprite2D? sprite = GetParent<Sprite2D>();
             {

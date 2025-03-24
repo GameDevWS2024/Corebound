@@ -2,12 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection.PortableExecutable;
+using System.Threading.Tasks;
 
 using Game.Scripts.AI;
 
 using GenerativeAI.Exceptions;
 
 using Godot;
+
 namespace Game.Scripts
 {
     public partial class Chat : LineEdit
@@ -17,111 +20,88 @@ namespace Game.Scripts
         [Export(PropertyHint.File, "ally_system_prompt.txt")]
         private string? _systemPromptFile;
 
-        //  [Export(PropertyHint.File, "introduction_ally_system_prompt.txt")]
-        //  private string? _introductionSystemPromptFile;
-
         private Ally _ally = null!;
 
         private string _systemPrompt = "";
-        //    private string _introductionSystemPrompt = "";
         public GeminiService? GeminiService;
         private readonly string _apiKeyPath = ProjectSettings.GlobalizePath("res://api_key.secret");
         private const string ChatPlaceholder = "Type here to chat", EnterApiPlaceholder = "Enter API key";
 
-        private int _responseCount;
         private readonly List<VisibleForAI> _alreadySeen = [];
-        private Godot.Collections.Array<Node> _entityList = null!;
-        private VisibleForAI _ally1VisibleForAi = null!, _ally2VisibleForAi = null!;
 
         public override void _Ready()
         {
             _ally = GetParent().GetParent<Ally>();
-            _responseCount = 0;
             TextSubmitted += OnTextSubmitted;
-            //  AlreadySeen = _ally.AlwaysVisible.ToList();
 
             string systemPromptAbsolutePath = ProjectSettings.GlobalizePath(_systemPromptFile);
-            //   string introductionSystemPromptAbsolutePath = ProjectSettings.GlobalizePath(_introductionSystemPromptFile);
+            _systemPrompt = File.ReadAllText(systemPromptAbsolutePath);
 
-            _systemPrompt = File.ReadAllText(systemPromptAbsolutePath); // Load system prompt into SystemPrompt
-                                                                        // _introductionSystemPrompt = File.ReadAllText(introductionSystemPromptAbsolutePath); // Load intro prompt
+            InitializeGeminiService(_systemPrompt);
 
-            InitializeGeminiService(_systemPrompt); // Pass system prompt to InitializeGeminiService
-            /* foreach (Ally ally in GetTree().GetNodesInGroup("Entities").OfType<Ally>())
-             {
-                 if (ally.GetName().ToString().Contains('2'))
-                 {
-                     _ally2VisibleForAi = ally.GetNode<VisibleForAI>("VisibleForAI");
-                     AlreadySeen.Add(_ally2VisibleForAi);
-                 }
-                 else
-                 {
-                     _ally1VisibleForAi = ally.GetNode<VisibleForAI>("VisibleForAI");
-                     AlreadySeen.Add(_ally1VisibleForAi);
-                 }
-             }
-             */
+            // Create a Timer to control SeenItems frequency
+            Timer timer = new()
+            {
+                WaitTime = 1.0f, // Adjust as needed (e.g., 1 second)
+                OneShot = false
+            };
+            timer.Timeout += OnTimerTimeout;
+            AddChild(timer);
+            timer.Start();
         }
 
-        public async void SeenItems()
+        private async void OnTimerTimeout() => SeenItems();
+
+        public async Task SeenItems()
         {
-            List<VisibleForAI> newItems = [];
-            List<VisibleForAI> visibleItems = _ally.GetCurrentlyVisible();
+            List<VisibleForAI> newItems = [], visibleItems = _ally.GetCurrentlyVisible();
 
             if (visibleItems.Count > 0)
             {
                 foreach (VisibleForAI item in visibleItems)
                 {
-                    bool isContains = false;
-                    foreach (VisibleForAI vfai in _alreadySeen)
-                    {
-                        if (vfai == item) { isContains = true; break; }
-                    }
-                    if (!isContains && item.NameForAi.Trim() != "")
+                    bool isContains = _alreadySeen.Contains(item);
+                    if (!isContains && !string.IsNullOrWhiteSpace(item.NameForAi))
                     {
                         _alreadySeen.Add(item);
                         newItems.Add(item);
                     }
                 }
             }
+
             if (newItems.Count > 0)
             {
-                GD.Print("prompt");
-                string alreadySeenFormatted = string.Join("\n", _alreadySeen);
-                string newItemsFormatted = string.Join("\n", newItems);
-                string completeInput = $"New Objects:\n\n{newItemsFormatted}\n\n" + $"Already Seen:\n\n{alreadySeenFormatted}\n\n" + "Player: ";
+                string alreadySeenFormatted = string.Join("\n", _alreadySeen.Select(v => v.NameForAi));
+                string newItemsFormatted = string.Join("\n", newItems.Select(v => v.NameForAi));
+                string completeInput = $"New Objects:\n\n{newItemsFormatted}\n\nAlready Seen:\n\n{alreadySeenFormatted}\n\nPlayer: ";
 
                 GD.Print($"-------------------------\nInput:\n{completeInput}");
 
-                string? response = await GeminiService!.MakeQuery(completeInput);
-                if (response != null)
+                if (GeminiService != null)
                 {
-                    Ally dummy = new Ally();
-                    EmitSignal(SignalName.ResponseReceived, response, dummy);
-                    GD.Print($"----------------\nResponse:\n{response}");
+                    string? response = await GeminiService.MakeQuery(completeInput); // Run on background thread
+                    if (response != null)
+                    {
+                        Ally dummy = new();
+                        EmitSignal(SignalName.ResponseReceived, response, dummy);
+                        GD.Print($"----------------\nResponse:\n{response}");
+                    }
+                    else
+                    {
+                        GD.Print("No response");
+                    }
                 }
-                else
-                {
-                    GD.Print("No response");
-                }
-
                 newItems.Clear();
             }
         }
 
-        public override void _PhysicsProcess(double delta)
-        {
-            base._PhysicsProcess(delta);
-            SeenItems();
-        }
         private void InitializeGeminiService(string systemPrompt)
         {
             try
             {
-                GeminiService = new GeminiService(_apiKeyPath, systemPrompt); // Pass system prompt to GeminiService constructor
+                GeminiService = new GeminiService(_apiKeyPath, systemPrompt);
                 PlaceholderText = ChatPlaceholder;
             }
-
             catch (Exception ex)
             {
                 GD.Print(ex.Message);
@@ -131,10 +111,11 @@ namespace Game.Scripts
 
         public async void SendSystemMessage(string systemMessage, Ally? sender)
         {
-            GD.Print($"Sending message from: {sender!.Name}, Message: {systemMessage}"); // ADD THIS
+            GD.Print($"Sending message from: {sender!.Name}, Message: {systemMessage}");
             try
             {
-                string? txt = await GeminiService!.MakeQuery("[SYSTEM MESSAGE] " + systemMessage + " [SYSTEM MESSAGE END] \n"); GD.Print(txt); // put it into text box
+                string? txt = await Task.Run(() => GeminiService!.MakeQuery("[SYSTEM MESSAGE] " + systemMessage + " [SYSTEM MESSAGE END] \n"));
+                GD.Print(txt);
                 if (txt == null)
                 {
                     GD.Print("AI response is null.");
@@ -147,36 +128,37 @@ namespace Game.Scripts
             }
         }
 
+        private void OnTextSubmitted(string input)
+        {
+            Task.Run(() => HandleInputAsync(input));
+        }
 
-        private async void OnTextSubmitted(string input)
+        private async Task HandleInputAsync(string input)
         {
             List<VisibleForAI> visibleItems = _ally.GetCurrentlyVisible().Concat(_ally.AlwaysVisible).ToList();
-            string visibleItemsFormatted = string.Join("\n", visibleItems),
-                alreadySeenFormatted = string.Join("\n", _alreadySeen),
-                completeInput = $"New Objects:\n\n\n\n" + $"Already Seen:\n\n{alreadySeenFormatted}\n\n" + $"Player: {input}";
+            string alreadySeenFormatted = string.Join("\n", _alreadySeen.Select(v => v.NameForAi));
+            string completeInput = $"New Objects:\n\n\n\nAlready Seen:\n\n{alreadySeenFormatted}\n\nPlayer: {input}";
+
             GD.Print($"-------------------------\nInput:\n{completeInput}");
 
-            if (GeminiService != null)
+            if (GeminiService == null)
             {
-                string? response = await GeminiService.MakeQuery(completeInput);
-                if (response != null)
+                await File.WriteAllTextAsync(_apiKeyPath, input.Trim());
+                InitializeGeminiService(_systemPrompt);
+            }
+            else
+            {
+                string? response = await GeminiService.MakeQuery(completeInput); //Run on background thread
+                if (response != null || response == "")
                 {
-                    Ally dummy = new Ally();
-                    EmitSignal(SignalName.ResponseReceived, response, dummy);
+                    EmitSignal(SignalName.ResponseReceived, response, new Ally());
                     GD.Print($"----------------\nResponse:\n{response}");
                 }
-
                 else
                 {
                     GD.Print("No response");
                 }
             }
-            else
-            {
-                await File.WriteAllTextAsync(_apiKeyPath, input.Trim());
-                InitializeGeminiService(_systemPrompt);
-            }
-
             Clear();
         }
     }

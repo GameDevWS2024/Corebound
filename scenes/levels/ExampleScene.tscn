@@ -1,4 +1,4 @@
-[gd_scene load_steps=136 format=4 uid="uid://dfkwq6qwtxw25"]
+[gd_scene load_steps=137 format=4 uid="uid://dfkwq6qwtxw25"]
 
 [ext_resource type="Script" path="res://scripts/EnemyManager.cs" id="1_bmkfv"]
 [ext_resource type="Script" path="res://scripts/Map.cs" id="1_pa1ge"]
@@ -17,7 +17,7 @@
 [ext_resource type="Script" path="res://scripts/WalkOverSound.cs" id="16_yq8ar"]
 [ext_resource type="Texture2D" uid="uid://desfy4vbdj1ld" path="res://assets/tilemaps/TX Props.png" id="18_mna0q"]
 [ext_resource type="Texture2D" uid="uid://dtw1kjrq4qor4" path="res://assets/tilemaps/TX Tileset Grass.png" id="19_jd32h"]
-[ext_resource type="PackedScene" uid="uid://cth35h6b6wlx7" path="res://scenes/levels/HauntedForest/insideSmallHouse.tscn" id="19_qd0ov"]
+[ext_resource type="PackedScene" path="res://scenes/levels/HauntedForest/insideSmallHouse.tscn" id="19_qd0ov"]
 [ext_resource type="Texture2D" uid="uid://cmooytb3c0mki" path="res://assets/sprites/Pasted image.png" id="20_lgqcj"]
 [ext_resource type="Script" path="res://scripts/Interaction/ItemAdder.cs" id="21_2au4o"]
 [ext_resource type="Script" path="res://scripts/AI/AiNode.cs" id="22_8wkxe"]
@@ -58,7 +58,8 @@
 [ext_resource type="Texture2D" uid="uid://b1n85g1blpu64" path="res://assets/tilemaps/Houses.png" id="49_pb6br"]
 [ext_resource type="Texture2D" uid="uid://cmy47y4t8sx0w" path="res://assets/sprites/BigTree.ShrubberyAnimation.png" id="58_5gqqc"]
 [ext_resource type="PackedScene" uid="uid://xy3d46bjniyg" path="res://scenes/levels/BigTree/insideBigTree.tscn" id="58_llp75"]
-[ext_resource type="PackedScene" uid="uid://dkj8strm3dfar" path="res://scenes/prefabs/teleport.tscn" id="59_8fv5o"]
+[ext_resource type="PackedScene" path="res://scenes/prefabs/teleport.tscn" id="59_8fv5o"]
+[ext_resource type="PackedScene" uid="uid://cb7y0rhixpx4d" path="res://scenes/prefabs/destination.tscn" id="60_mti2g"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qwcva"]
 bg_color = Color(0.6, 0.6, 0.6, 0.654902)
@@ -14983,6 +14984,21 @@ b = Vector2(-14, 132)
 a = Vector2(-11, -257)
 b = Vector2(-11, -7)
 
+[sub_resource type="Animation" id="Animation_j2l0q"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [0]
+}
+
 [sub_resource type="Animation" id="Animation_kiuqu"]
 resource_name = "TreeAnimation"
 step = 0.1
@@ -14997,21 +15013,6 @@ tracks/0/keys = {
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1),
 "update": 1,
 "values": [0, 1, 2, 3, 4, 5, 6, 7, 8]
-}
-
-[sub_resource type="Animation" id="Animation_j2l0q"]
-length = 0.001
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath(".:frame")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [0]
 }
 
 [sub_resource type="Animation" id="Animation_qm3ix"]
@@ -15404,7 +15405,7 @@ scale = Vector2(0.999999, 0.999999)
 
 [node name="InsideBigHouse" type="Node2D" parent="Abandoned Village/Sprite2D"]
 z_index = 2
-position = Vector2(-221, -475.001)
+position = Vector2(5807.01, -4040)
 script = ExtResource("25_0y114")
 SceneToShow = ExtResource("26_vmw0c")
 Radius = 500
@@ -15412,7 +15413,7 @@ ItemActivationStatus = false
 
 [node name="InsideBigHouse2" parent="Abandoned Village/Sprite2D" instance=ExtResource("26_vmw0c")]
 z_index = 30
-position = Vector2(-222, -200.001)
+position = Vector2(5812.01, -3628)
 scale = Vector2(3.7, 6.5)
 
 [node name="VisibleForAI" type="Node2D" parent="Abandoned Village/Sprite2D"]
@@ -15452,6 +15453,7 @@ MusicPlayer2 = NodePath("../../AudioManager/creepy_music")
 [node name="Node2D" type="Node2D" parent="Abandoned Village"]
 
 [node name="Sprite2D" type="Sprite2D" parent="Abandoned Village/Node2D"]
+position = Vector2(8097, -5543)
 
 [node name="InsideSmallHouse" parent="Abandoned Village/Node2D/Sprite2D" instance=ExtResource("19_qd0ov")]
 z_index = 30
@@ -15514,7 +15516,7 @@ script = ExtResource("6_7bcmx")
 NameForAi = "Torch"
 
 [node name="Torch" parent="." instance=ExtResource("13_05imv")]
-position = Vector2(5631, -5569)
+position = Vector2(11335, -9281)
 ObjectName = "Torch"
 ObjectDescription = "An unlit Torch, engraved with ceremonial runes. It seems to important to just be burned, maybe it functions differently then a regular torch"
 ObjectHint = "Tell the commander about the object you just spotted. You may use the command  [INTERACT] or [GOTO AND INTERACT]."
@@ -15969,12 +15971,65 @@ scale = Vector2(3.5, 3.5)
 texture = ExtResource("58_5gqqc")
 hframes = 17
 
-[node name="Teleport" parent="." instance=ExtResource("59_8fv5o")]
-position = Vector2(5994, -7764)
-X = 9641
-Y = -8454
-Length = 100
-Width = 20
-
 [node name="InsideBigTree" parent="." instance=ExtResource("58_llp75")]
-position = Vector2(9641, -8454)
+position = Vector2(9634, -8452)
+scale = Vector2(5.81, 5.81)
+
+[node name="TeleportNodes" type="Node" parent="."]
+
+[node name="Teleport" parent="TeleportNodes" node_paths=PackedStringArray("Destination") instance=ExtResource("59_8fv5o")]
+position = Vector2(8245, -5525)
+Length = 150
+Width = 20
+Destination = NodePath("../Destination")
+
+[node name="Teleport2" parent="TeleportNodes" node_paths=PackedStringArray("Destination") instance=ExtResource("59_8fv5o")]
+position = Vector2(12094, -6034)
+Length = 150
+Width = 10
+Destination = NodePath("../Destination2")
+
+[node name="Teleport3" parent="TeleportNodes" node_paths=PackedStringArray("Destination") instance=ExtResource("59_8fv5o")]
+position = Vector2(8391, -2350)
+scale = Vector2(0.999999, 0.999999)
+Length = 150
+Width = 10
+Destination = NodePath("../Destination3")
+
+[node name="Teleport4" parent="TeleportNodes" node_paths=PackedStringArray("Destination") instance=ExtResource("59_8fv5o")]
+position = Vector2(14412, -5950)
+scale = Vector2(0.999999, 0.999999)
+Length = 200
+Width = 10
+Destination = NodePath("../Destination4")
+
+[node name="Teleport5" parent="TeleportNodes" node_paths=PackedStringArray("Destination") instance=ExtResource("59_8fv5o")]
+position = Vector2(9147, -401)
+Length = 150
+Width = 10
+Destination = NodePath("../Destination5")
+
+[node name="Teleport6" parent="TeleportNodes" node_paths=PackedStringArray("Destination") instance=ExtResource("59_8fv5o")]
+position = Vector2(17248, -6058)
+Length = 200
+Width = 10
+Destination = NodePath("../Destination6")
+
+[node name="Destination" parent="TeleportNodes" instance=ExtResource("60_mti2g")]
+position = Vector2(12091, -6203)
+
+[node name="Destination2" parent="TeleportNodes" instance=ExtResource("60_mti2g")]
+position = Vector2(8246, -5413)
+
+[node name="Destination3" parent="TeleportNodes" instance=ExtResource("60_mti2g")]
+position = Vector2(14412, -6109)
+scale = Vector2(0.999999, 0.999999)
+
+[node name="Destination4" parent="TeleportNodes" instance=ExtResource("60_mti2g")]
+position = Vector2(8388, -2284)
+
+[node name="Destination5" parent="TeleportNodes" instance=ExtResource("60_mti2g")]
+position = Vector2(17248, -6144)
+
+[node name="Destination6" parent="TeleportNodes" instance=ExtResource("60_mti2g")]
+position = Vector2(9149, -333)

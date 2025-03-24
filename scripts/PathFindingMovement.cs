@@ -22,7 +22,7 @@ public partial class PathFindingMovement : Node
     [Export] Sprite2D _sprite = null!;
 
     public Vector2 TargetPosition { get; set; }
-    private object _lastCollider = null; // Speichert den letzten Kollisionspartner
+    private object? _lastCollider = null; // Speichert den letzten Kollisionspartner
     private bool _recentlyBumped = false; // Verhindert Dauersound
     private bool _reachedTarget;
     private int _currentTargetDistance;
