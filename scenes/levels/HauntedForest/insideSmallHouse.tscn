@@ -1,8 +1,6 @@
-[gd_scene load_steps=4 format=4 uid="uid://cth35h6b6wlx7"]
+[gd_scene load_steps=2 format=4 uid="uid://cth35h6b6wlx7"]
 
 [ext_resource type="TileSet" uid="uid://b57mlmhoqye7c" path="res://assets/hauntedForestVillage/Interior.tres" id="1_3g5np"]
-[ext_resource type="PackedScene" uid="uid://d0natjkfu7hhd" path="res://scenes/prefabs/ai_node.tscn" id="2_3n5hg"]
-[ext_resource type="Texture2D" uid="uid://dc2h5ioqelopi" path="res://assets/items/bucket_empty.png" id="3_bobym"]
 
 [node name="StaticBody2D" type="StaticBody2D"]
 
@@ -21,16 +19,3 @@ tile_set = ExtResource("1_3g5np")
 scale = Vector2(1, 0.5)
 build_mode = 1
 polygon = PackedVector2Array(-20, 0, -66, 2, -66, -258, 65, -258, 66, 0, 18, -1, 66, 0, 65, -258, 2, -258, -66, -258, -66, 2)
-
-[node name="EmptyBucket" parent="." instance=ExtResource("2_3n5hg")]
-position = Vector2(-44, -110)
-ObjectName = "Empty Bucket"
-ObjectDescription = "Its an empty bucket"
-CustomOverrideMessage = "Maybe fill it with something"
-AddedMaterial = 1
-
-[node name="Sprite2D" type="Sprite2D" parent="EmptyBucket"]
-position = Vector2(-0.484364, -1.5069)
-rotation = 1.2598
-scale = Vector2(0.802146, 1)
-texture = ExtResource("3_bobym")

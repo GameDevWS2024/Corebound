@@ -33,6 +33,7 @@ public partial class ShowWhileInRadius : Node2D
     Boolean _ghostspawned = false;
     Boolean _notebookspawned = false;
     AiNode _notebookCode = null!;
+    Sprite2D _notebookSprite = null!;
 
     // Load the scene you want to instance.   ONLY FOR CHEST INSIDE BIG HOUSE
     private PackedScene _sceneToInstance = null!;
@@ -41,8 +42,10 @@ public partial class ShowWhileInRadius : Node2D
     {
         _notebookCode = GetTree().Root.GetNode<AiNode>("Node2D/NotebookWithCode");
         _core = GetTree().GetNodesInGroup("Core").Cast<Core>().SingleOrDefault();
+        _notebookSprite = GetTree().Root.GetNode<Sprite2D>("Node2D/NotebookWithCode/Notebook_sprite");
         _entitiesList = GetTree().GetNodesInGroup("Entities");
         float dist = float.MaxValue;
+        _notebookSprite.Visible = false;
         foreach (Ally ally in _entitiesList)
         {
             if (ally.GlobalPosition.DistanceTo(GlobalPosition) <= dist)
@@ -143,7 +146,8 @@ public partial class ShowWhileInRadius : Node2D
                        aiNode.FromChosenMaterial = Game.Scripts.Items.Material.FestiveStaff;
                    }
                    */
-                    if(Interactable.TreeCured) {
+                    if (Interactable.TreeCured)
+                    {
                         _treeShow = true;
                     }
                 }
@@ -171,6 +175,7 @@ public partial class ShowWhileInRadius : Node2D
                     if (parentNode.Name == "Rune" && allyinv.GlobalPosition.DistanceTo(GetTree().Root.GetNode<Node2D>("Node2D/Spaceport/Spaceship").GlobalPosition) < 250 && allyinv.SsInventory.ContainsMaterial(Game.Scripts.Items.Material.Copper) && _ghostspawned && !_notebookspawned)
                     {
                         GD.Print("Notebook spawned");
+                        _notebookSprite.Visible = true;
                         _notebookspawned = true;
                         _notebookCode.Visible = true;
                         VisibleForAI instance = new VisibleForAI
@@ -186,11 +191,11 @@ public partial class ShowWhileInRadius : Node2D
                 }
             }
         }
-        
+
         if (GetParent().Name == "Sprite2D")
         {
             Sprite2D? sprite = GetParent<Sprite2D>();
-            
+
             if (sprite != null)
             {
                 SetShowSceneState(sprite, villageShow);
@@ -201,12 +206,13 @@ public partial class ShowWhileInRadius : Node2D
             }
         }
         //GD.Print(Interactable.TreeCured);
-        if (GetParent().Name == "Big Tree") {
+        if (GetParent().Name == "Big Tree")
+        {
             Sprite2D? sprite = GetParent<Sprite2D>();
             {
                 SetShowSceneState(sprite, Interactable.TreeCured);
             }
-        } 
+        }
 
 
     }

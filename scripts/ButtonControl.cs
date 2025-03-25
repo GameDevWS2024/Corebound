@@ -54,6 +54,8 @@ public partial class ButtonControl : Control
 
         // Activate _ally1 by default
         SwitchToAlly(1);
+        _ally2Chat.Visible = false;
+        _ally2ResponseField.Visible = false;
     }
 
     private void OnMouseEnteredUI()

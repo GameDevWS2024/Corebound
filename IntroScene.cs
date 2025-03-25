@@ -286,7 +286,7 @@ public partial class IntroScene : Control
         }
         _button.Visible = true;
         _ally1ResponseField.Visible = true;
-        _ally2ResponseField.Visible = true;
+        _ally2ResponseField.Visible = false;
         _ally1Chat.Visible = true;
 
         // Resume the game

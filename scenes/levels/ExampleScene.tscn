@@ -1,4 +1,4 @@
-[gd_scene load_steps=139 format=4 uid="uid://dfkwq6qwtxw25"]
+[gd_scene load_steps=145 format=4 uid="uid://dfkwq6qwtxw25"]
 
 [ext_resource type="Script" path="res://scripts/EnemyManager.cs" id="1_bmkfv"]
 [ext_resource type="Script" path="res://scripts/Map.cs" id="1_pa1ge"]
@@ -17,9 +17,10 @@
 [ext_resource type="Script" path="res://scripts/WalkOverSound.cs" id="16_yq8ar"]
 [ext_resource type="Texture2D" uid="uid://desfy4vbdj1ld" path="res://assets/tilemaps/TX Props.png" id="18_mna0q"]
 [ext_resource type="Texture2D" uid="uid://dtw1kjrq4qor4" path="res://assets/tilemaps/TX Tileset Grass.png" id="19_jd32h"]
-[ext_resource type="PackedScene" path="res://scenes/levels/HauntedForest/insideSmallHouse.tscn" id="19_qd0ov"]
+[ext_resource type="PackedScene" uid="uid://cth35h6b6wlx7" path="res://scenes/levels/HauntedForest/insideSmallHouse.tscn" id="19_qd0ov"]
 [ext_resource type="Texture2D" uid="uid://cmooytb3c0mki" path="res://assets/sprites/Pasted image.png" id="20_lgqcj"]
 [ext_resource type="Script" path="res://scripts/Interaction/ItemAdder.cs" id="21_2au4o"]
+[ext_resource type="Texture2D" uid="uid://dc2h5ioqelopi" path="res://assets/items/bucket_empty.png" id="21_xqa7f"]
 [ext_resource type="Script" path="res://scripts/AI/AiNode.cs" id="22_8wkxe"]
 [ext_resource type="TileSet" uid="uid://b57mlmhoqye7c" path="res://assets/hauntedForestVillage/Interior.tres" id="23_6wlm7"]
 [ext_resource type="Script" path="res://scripts/Interaction/Removeable.cs" id="24_ex5ip"]
@@ -34,7 +35,7 @@
 [ext_resource type="AudioStream" uid="uid://dk6o3bfgpq5as" path="res://assets/audio/intro_song.mp3" id="28_u8gsi"]
 [ext_resource type="AudioStream" uid="uid://ckepkjqosl80g" path="res://assets/audio/gameOver.mp3" id="29_jcr58"]
 [ext_resource type="AudioStream" uid="uid://dpq5uuhy4kxlo" path="res://assets/audio/victoryScreen.mp3" id="30_4ukal"]
-[ext_resource type="Script" path="res://scenes/levels/ButtonControl.cs" id="30_pwpih"]
+[ext_resource type="Script" path="res://scripts/ButtonControl.cs" id="30_pwpih"]
 [ext_resource type="AudioStream" uid="uid://ccjwwjvfktune" path="res://assets/audio/Damage.mp3" id="31_0ksbt"]
 [ext_resource type="ButtonGroup" uid="uid://canjpaliv4kso" path="res://assets/resources/chat_button_group.tres" id="31_rop2t"]
 [ext_resource type="AudioStream" uid="uid://u1eq84kjmd3i" path="res://assets/audio/Bump.mp3" id="32_2bq74"]
@@ -56,10 +57,11 @@
 [ext_resource type="PackedScene" uid="uid://dr53bjmurlnut" path="res://scenes/Tutorial.tscn" id="48_3yv6f"]
 [ext_resource type="Script" path="res://scripts/Interaction/CodeInput.cs" id="48_x4dce"]
 [ext_resource type="Texture2D" uid="uid://b1n85g1blpu64" path="res://assets/tilemaps/Houses.png" id="49_pb6br"]
-[ext_resource type="Texture2D" uid="uid://bhv8adq4ph4x7" path="res://assets/obstacles/well.png" id="57_t5x8p"]
+[ext_resource type="Texture2D" uid="uid://cltp3i5osth53" path="res://assets/obstacles/well.png" id="57_t5x8p"]
 [ext_resource type="Texture2D" uid="uid://cmy47y4t8sx0w" path="res://assets/sprites/BigTree.ShrubberyAnimation.png" id="58_5gqqc"]
 [ext_resource type="PackedScene" uid="uid://xy3d46bjniyg" path="res://scenes/levels/BigTree/insideBigTree.tscn" id="58_llp75"]
-[ext_resource type="PackedScene" path="res://scenes/prefabs/teleport.tscn" id="59_8fv5o"]
+[ext_resource type="Texture2D" uid="uid://dp604e41wt50p" path="res://assets/sprites/Barrier.png" id="58_vqwoj"]
+[ext_resource type="PackedScene" uid="uid://dkj8strm3dfar" path="res://scenes/prefabs/teleport.tscn" id="59_8fv5o"]
 [ext_resource type="PackedScene" uid="uid://cb7y0rhixpx4d" path="res://scenes/prefabs/destination.tscn" id="60_mti2g"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qwcva"]
@@ -14981,13 +14983,76 @@ height = 625.975
 a = Vector2(-14, -120)
 b = Vector2(-14, 132)
 
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_630vn"]
-radius = 29.0054
-height = 148.018
+[sub_resource type="Animation" id="Animation_3q1do"]
+resource_name = "Barier"
+step = 0.1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("AnimatedSprite2D:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"update": 1,
+"values": [0, 1, 2, 3, 4]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("AnimatedSprite2D2:frame")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"update": 1,
+"values": [0, 1, 2, 3, 4]
+}
 
-[sub_resource type="SegmentShape2D" id="SegmentShape2D_k0qre"]
-a = Vector2(-11, -257)
-b = Vector2(-11, -7)
+[sub_resource type="Animation" id="Animation_ipq10"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("AnimatedSprite2D:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [0]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("AnimatedSprite2D2:frame")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [0]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_sbsrt"]
+_data = {
+"Barier": SubResource("Animation_3q1do"),
+"RESET": SubResource("Animation_ipq10")
+}
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_630vn"]
+radius = 37.9971
+height = 171.988
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_6wyny"]
+size = Vector2(31.5, 245.5)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1a47p"]
+size = Vector2(32, 245)
 
 [sub_resource type="Animation" id="Animation_j2l0q"]
 length = 0.001
@@ -15404,6 +15469,51 @@ WalkingObject = NodePath("../../../Ally")
 WalkingObject2 = NodePath("../../../Ally2")
 Sound = NodePath("../../../AudioManager/door_sound")
 
+[node name="Door_sound2" type="Node2D" parent="Abandoned Village/Big House" node_paths=PackedStringArray("WalkingObject", "WalkingObject2", "Sound")]
+position = Vector2(253, 655)
+scale = Vector2(0.333333, 0.333333)
+script = ExtResource("16_yq8ar")
+InsideRadius = 20.0
+WalkingObject = NodePath("../../../Ally")
+WalkingObject2 = NodePath("../../../Ally2")
+Sound = NodePath("../../../AudioManager/door_sound")
+
+[node name="Door_sound3" type="Node2D" parent="Abandoned Village/Big House" node_paths=PackedStringArray("WalkingObject", "WalkingObject2", "Sound")]
+position = Vector2(1235.33, -1228)
+scale = Vector2(0.333333, 0.333333)
+script = ExtResource("16_yq8ar")
+InsideRadius = 20.0
+WalkingObject = NodePath("../../../Ally")
+WalkingObject2 = NodePath("../../../Ally2")
+Sound = NodePath("../../../AudioManager/door_sound")
+
+[node name="Door_sound4" type="Node2D" parent="Abandoned Village/Big House" node_paths=PackedStringArray("WalkingObject", "WalkingObject2", "Sound")]
+position = Vector2(2007.67, -1201)
+scale = Vector2(0.333333, 0.333333)
+script = ExtResource("16_yq8ar")
+InsideRadius = 20.0
+WalkingObject = NodePath("../../../Ally")
+WalkingObject2 = NodePath("../../../Ally2")
+Sound = NodePath("../../../AudioManager/door_sound")
+
+[node name="Door_sound5" type="Node2D" parent="Abandoned Village/Big House" node_paths=PackedStringArray("WalkingObject", "WalkingObject2", "Sound")]
+position = Vector2(2953.33, -1237)
+scale = Vector2(0.333333, 0.333333)
+script = ExtResource("16_yq8ar")
+InsideRadius = 20.0
+WalkingObject = NodePath("../../../Ally")
+WalkingObject2 = NodePath("../../../Ally2")
+Sound = NodePath("../../../AudioManager/door_sound")
+
+[node name="Door_sound6" type="Node2D" parent="Abandoned Village/Big House" node_paths=PackedStringArray("WalkingObject", "WalkingObject2", "Sound")]
+position = Vector2(-47.3332, -1054)
+scale = Vector2(0.333333, 0.333333)
+script = ExtResource("16_yq8ar")
+InsideRadius = 20.0
+WalkingObject = NodePath("../../../Ally")
+WalkingObject2 = NodePath("../../../Ally2")
+Sound = NodePath("../../../AudioManager/door_sound")
+
 [node name="Sprite2D" type="Sprite2D" parent="Abandoned Village"]
 position = Vector2(8600, -2333)
 scale = Vector2(0.999999, 0.999999)
@@ -15424,19 +15534,6 @@ scale = Vector2(3.7, 6.5)
 [node name="VisibleForAI" type="Node2D" parent="Abandoned Village/Sprite2D"]
 script = ExtResource("6_7bcmx")
 NameForAi = "Big House"
-
-[node name="SmallHouse" parent="Abandoned Village/Sprite2D" instance=ExtResource("13_05imv")]
-position = Vector2(539.001, 1937)
-ObjectName = "Small House"
-
-[node name="Door_sound" type="Node2D" parent="Abandoned Village/Sprite2D/SmallHouse" node_paths=PackedStringArray("WalkingObject", "WalkingObject2", "Sound")]
-position = Vector2(0.666664, -1.33337)
-scale = Vector2(0.333333, 0.333333)
-script = ExtResource("16_yq8ar")
-InsideRadius = 20.0
-WalkingObject = NodePath("../../../../Ally")
-WalkingObject2 = NodePath("../../../../Ally2")
-Sound = NodePath("../../../../AudioManager/door_sound")
 
 [node name="HauntedForestVillageAiNode" parent="Abandoned Village" instance=ExtResource("13_05imv")]
 position = Vector2(8649, -1315)
@@ -15465,12 +15562,18 @@ z_index = 30
 position = Vector2(9150, -525.002)
 scale = Vector2(4, 4.99999)
 
-[node name="InsideSmallHouse2" type="Node2D" parent="Abandoned Village/Node2D/Sprite2D"]
-position = Vector2(9140, -854.001)
-scale = Vector2(0.999999, 0.999999)
-script = ExtResource("25_0y114")
-SceneToShow = ExtResource("19_qd0ov")
-Radius = 500
+[node name="Empty Bucket" parent="Abandoned Village/Node2D/Sprite2D/InsideSmallHouse" instance=ExtResource("13_05imv")]
+position = Vector2(-44.25, -111)
+scale = Vector2(0.25, 0.2)
+ObjectName = "Empty Bucket"
+ObjectDescription = "Its an empty bucket"
+ItemAdderMessage = PackedStringArray()
+AddedMaterial = 1
+
+[node name="EmptyBucketSprite" type="Sprite2D" parent="Abandoned Village/Node2D/Sprite2D/InsideSmallHouse/Empty Bucket"]
+rotation = 1.28978
+scale = Vector2(5, 5)
+texture = ExtResource("21_xqa7f")
 
 [node name="Spaceport" type="Node" parent="."]
 
@@ -15526,7 +15629,7 @@ ObjectName = "Torch"
 ObjectDescription = "An unlit Torch, engraved with ceremonial runes. It seems to important to just be burned, maybe it functions differently then a regular torch"
 ObjectHint = "Tell the commander about the object you just spotted. You may use the command  [INTERACT] or [GOTO AND INTERACT]."
 ItemAdderMessage = PackedStringArray("You picked up: ", "It could possibly be useful for seeing items that may have been out of sight for now if it is lit.")
-AddedMaterial = 7
+AddedMaterial = 14
 
 [node name="AudioManager" type="Node" parent="." node_paths=PackedStringArray("_menuMusic", "_gameMusic", "_gameOverMusic")]
 script = ExtResource("25_fif0r")
@@ -15922,6 +16025,25 @@ z_index = 1
 position = Vector2(-60, 114)
 shape = SubResource("SegmentShape2D_i54bb")
 
+[node name="AnimatedSprite2D" type="Sprite2D" parent="CaveEntranceTerminal"]
+z_index = 1
+position = Vector2(-72.0001, 121)
+scale = Vector2(3.84999, 3.84999)
+texture = ExtResource("58_vqwoj")
+hframes = 5
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="CaveEntranceTerminal"]
+libraries = {
+"": SubResource("AnimationLibrary_sbsrt")
+}
+
+[node name="AnimatedSprite2D2" type="Sprite2D" parent="CaveEntranceTerminal"]
+z_index = 2
+position = Vector2(-712, 120)
+scale = Vector2(3.84999, 3.84999)
+texture = ExtResource("58_vqwoj")
+hframes = 5
+
 [node name="Scar" parent="." instance=ExtResource("13_05imv")]
 position = Vector2(5647, -8048)
 ObjectName = "Scar"
@@ -15932,7 +16054,7 @@ ShowWhileInRadius = true
 [node name="Well" parent="." instance=ExtResource("13_05imv")]
 unique_name_in_owner = true
 z_index = 100
-position = Vector2(8577, -2210)
+position = Vector2(8578, -2242)
 ObjectName = "Well"
 ObjectDescription = "can be used to fill an empty bucket with water"
 RemovedAfter = false
@@ -15940,7 +16062,8 @@ CustomOverrideMessage = "the ally now has a water bucket"
 
 [node name="Sprite2D" type="Sprite2D" parent="Well"]
 z_index = 70
-position = Vector2(1, -36)
+position = Vector2(-4, -71)
+scale = Vector2(8, 8)
 texture = ExtResource("57_t5x8p")
 
 [node name="StaticBody2D" type="StaticBody2D" parent="Well"]
@@ -15962,15 +16085,34 @@ CustomOverrideMessage = "Door is now open for 5 seconds"
 
 [node name="CaveEntrance1" type="CollisionShape2D" parent="DoorOpener/StaticBody2D"]
 z_index = 2
-position = Vector2(-25, -835)
-shape = SubResource("SegmentShape2D_k0qre")
+position = Vector2(-40.25, -967.75)
+shape = SubResource("RectangleShape2D_6wyny")
 
 [node name="StaticBody2D2" type="StaticBody2D" parent="DoorOpener"]
 
 [node name="CaveEntrance2" type="CollisionShape2D" parent="DoorOpener/StaticBody2D2"]
 z_index = 2
-position = Vector2(-541, -834)
-shape = SubResource("SegmentShape2D_k0qre")
+position = Vector2(-548, -964.5)
+shape = SubResource("RectangleShape2D_1a47p")
+
+[node name="AnimatedSprite2D" type="Sprite2D" parent="DoorOpener"]
+z_index = 2
+position = Vector2(-39.6, -967.8)
+scale = Vector2(3.84999, 3.84999)
+texture = ExtResource("58_vqwoj")
+hframes = 5
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="DoorOpener"]
+libraries = {
+"": SubResource("AnimationLibrary_sbsrt")
+}
+
+[node name="AnimatedSprite2D2" type="Sprite2D" parent="DoorOpener"]
+z_index = 2
+position = Vector2(-548, -965)
+scale = Vector2(3.84999, 3.84999)
+texture = ExtResource("58_vqwoj")
+hframes = 5
 
 [node name="Node2D" type="Node2D" parent="."]
 
