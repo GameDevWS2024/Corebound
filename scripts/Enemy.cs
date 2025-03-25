@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using Game.Scripts;
+
 using Godot;
 using Godot.Collections;
 
@@ -21,28 +23,30 @@ public partial class Enemy : CharacterBody2D
     public override void _Ready()
     {
         Health = GetNode<Health>("Health");
-        _player = GetTree().CurrentScene.GetNode<CharacterBody2D>("%Player");
         _core = GetTree().CurrentScene.GetNode<Node2D>("%Core");
+        
     }
 
     private float _attackCooldown = 0.5f; // Time between attacks in seconds
-    private float _timeSinceLastAttack = 0.0f; // Time accumulator
-    private const float AttackRange = 170.0f; // Distance at which enemy can attack
+    private float _timeSinceLastAttack; // Time accumulator
+    private const float AttackRange = 200.0f; // Distance at which enemy can attack
 
     public override void _PhysicsProcess(double delta)
     {
-        // temporary cause I couldnt figure out how to hide/delete Enemy like Player or Allie
         if (Health.Amount <= 0)
         {
             QueueFree();
+            List<Ally> allies = GetTree().GetNodesInGroup("Entities").OfType<Ally>().ToList();
+            foreach (Health health in from ally in allies where ally.Name.Equals("Ally2") select ally.GetNode<Health>("Health"))
+            {
+                health.Heal(10);
+            }
         }
-
-        //
 
         _timeSinceLastAttack += (float)delta;
 
         _entityGroup = GetTree().GetNodesInGroup("Entities");
-        if (GetTree().GetNodesInGroup("Entities").ToList().Count == 0)
+        if (_entityGroup.ToList().Count == 0)
         {
             GetTree().CurrentScene.QueueFree();
             Node gameOverScene = GD.Load<PackedScene>("res://scenes/prefabs/GameOver.tscn").Instantiate();
@@ -53,21 +57,23 @@ public partial class Enemy : CharacterBody2D
 
         Node2D nearestEntity = nearestEntities.OrderBy(tup => tup.distance).FirstOrDefault().entity;
 
-        if (nearestEntity != null)
+        if (nearestEntity == null)
         {
-            Vector2 pos = nearestEntity.GlobalPosition;
-            float distanceToTarget = pos.DistanceTo(this.GlobalPosition);
-            if (_attack)
-            {
-                _pathFindingMovement.TargetPosition = pos;
-                if (distanceToTarget < AttackRange && _timeSinceLastAttack >= _attackCooldown)
-                {
-                    Health allieHealth = nearestEntity.GetNode<Health>("Health");
-                    allieHealth.Damage(_damage);
-                    _timeSinceLastAttack = 0;
-                }
-            }
+            return;
         }
+
+        Vector2 pos = nearestEntity.GlobalPosition;
+        float distanceToTarget = pos.DistanceTo(this.GlobalPosition);
+
+        _pathFindingMovement.GoTo(pos);
+        if (!(distanceToTarget < AttackRange) || !(_timeSinceLastAttack >= _attackCooldown) || !_attack)
+        {
+            return;
+        }
+
+        Health allieHealth = nearestEntity.GetNode<Health>("Health");
+        allieHealth.Damage(_damage);
+        _timeSinceLastAttack = 0;
     }
 
 
