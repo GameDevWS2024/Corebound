@@ -22,6 +22,7 @@ public partial class Interactable : Node2D
     private AnimationPlayer _animTree = null!;
     private AnimationPlayer _animEntrance = null!;
     private AnimationPlayer _animDoorOpener = null!;
+    private Sprite2D _keySprite = null!;
 
     public override void _Ready()
     {
@@ -31,6 +32,7 @@ public partial class Interactable : Node2D
         _animTree = GetTree().Root.GetNode<AnimationPlayer>("Node2D/Node2D/AnimationPlayer");
         _animEntrance = GetTree().Root.GetNode<AnimationPlayer>("Node2D/CaveEntranceTerminal/AnimationPlayer");
         _animDoorOpener = GetTree().Root.GetNode<AnimationPlayer>("Node2D/DoorOpener/AnimationPlayer");
+        _keySprite = GetTree().Root.GetNode<Sprite2D>("Node2D/RuneHolder/Key");
         _scar = GetTree().Root.GetNode<AiNode>("Node2D/Scar");
         if (GetParent().Equals(_scar))
         {
@@ -58,6 +60,18 @@ public partial class Interactable : Node2D
         {
             Ally ally = (caller as Ally)!;
             ally.Chat.SendSystemMessage(SystemMessageForAlly, new Ally());
+        }
+
+        //Open door
+        if (GetParent<AiNode>().Name.Equals("LockedDoor") && caller.Name.ToString().Contains("Ally"))
+        {
+            Ally ally = (caller as Ally)!;
+            if (!ally.SsInventory.ContainsMaterial(Game.Scripts.Items.Material.Key)) {
+                Ally? confirmedAlly = caller as Ally;
+                Chat confirmedAllyChat = confirmedAlly!.Chat;
+                confirmedAllyChat.SendSystemMessage("The door is locked, you cannot enter.", new Ally());
+                return;
+            }
         }
 
         //Fill bucket with water
@@ -154,7 +168,11 @@ public partial class Interactable : Node2D
             Ally? james = caller as Ally;
             Chat jonesChat = james!.Chat;
             jonesChat.SendSystemMessage("You've picked up the empty bucket. Maybe fill it with something.", new Ally());
+        }
 
+        if (GetParent<AiNode>().Name.Equals("Key") && caller.Name.ToString().Equals("Ally"))
+        {
+            _keySprite.Visible = false;
         }
 
         EmitSignal(SignalName.Interact);

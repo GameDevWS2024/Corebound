@@ -34,6 +34,11 @@ public partial class ShowWhileInRadius : Node2D
     Boolean _notebookspawned = false;
     AiNode _notebookCode = null!;
     Sprite2D _notebookSprite = null!;
+    Sprite2D _keySprite = null!;
+    CodeInput _codeInput = null!;
+    private CollisionShape2D _smallHouseBarrier= null!;
+
+    private bool _keyExist = false;
 
     // Load the scene you want to instance.   ONLY FOR CHEST INSIDE BIG HOUSE
     private PackedScene _sceneToInstance = null!;
@@ -44,6 +49,9 @@ public partial class ShowWhileInRadius : Node2D
         _core = GetTree().GetNodesInGroup("Core").Cast<Core>().SingleOrDefault();
         _notebookSprite = GetTree().Root.GetNode<Sprite2D>("Node2D/NotebookWithCode/Notebook_sprite");
         _entitiesList = GetTree().GetNodesInGroup("Entities");
+        _keySprite = GetTree().Root.GetNode<Sprite2D>("Node2D/RuneHolder/Key");
+        _codeInput = GetTree().Root.GetNode<CodeInput>("Node2D/RuneHolder/CodeInput");
+        _smallHouseBarrier = GetTree().Root.GetNode<CollisionShape2D>("Node2D/StaticBody2D/CollisionShape2D");
         float dist = float.MaxValue;
         _notebookSprite.Visible = false;
         foreach (Ally ally in _entitiesList)
@@ -160,6 +168,7 @@ public partial class ShowWhileInRadius : Node2D
                     //GD.Print("Ally has FestiveStaff: ", allyinv.SsInventory.ContainsMaterial(Game.Scripts.Items.Material.FestiveStaff));
                     if (parentNode.Name == "Rune" && allyinv.GlobalPosition.DistanceTo(parentNode.GlobalPosition) < 250 && allyinv.SsInventory.ContainsMaterial(Game.Scripts.Items.Material.FestiveStaff) && !_ghostspawned)
                     {
+                        
                         GD.Print("Ghost spawned");
                         PackedScene scene = (PackedScene)ResourceLoader.Load("res://scenes/prefabs/ai_node.tscn");
                         AiNode instance = scene.Instantiate<AiNode>();
@@ -188,6 +197,32 @@ public partial class ShowWhileInRadius : Node2D
                         _notebookCode.ObjectDescription = "A Notebook that contains the code for the runeholder";
                         _notebookCode.CustomOverrideMessage = "Tell the commander that the code for the rune holder is 1234";
                     }
+                    /*
+                    if (parentNode.Name == "Rune" && CodeInput.CodeCorrect && !_keyExist)
+                    {
+                        _keyExist = true;
+                        _codeInput.CloseTextField();
+                        GD.Print("Code correct");
+                        _keySprite.Visible = true;
+                        PackedScene scene = (PackedScene)ResourceLoader.Load("res://scenes/prefabs/ai_node.tscn");
+                        AiNode instance = scene.Instantiate<AiNode>();
+                        instance.ObjectName = "Key";
+                        instance.ObjectDescription = "Maybe usefull to enter some house.";
+                        Interactable keyInteractable = instance.GetNode<Interactable>("Interactible");
+                        Removeable removeable = instance.GetNode<Removeable>("Removeable");
+                        ItemAdder itemAdder = instance.GetNode<ItemAdder>("ItemAdder");
+                        itemAdder.ItemToAdd = Game.Scripts.Items.Material.Key;
+                        itemAdder.Amount = 1;
+                        itemAdder.ItemToAddName = "Key";
+                        _keySprite.AddChild(instance);
+                        GD.Print("Key spawned");
+                    }
+                    */
+                    if(CodeInput.CodeCorrect) {
+                        _smallHouseBarrier.SetDeferred("disabled", true);
+                    }
+                    
+                    
                 }
             }
         }

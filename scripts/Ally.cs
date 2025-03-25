@@ -48,7 +48,7 @@ public partial class Ally : CharacterBody2D
     private PointLight2D _torch = null!;
     private AiNode _well = null!;
 
-    //Enum with states for ally in darkness, in bigger or smaller circle for map damage system
+    //enum with states for ally in darkness, in bigger or smaller circle for map damage system
     public enum AllyState
     {
         Darkness,

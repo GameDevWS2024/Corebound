@@ -1,9 +1,13 @@
+using System;
+using System.Runtime.CompilerServices;
+
 using Godot;
 public partial class CodeInput : Node2D
 {
     private LineEdit _codeinputfield = null!;
     private AnimationPlayer _fadeToWhite = null!;
     private Node2D _victoryScreen = null!;
+    public static Boolean CodeCorrect = false;
     public override void _Ready()
     {
         _codeinputfield = GetTree().Root.GetNode<LineEdit>("Node2D/RuneHolder/CodeInputField");
@@ -24,14 +28,20 @@ public partial class CodeInput : Node2D
     {
         if (text.Contains("1234"))
         {
-            GD.Print("Game Won");
-            _fadeToWhite.Play("fade_to_white");
+            CodeCorrect = true;
         }
     }
 
     private void OpenTextField()
     {
+        if(!CodeCorrect) {
         _codeinputfield.Visible = true;
         _codeinputfield.GrabFocus();
+        }
+    }
+
+    public void CloseTextField()
+    {
+        _codeinputfield.Visible = false;
     }
 }
