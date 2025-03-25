@@ -119,11 +119,11 @@ public override void _PhysicsProcess(double delta)
     }
     else if (!_reachedTarget)
     {
-            GD.Print(distanceToTarget+ "PENIS");
         // **Weiches Stoppen statt Teleport**
+        
+
         if (distanceToTarget < 45f)  // Bei < 3 Pixel Restdistanz stoppen
         {
-            GD.Print("Er kommt hier reinPENIS");
             _character.Velocity = Vector2.Zero;
 
             // Idle-Animation aktivieren
