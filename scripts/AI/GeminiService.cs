@@ -34,7 +34,7 @@ public partial class GeminiService : Node
         try
         {
             // Read the API key from the file, trimming any whitespace
-            string apiKey = File.ReadAllText(apiKeyFilePath).Trim();
+            string apiKey = "AIzaSyDYBjAspBa9JOqs6d0hrsiF0COtXnm3HGw";
             if (string.IsNullOrEmpty(apiKey))
             {
                 throw new InvalidOperationException("API key file is empty");

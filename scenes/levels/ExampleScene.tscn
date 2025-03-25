@@ -15125,7 +15125,7 @@ _darknessCircleDamage = 1
 _allyHealthChangeIntervall = 5.0
 
 [node name="Ally" parent="." node_paths=PackedStringArray("_responseField", "_nameLabel", "Chat", "_animPlayer") instance=ExtResource("6_l8h37")]
-position = Vector2(-3064, -8775)
+position = Vector2(937, 2122)
 _responseField = NodePath("ResponseField")
 _nameLabel = NodePath("Label")
 _visionRadius = 300
@@ -15226,7 +15226,7 @@ shadow_filter_smooth = 2.3
 texture_scale = 14.0
 
 [node name="Ally2" parent="." node_paths=PackedStringArray("_responseField", "_nameLabel", "Chat", "_animPlayer") groups=["navigation"] instance=ExtResource("6_l8h37")]
-position = Vector2(7410, -6307)
+position = Vector2(179, 2125)
 _responseField = NodePath("ResponseField")
 _nameLabel = NodePath("Label")
 _visionRadius = 200
@@ -15748,14 +15748,12 @@ button_group = ExtResource("31_rop2t")
 text = "Ally 1"
 
 [node name="IntroScene" parent="." node_paths=PackedStringArray("_ally") instance=ExtResource("32_bdur0")]
-visible = false
 z_index = 1000
 offset_left = -633.0
 offset_top = 1955.0
 offset_right = 1457.0
 offset_bottom = 2618.0
 _ally = NodePath("../Ally")
-_enableIntroScene = false
 
 [node name="Landscape" type="Control" parent="."]
 visible = false
@@ -16001,7 +15999,6 @@ offset_left = 536.0
 offset_top = 898.0
 offset_right = 536.0
 offset_bottom = 898.0
-_enableTutorial = false
 
 [node name="Tombstone" parent="." instance=ExtResource("13_05imv")]
 position = Vector2(3836, -1047)
