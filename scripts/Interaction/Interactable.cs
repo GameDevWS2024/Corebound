@@ -1,3 +1,5 @@
+using System.Threading.Tasks;
+
 using Game.Scripts;
 using Game.Scripts.AI;
 using Game.Scripts.Items;
@@ -36,8 +38,21 @@ public partial class Interactable : Node2D
         }
     }
 
-    public void Trigger(Node caller)
+    public async Task Trigger(Node caller)
     {
+        if (GetParent<AiNode>().Name.Equals("End"))
+        {
+            AnimationPlayer fade = GetTree().Root.GetNode<AnimationPlayer>("Node2D/ColorRect/FadeToWhite");
+            fade.Play("fade_to_white");
+            
+            await Task.Delay(3000);
+                
+            Node2D oben = GetTree().Root.GetNode<Node2D>("Node2D");
+            PackedScene victoryScene = ResourceLoader.Load<PackedScene>("scenes/prefabs/VictoryScreen.tscn");
+            Node2D victoryInstance = victoryScene.Instantiate<Node2D>(); 
+            oben.AddChild(victoryInstance); 
+        }
+        
         //Ally response
         if (!string.IsNullOrEmpty(SystemMessageForAlly) && caller.Name.ToString().Contains("Ally"))
         {
