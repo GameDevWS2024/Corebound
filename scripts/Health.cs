@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 using Game.Scenes.Levels;
 using Game.Scripts;
 
@@ -23,33 +25,38 @@ public partial class Health : Node
     public override void _Ready()
     {
         _damageSound = GetTree().Root.GetNode<AudioStreamPlayer>("Node2D/AudioManager/damage_sound");
-        _ally = this.GetParent<Ally>();
+        if (!GetParent().Name.Equals("Enemy"))
+        {
+            _ally = this.GetParent<Ally>();
+        }
         _buttonControl = GetTree().Root.GetNode<ButtonControl>("Node2D/UI");
     }
 
     public void Heal(double amount)
     {
-        if ((!Dead || _reviveable) && Amount < MaxHealth)
+        if ((Dead && !_reviveable) || (Amount >= MaxHealth))
         {
-            Amount += amount;
-            GD.Print(Amount);
-            if (Amount > MaxHealth)
-            {
-                Amount = MaxHealth;
-            }
-
-            EmitSignal(SignalName.HealthChanged, Amount);
+            return;
         }
+
+        Amount += amount;
+        GD.Print(Amount);
+        if (Amount > MaxHealth)
+        {
+            Amount = MaxHealth;
+        }
+
+        EmitSignal(SignalName.HealthChanged, Amount);
     }
 
     public void Damage(double amount)
     {
         Amount -= amount;
-        GD.Print(Amount);
 
         //Sound part
-        if (_ally.Name == "Ally" && _buttonControl.CurrentCamera == 1 || _ally.Name == "Ally2" && _buttonControl.CurrentCamera == 2)
+        if (GetParent().Name != "Enemy" || _ally.Name.ToString() == "Ally" && _buttonControl.CurrentCamera == 1 || _ally.Name.ToString() == "Ally2" && _buttonControl.CurrentCamera == 2)
         {
+            Debug.Assert(_damageSound != null, nameof(_damageSound) + " != null");
             _damageSound.Play();
         }
 

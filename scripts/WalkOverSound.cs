@@ -36,11 +36,7 @@ public partial class WalkOverSound : Node2D
         Vector2 distance2 = WalkingObject2.GlobalPosition - _objectPosition;
         float objectDistance1 = distance2.Length();
 
-        if (objectDistance < InsideRadius || objectDistance1 < InsideRadius)
-        {
-            return true;
-        }
-        return false;
+        return objectDistance < InsideRadius || objectDistance1 < InsideRadius;
     }
 
     // Called every frame. 'delta' is the elapsed time since the previous frame.

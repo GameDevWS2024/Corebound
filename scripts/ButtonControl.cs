@@ -101,36 +101,40 @@ public partial class ButtonControl : Control
             return;
         }
 
-        if (@event is InputEventMouseButton mouseEvent)
+        if (@event is not InputEventMouseButton mouseEvent)
         {
-            if (mouseEvent.Pressed && mouseEvent.ButtonIndex == MouseButton.Right)
-            {
-                // Switch to the other character on right-click
-                int nextAlly = _activeCharacter == _ally1 ? 2 : 1;
-                SwitchToAlly(nextAlly);
-                return;
-            }
+            return;
+        }
 
-            if (mouseEvent.Pressed && mouseEvent.ButtonIndex == MouseButton.Left)
-            {
-                // Get the global mouse position
-                Vector2 mousePosition = GetGlobalMousePosition();
+        if (mouseEvent is { Pressed: true, ButtonIndex: MouseButton.Right })
+        {
+            // Switch to the other character on right-click
+            int nextAlly = _activeCharacter == _ally1 ? 2 : 1;
+            SwitchToAlly(nextAlly);
+            return;
+        }
 
-                // Ignore clicks on buttons
-                if (_buttonAlly1.GetGlobalRect().HasPoint(mousePosition) ||
-                    _buttonAlly2.GetGlobalRect().HasPoint(mousePosition))
-                {
-                    return;
-                }
+        if (mouseEvent is not { Pressed: true, ButtonIndex: MouseButton.Left })
+        {
+            return;
+        }
 
-                // Set the target position for the active character
-                if (_activeCharacter != null && _activePathfinder != null)
-                {
-                    _targetPosition = mousePosition;
-                    _activePathfinder.TargetPosition = mousePosition;
-                    _isManualMovement = true;
-                }
-            }
+        // Get the global mouse position
+        Vector2 mousePosition = GetGlobalMousePosition();
+
+        // Ignore clicks on buttons
+        if (_buttonAlly1.GetGlobalRect().HasPoint(mousePosition) ||
+            _buttonAlly2.GetGlobalRect().HasPoint(mousePosition))
+        {
+            return;
+        }
+
+        // Set the target position for the active character
+        if (_activeCharacter != null && _activePathfinder != null)
+        {
+            _targetPosition = mousePosition;
+            _activePathfinder.TargetPosition = mousePosition;
+            _isManualMovement = true;
         }
     }
 
@@ -224,9 +228,9 @@ public partial class ButtonControl : Control
         // Display text in a typewriter effect
         label.Text = "";
 
-        for (int i = 0; i < fullText.Length; i++)
+        foreach (char t in fullText)
         {
-            label.Text += fullText[i];
+            label.Text += t;
             await ToSignal(GetTree().CreateTimer(delay), "timeout");
         }
     }

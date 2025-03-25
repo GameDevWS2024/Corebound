@@ -11,6 +11,7 @@ using Game.Scripts.AI;
 using Game.Scripts.Items;
 
 using Godot;
+using Godot.Collections;
 
 using Vector2 = Godot.Vector2;
 
@@ -47,6 +48,11 @@ public partial class Ally : CharacterBody2D
 
     private PointLight2D _torch = null!;
     private AiNode _well = null!;
+    
+    private float _attackCooldown = 0.5f; // Time between attacks in seconds
+    private float _timeSinceLastAttack = 0.0f; // Time accumulator
+    private const float AttackRange = 170.0f; // Distance at which ally can attack
+    private int _damage = 10; // Damage dealt to enemies
 
     //Enum with states for ally in darkness, in bigger or smaller circle for map damage system
     public enum AllyState
@@ -204,8 +210,57 @@ public partial class Ally : CharacterBody2D
     }
 
     private bool _hasSeenOtherAlly = false;
+
+    private bool IsCombatAlly()
+    {
+        return Name.ToString().Equals("Ally2");
+    }
+    
+    private void AttackNearestEnemy()
+    {
+        Array<Node> enemyGroup = GetTree().GetNodesInGroup("Enemies");
+        if (enemyGroup == null || enemyGroup.Count == 0)
+        {
+            return;
+        }
+
+        // Find the nearest enemy
+        List<(Node2D enemy, float distance)> nearestEnemies = enemyGroup
+            .OfType<Node2D>()
+            .Select(enemy => (enemy, distance: enemy.GlobalPosition.DistanceTo(GlobalPosition)))
+            .ToList();
+        Node2D? nearestEnemy = nearestEnemies.OrderBy(t => t.distance).FirstOrDefault().enemy;
+
+        Vector2 targetPosition = nearestEnemy.GlobalPosition;
+        float distanceToTarget = targetPosition.DistanceTo(GlobalPosition);
+
+        if (distanceToTarget >= 2500)
+        {
+            return;
+        }
+        
+        // Move toward the target
+        PathFindingMovement.GoTo(targetPosition);
+
+        if (!(distanceToTarget < AttackRange) || !(_timeSinceLastAttack >= _attackCooldown))
+        {
+            return;
+        }
+
+        if (nearestEnemy.HasNode("Health"))
+        {
+            Health enemyHealth = nearestEnemy.GetNode<Health>("Health");
+            enemyHealth.Damage(_damage);
+        }
+        _timeSinceLastAttack = 0;
+    }
     public override void _PhysicsProcess(double delta)
     {
+        if (IsCombatAlly())
+        {
+            _timeSinceLastAttack += (float)delta;
+            AttackNearestEnemy();
+        }
 
         if (this.GlobalPosition.DistanceTo(_otherAlly.GlobalPosition) > 1500)
         {

@@ -118,23 +118,14 @@ public partial class MouseControl : Control
                 ally.Chat.Visible = true;
                 ally.Chat.GrabFocus();
             }
-            else if (_selectedEntityChat is CombatAlly combatAlly)
-            {
-                combatAlly.Chat.Visible = true;
-                combatAlly.Chat.GrabFocus();
-            }
         }
         //if mouseclick was outside of defined radius
-        else if (_selectedEntityChat != null)
+        else
         {
             //check type to send ally or combat ally to selected coordinates 
             if (_selectedEntityChat is Ally ally)
             {
                 ally.Chat.Visible = false;
-            }
-            else if (_selectedEntityChat is CombatAlly combatAlly)
-            {
-                combatAlly.Chat.Visible = false;
             }
             _selectedEntityChat = null;
         }

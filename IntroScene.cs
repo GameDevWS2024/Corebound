@@ -347,7 +347,7 @@ public partial class IntroScene : Control
         else
         {
             // Stop shaking and reset camera offset
-            _shakeTimer.Stop();
+            _shakeTimer!.Stop();
             if (_mainCamera != null)
             {
                 _mainCamera.Offset = Vector2.Zero;
