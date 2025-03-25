@@ -27,13 +27,16 @@ public partial class Teleport : Node2D
         {
             _ally1.GlobalPosition = Destination.GlobalPosition;
             _ally1.PathFindingMovement.GoTo(Destination.GlobalPosition);
+            _ally1.PathFindingMovement.TargetPosition = Destination.GlobalPosition;
             GD.Print("Teleportet to " + Destination.GlobalPosition);
+            GD.Print("Target: " + _ally1.PathFindingMovement.TargetPosition);
         }
         else if (Vertical && _ally1.GlobalPosition.Y < GlobalPosition.Y + Length && _ally1.GlobalPosition.Y > GlobalPosition.Y - Length && _ally1.GlobalPosition.X < GlobalPosition.X + Width && _ally1.GlobalPosition.X > GlobalPosition.X - Width)
         {
             _ally1.GlobalPosition = Destination.GlobalPosition;
-            _ally1.PathFindingMovement.GoTo(Destination.GlobalPosition);
+            _ally1.PathFindingMovement.TargetPosition = Destination.GlobalPosition;
             GD.Print("Teleportet to " + Destination.GlobalPosition);
+            GD.Print("Target: " + _ally1.PathFindingMovement.TargetPosition);
         }
         if (!Vertical && _ally2.GlobalPosition.Y < GlobalPosition.Y + Width && _ally2.GlobalPosition.Y > GlobalPosition.Y - Width && _ally2.GlobalPosition.X < GlobalPosition.X + Length && _ally2.GlobalPosition.X > GlobalPosition.X - Length)
         {

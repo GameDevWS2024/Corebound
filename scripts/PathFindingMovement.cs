@@ -47,7 +47,6 @@ public partial class PathFindingMovement : Node
         this.CallDeferred("ActorSetup"); // Still good to defer setup
         _bumpSound = GetTree().Root.GetNode<AudioStreamPlayer>("Node2D/AudioManager/bump_sound");
         _buttonControl = GetTree().Root.GetNode<ButtonControl>("Node2D/UI");
-
     }
 
     public async void ActorSetup()
@@ -61,77 +60,79 @@ public partial class PathFindingMovement : Node
         TargetPosition = loc;
     }
 
-    public override void _PhysicsProcess(double delta)
+public override void _PhysicsProcess(double delta)
+{
+    _speed = 250;
+    _agent.SetTargetPosition(TargetPosition);
+
+    float distanceToTarget = _character.GlobalPosition.DistanceTo(_agent.TargetPosition);
+
+    if (distanceToTarget > _currentTargetDistance)
     {
-        _speed = 250;
+        _reachedTarget = false;
 
-        _agent.SetTargetPosition(TargetPosition); // Keep this for consistent target setting
+        Vector2 currentLocation = _character.GlobalPosition;
+        Vector2 nextLocation = _agent.GetNextPathPosition();
 
-        if (_debug)
+        // Motivation und Speed-Berechnung
+        Motivation motivation = GetParent().GetNode<Motivation>("Motivation");
+        double motivationFactor = (double)motivation.Amount / 10;
+        int modifiedSpeed = (int)(_minimumSpeed + (_speed - _minimumSpeed) * motivationFactor);
+
+        // Bewegung berechnen
+        Vector2 newVel = (nextLocation - currentLocation).Normalized() * modifiedSpeed;
+
+        // Richtung für die Animation setzen
+        CurrentDirection = nextLocation.X < currentLocation.X ? WalkingState.Left : WalkingState.Right;
+
+        if (newVel.X != 0 && distanceToTarget > 50)
         {
-            float distance = _character.GlobalPosition.DistanceTo(_agent.TargetPosition);
-            //GD.Print($"Distance: {distance}, Target Position: {_agent.TargetPosition}");
+            _sprite.FlipH = newVel.X > 0;
         }
 
-        float distanceToTarget = _character.GlobalPosition.DistanceTo(_agent.TargetPosition);
-
-        if (distanceToTarget > _currentTargetDistance)
+        // **Langsamer werden bei Zielnähe (weiches Bremsen)**
+        if (distanceToTarget < 50)
         {
-            _reachedTarget = false;
-            Vector2 currentLocation = _character.GlobalPosition, nextLocation = _agent.GetNextPathPosition();
-
-            Motivation motivation = GetParent().GetNode<Motivation>("Motivation");
-            double motivationFactor = (double)motivation.Amount / 10;
-            int modifiedSpeed = (int)(_minimumSpeed + (_speed - _minimumSpeed) * motivationFactor);
-            Ally? ally = GetParent() as Ally;
-            Chat chat = ally!.FindChild("Speech").GetParent() as Chat ?? throw new InvalidOperationException();
-            _minimumSpeed = (ally!.GetResponseQueue().Count > 0 || !ally!.IsTextBoxReady) ? 0 : _origMinimumSpeed; // dont move while responding or if more than one response is being processed.
-            Vector2 newVel = (nextLocation - currentLocation).Normalized() * modifiedSpeed;
-            CurrentDirection = nextLocation.X < currentLocation.X ? WalkingState.Left : WalkingState.Right;
-
-            if (newVel.X != 0 && distanceToTarget > 50)
-            {
-                _sprite.FlipH = newVel.X > 0;
-            }
-
-            _character.Velocity = newVel;
-            KinematicCollision2D collision = _character.MoveAndCollide(newVel * (float)delta);
-            if (collision != null)
-            {
-                // Prüfen, ob der Kollisionspartner neu ist
-                if (collision.GetCollider() != _lastCollider)
-                {
-                    if (_character.Name == "Ally" && _buttonControl.CurrentCamera == 1 || _character.Name == "Ally2" && _buttonControl.CurrentCamera == 2)
-                    {
-                        _lastCollider = collision.GetCollider(); // Aktualisieren
-                        _bumpSound!.Play();
-                        _recentlyBumped = true;
-                    }
-                }
-            }
-            else
-            {
-                // Keine Kollision mehr, Zustand zurücksetzen
-                _lastCollider = null;
-                _recentlyBumped = false;
-            }
-
-            _character.Velocity = newVel;
+            float slowdownFactor = Mathf.Clamp(distanceToTarget / 50, 0.1f, 1f);
+            newVel *= slowdownFactor;
         }
-        else if (!_reachedTarget) // Only emit and set _reachedTarget once, when the condition is first met
-        {
-            if (CurrentDirection == PathFindingMovement.WalkingState.Left)
-            {
-                CurrentDirection = WalkingState.IdleLeft;
-            }
-            else
-            {
-                CurrentDirection = WalkingState.IdleRight;
-            }
 
-            _currentTargetDistance = _minTargetDistance; // Reset for the next target
+        _character.Velocity = newVel;
+
+        // Kollisionsabfrage bleibt bestehen
+        KinematicCollision2D collision = _character.MoveAndCollide(newVel * (float)delta);
+        if (collision != null && collision.GetCollider() != _lastCollider)
+        {
+            if ((_character.Name == "Ally" && _buttonControl.CurrentCamera == 1) ||
+                (_character.Name == "Ally2" && _buttonControl.CurrentCamera == 2))
+            {
+                _lastCollider = collision.GetCollider();
+                _bumpSound!.Play();
+                _recentlyBumped = true;
+            }
+        }
+        else
+        {
+            _lastCollider = null;
+            _recentlyBumped = false;
+        }
+    }
+    else if (!_reachedTarget)
+    {
+            GD.Print(distanceToTarget+ "PENIS");
+        // **Weiches Stoppen statt Teleport**
+        if (distanceToTarget < 45f)  // Bei < 3 Pixel Restdistanz stoppen
+        {
+            GD.Print("Er kommt hier reinPENIS");
+            _character.Velocity = Vector2.Zero;
+
+            // Idle-Animation aktivieren
+            CurrentDirection = (CurrentDirection == WalkingState.Left) ? WalkingState.IdleLeft : WalkingState.IdleRight;
+
+            _currentTargetDistance = _minTargetDistance;
             EmitSignal(SignalName.ReachedTarget);
             _reachedTarget = true;
         }
     }
+}
 }
