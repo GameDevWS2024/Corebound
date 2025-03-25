@@ -71,6 +71,9 @@ public partial class Interactable : Node2D
         //Remove scrub with Jones
         if (GetParent<AiNode>().Name.Equals("Big Tree") && caller.Name.ToString().Equals("Ally2"))
         {
+            Ally? jones = caller as Ally;
+            Chat jonesChat = jones!.Chat;
+            jonesChat.SendSystemMessage("You've successfully removed the scrub from the tree and a big hideous scar appears underneath it", new Ally());
             _animTree.Play("TreeAnimation");
             GD.Print("Scrub removed!");
             VisibleForAI scarVisibileForAI = new()
@@ -97,8 +100,10 @@ public partial class Interactable : Node2D
             Ally ally = (caller as Ally)!;
             if (!ally.SsInventory.ContainsMaterial(Game.Scripts.Items.Material.BucketWater))
             {
+            ally!.Chat.SendSystemMessage("Can't interact. Maybe there is something missing.", new Ally());
                 return;
             }
+            
             ally.AnimationIsAlreadyPlaying = true;
             ally._animPlayer.Play("Empty-Bucket");
             _animTree.Play("TreeOpens");

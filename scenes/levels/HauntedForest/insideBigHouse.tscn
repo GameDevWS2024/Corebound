@@ -1,9 +1,7 @@
-[gd_scene load_steps=5 format=4 uid="uid://dlswxsom74twu"]
+[gd_scene load_steps=3 format=4 uid="uid://dlswxsom74twu"]
 
 [ext_resource type="TileSet" uid="uid://b57mlmhoqye7c" path="res://assets/hauntedForestVillage/Interior.tres" id="1_wk18s"]
 [ext_resource type="Script" path="res://scripts/AI/VisibleForAI.cs" id="2_nypkc"]
-[ext_resource type="Script" path="res://scripts/Interaction/ShowWhileInRadius.cs" id="3_hysjd"]
-[ext_resource type="PackedScene" uid="uid://cr6gw7pesab2x" path="res://scenes/levels/HauntedForest/Chest.tscn" id="4_5v46h"]
 
 [node name="StaticBody2D" type="StaticBody2D"]
 
@@ -26,18 +24,6 @@ position = Vector2(-135, -49)
 position = Vector2(-133, -67)
 script = ExtResource("2_nypkc")
 NameForAi = "Drawer"
-
-[node name="Sprite2D" type="Sprite2D" parent="InsideBigHouse"]
-position = Vector2(0, -122)
-
-[node name="ChestInsideHouse" type="Node2D" parent="InsideBigHouse/Sprite2D"]
-scale = Vector2(1.5, 0.75)
-script = ExtResource("3_hysjd")
-SceneToShow = ExtResource("4_5v46h")
-Radius = 99999
-NeedsToBeInInventoryName = 8
-
-[node name="Chest" parent="InsideBigHouse/Sprite2D/ChestInsideHouse" instance=ExtResource("4_5v46h")]
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
 scale = Vector2(1, 0.5)

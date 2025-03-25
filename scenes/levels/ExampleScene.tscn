@@ -1,4 +1,4 @@
-[gd_scene load_steps=145 format=4 uid="uid://dfkwq6qwtxw25"]
+[gd_scene load_steps=149 format=4 uid="uid://dfkwq6qwtxw25"]
 
 [ext_resource type="Script" path="res://scripts/EnemyManager.cs" id="1_bmkfv"]
 [ext_resource type="Script" path="res://scripts/Map.cs" id="1_pa1ge"]
@@ -16,6 +16,7 @@
 [ext_resource type="PackedScene" uid="uid://d0natjkfu7hhd" path="res://scenes/prefabs/ai_node.tscn" id="13_05imv"]
 [ext_resource type="Script" path="res://scripts/WalkOverSound.cs" id="16_yq8ar"]
 [ext_resource type="Texture2D" uid="uid://desfy4vbdj1ld" path="res://assets/tilemaps/TX Props.png" id="18_mna0q"]
+[ext_resource type="PackedScene" uid="uid://cr6gw7pesab2x" path="res://scenes/levels/HauntedForest/Chest.tscn" id="19_acir4"]
 [ext_resource type="Texture2D" uid="uid://dtw1kjrq4qor4" path="res://assets/tilemaps/TX Tileset Grass.png" id="19_jd32h"]
 [ext_resource type="PackedScene" path="res://scenes/levels/HauntedForest/insideSmallHouse.tscn" id="19_qd0ov"]
 [ext_resource type="Texture2D" uid="uid://cmooytb3c0mki" path="res://assets/sprites/Pasted image.png" id="20_lgqcj"]
@@ -30,6 +31,7 @@
 [ext_resource type="Script" path="res://scenes/levels/AudioManager.cs" id="25_fif0r"]
 [ext_resource type="AudioStream" uid="uid://dakeblpcjdlfw" path="res://assets/audio/creepy_music.mp3" id="26_rqvqj"]
 [ext_resource type="PackedScene" uid="uid://dlswxsom74twu" path="res://scenes/levels/HauntedForest/insideBigHouse.tscn" id="26_vmw0c"]
+[ext_resource type="Texture2D" uid="uid://dt3mmn8grl1vd" path="res://assets/items/torch.png" id="26_yt0vt"]
 [ext_resource type="Texture2D" uid="uid://ctl8fttcbljlm" path="res://assets/tilemaps/spaceship.png" id="27_lqhmv"]
 [ext_resource type="AudioStream" uid="uid://miidgr6peqh" path="res://assets/audio/game_music.mp3" id="27_n56s6"]
 [ext_resource type="AudioStream" uid="uid://dk6o3bfgpq5as" path="res://assets/audio/intro_song.mp3" id="28_u8gsi"]
@@ -61,8 +63,9 @@
 [ext_resource type="Texture2D" uid="uid://cmy47y4t8sx0w" path="res://assets/sprites/BigTree.ShrubberyAnimation.png" id="58_5gqqc"]
 [ext_resource type="PackedScene" uid="uid://xy3d46bjniyg" path="res://scenes/levels/BigTree/insideBigTree.tscn" id="58_llp75"]
 [ext_resource type="Texture2D" uid="uid://dp604e41wt50p" path="res://assets/sprites/Barrier.png" id="58_vqwoj"]
-[ext_resource type="PackedScene" path="res://scenes/prefabs/teleport.tscn" id="59_8fv5o"]
-[ext_resource type="PackedScene" path="res://scenes/prefabs/destination.tscn" id="60_mti2g"]
+[ext_resource type="PackedScene" uid="uid://dkj8strm3dfar" path="res://scenes/prefabs/teleport.tscn" id="59_8fv5o"]
+[ext_resource type="PackedScene" uid="uid://cb7y0rhixpx4d" path="res://scenes/prefabs/destination.tscn" id="60_mti2g"]
+[ext_resource type="Texture2D" uid="uid://bd3coeghrdgny" path="res://assets/sprites/Unconscious.png" id="62_f241n"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qwcva"]
 bg_color = Color(0.6, 0.6, 0.6, 0.654902)
@@ -15044,6 +15047,10 @@ _data = {
 "RESET": SubResource("Animation_ipq10")
 }
 
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_m3n0y"]
+radius = 99.0
+height = 434.0
+
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_630vn"]
 radius = 37.9971
 height = 171.988
@@ -15118,8 +15125,8 @@ _allyHealthChangeIntervall = 5.0
 position = Vector2(5780, -4309)
 _responseField = NodePath("ResponseField")
 _nameLabel = NodePath("Label")
-_visionRadius = 200
-_interactionRadius = 250
+_visionRadius = 300
+_interactionRadius = 300
 Chat = NodePath("Ally1Cam/Ally1Chat")
 _animPlayer = NodePath("AnimationPlayer2")
 
@@ -15452,11 +15459,12 @@ scale = Vector2(4, 4)
 tile_set = ExtResource("24_igx6k")
 
 [node name="Big House" parent="Abandoned Village" instance=ExtResource("13_05imv")]
+visible = false
 position = Vector2(8387, -2364)
 scale = Vector2(3, 3)
 ObjectName = "Big House"
 ObjectDescription = "The biggest house in the village. It doesn't seem like anyone lived there, but more like the ghosts gathered there"
-ObjectHint = "Tell the commander about the object you just spotted. You may use the command [GOTO] on this object if the commander explicitly told you to engage with it"
+ObjectHint = "Don't tell the commander about the object you just spotted. You may use the command [GOTO] on this object if the commander explicitly told you to engage with it"
 Interactable = false
 RemovedAfter = false
 
@@ -15518,18 +15526,22 @@ Sound = NodePath("../../../AudioManager/door_sound")
 position = Vector2(8600, -2333)
 scale = Vector2(0.999999, 0.999999)
 
-[node name="InsideBigHouse" type="Node2D" parent="Abandoned Village/Sprite2D"]
-z_index = 2
-position = Vector2(5807.01, -4040)
-script = ExtResource("25_0y114")
-SceneToShow = ExtResource("26_vmw0c")
-Radius = 500
-ItemActivationStatus = false
-
 [node name="InsideBigHouse2" parent="Abandoned Village/Sprite2D" instance=ExtResource("26_vmw0c")]
 z_index = 30
 position = Vector2(5812.01, -3628)
 scale = Vector2(3.7, 6.5)
+
+[node name="Sprite2D" type="Sprite2D" parent="Abandoned Village/Sprite2D/InsideBigHouse2"]
+position = Vector2(0, -122)
+
+[node name="ChestInsideHouse" type="Node2D" parent="Abandoned Village/Sprite2D/InsideBigHouse2/Sprite2D"]
+scale = Vector2(1.5, 0.75)
+script = ExtResource("25_0y114")
+SceneToShow = ExtResource("19_acir4")
+Radius = 99999
+NeedsToBeInInventoryName = 11
+
+[node name="Chest" parent="Abandoned Village/Sprite2D/InsideBigHouse2/Sprite2D/ChestInsideHouse" instance=ExtResource("19_acir4")]
 
 [node name="VisibleForAI" type="Node2D" parent="Abandoned Village/Sprite2D"]
 script = ExtResource("6_7bcmx")
@@ -15630,6 +15642,13 @@ ObjectDescription = "An unlit Torch, engraved with ceremonial runes. It seems to
 ObjectHint = "Tell the commander about the object you just spotted. You may use the command  [INTERACT] or [GOTO AND INTERACT]."
 ItemAdderMessage = PackedStringArray("You picked up: ", "It could possibly be useful for seeing items that may have been out of sight for now if it is lit.")
 AddedMaterial = 14
+
+[node name="Sprite2D" type="Sprite2D" parent="Torch"]
+z_index = 31
+position = Vector2(-12, 15)
+rotation = -0.754257
+scale = Vector2(1.5, 1.5)
+texture = ExtResource("26_yt0vt")
 
 [node name="AudioManager" type="Node" parent="." node_paths=PackedStringArray("_menuMusic", "_gameMusic", "_gameOverMusic")]
 script = ExtResource("25_fif0r")
@@ -15968,12 +15987,6 @@ ObjectHint = "Tell the commander about the place you just spotted. You may use t
 Interactable = false
 RemovedAfter = false
 
-[node name="AiNode" parent="." instance=ExtResource("13_05imv")]
-position = Vector2(516, 1737)
-ObjectName = "BEGINNING OF THE GAME"
-ObjectDescription = "Greet the commander in a friendly tone, ask for his name and tell him to move upwards."
-ObjectHint = "Keep explaining to the commander what our missions is for the first few messages but stop if he indicates he understood everything."
-
 [node name="Tutorial" parent="." instance=ExtResource("48_3yv6f")]
 offset_left = 536.0
 offset_top = 898.0
@@ -16000,7 +16013,7 @@ tile_set = SubResource("TileSet_tur7q")
 position = Vector2(5567, -7879)
 ObjectName = "Big Tree"
 ObjectDescription = "A massive tree that is surrounded by scrub and looks damaged"
-CustomOverrideMessage = "You've successfully removed the scrub from the tree and a big hideous scar appears underneath it"
+ItemAdderMessage = PackedStringArray()
 ShowWhileInRadius = true
 
 [node name="StaticBody2D" type="StaticBody2D" parent="Big Tree"]
@@ -16045,11 +16058,19 @@ texture = ExtResource("58_vqwoj")
 hframes = 5
 
 [node name="Scar" parent="." instance=ExtResource("13_05imv")]
-position = Vector2(5647, -8048)
+position = Vector2(5650, -7924)
 ObjectName = "Scar"
 ObjectDescription = "A big scar on the tree which could be the reason for the tree looking dead. It is not reachable because of the scrub"
 CustomOverrideMessage = "The tree seems to have recovered from the injurys and opens up to give the entrance to it's inside."
 ShowWhileInRadius = true
+
+[node name="StaticBody2D" type="StaticBody2D" parent="Scar"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Scar/StaticBody2D"]
+z_index = 2
+position = Vector2(3, -176)
+rotation = 1.584
+shape = SubResource("CapsuleShape2D_m3n0y")
 
 [node name="Well" parent="." instance=ExtResource("13_05imv")]
 unique_name_in_owner = true
@@ -16135,6 +16156,19 @@ hframes = 17
 [node name="InsideBigTree" parent="." instance=ExtResource("58_llp75")]
 position = Vector2(9634, -8452)
 scale = Vector2(5.81, 5.81)
+
+[node name="Unconscious man" parent="InsideBigTree" instance=ExtResource("13_05imv")]
+position = Vector2(-43, -103)
+ObjectName = "Unconscious man"
+ObjectDescription = "An unconscious man that doesn't seem to react to anything and can obviously not wake up. Maybe loot"
+RemovedAfter = false
+CustomOverrideMessage = "You've found a Chipcard. Seems to work like a key to some door. "
+
+[node name="Sprite2D" type="Sprite2D" parent="InsideBigTree/Unconscious man"]
+position = Vector2(0, -1)
+rotation = -1.54128
+scale = Vector2(0.53125, 0.53125)
+texture = ExtResource("62_f241n")
 
 [node name="TeleportNodes" type="Node" parent="."]
 

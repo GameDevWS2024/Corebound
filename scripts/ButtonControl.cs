@@ -87,10 +87,10 @@ public partial class ButtonControl : Control
         UpdateButtonPositions();
 
         // Handle manual movement if active
-        if (_activeCharacter != null && _isManualMovement)
+        /*if (_activeCharacter != null && _isManualMovement)
         {
             MoveManually(delta);
-        }
+        }*/
     }
 
     public override void _Input(InputEvent @event)
@@ -127,19 +127,19 @@ public partial class ButtonControl : Control
                 if (_activeCharacter != null && _activePathfinder != null)
                 {
                     _targetPosition = mousePosition;
-                    _activePathfinder.TargetPosition = mousePosition;
+                    _activePathfinder.TargetPosition = _targetPosition;
                     _isManualMovement = true;
                 }
             }
         }
     }
 
-    private void MoveManually(double delta)
+    /*private void MoveManually(double delta)
     {
         if (_activeCharacter != null)
         {
             // Move the character toward the target position
-            if (_activeCharacter.GlobalPosition != _targetPosition)
+            if (_activeCharacter.GlobalPosition.DistanceTo(_targetPosition) < 50 )
             {
                 Vector2 direction = (_targetPosition - _activeCharacter.GlobalPosition).Normalized();
                 _activeCharacter.GlobalPosition += direction * _moveSpeed * (float)delta;
@@ -153,7 +153,7 @@ public partial class ButtonControl : Control
                 }
             }
         }
-    }
+    }*/
 
     private void OnButtonAlly1Pressed()
     {
