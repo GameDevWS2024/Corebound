@@ -11,11 +11,14 @@ public partial class Interactable : Node2D
 {
     public const string GroupName = "Interactable";
     public static bool TreeCured = false;
+
+    public static bool ScrubRemoved = false;
     [Signal] public delegate void InteractFromNodeEventHandler(Node caller);
     [Signal] public delegate void InteractEventHandler();
 
     public string? SystemMessageForAlly;
     private CollisionShape2D _caveEntrance1 = null!;
+    private CollisionShape2D _scrub = null!;
     private CollisionShape2D _caveEntrance2 = null!;
     private float _doorDuration = 5.0f;
     private AiNode _scar = null!;
@@ -29,6 +32,7 @@ public partial class Interactable : Node2D
         AddToGroup(GroupName);
         _caveEntrance1 = GetTree().Root.GetNode<CollisionShape2D>("Node2D/DoorOpener/StaticBody2D/CaveEntrance1");
         _caveEntrance2 = GetTree().Root.GetNode<CollisionShape2D>("Node2D/DoorOpener/StaticBody2D2/CaveEntrance2");
+        _scrub = GetTree().Root.GetNode<CollisionShape2D>("Node2D/Big Tree/StaticBody2D/CollisionShape2D");
         _animTree = GetTree().Root.GetNode<AnimationPlayer>("Node2D/Node2D/AnimationPlayer");
         _animEntrance = GetTree().Root.GetNode<AnimationPlayer>("Node2D/CaveEntranceTerminal/AnimationPlayer");
         _animDoorOpener = GetTree().Root.GetNode<AnimationPlayer>("Node2D/DoorOpener/AnimationPlayer");
@@ -84,8 +88,9 @@ public partial class Interactable : Node2D
             ally.AnimPlayer.Play("Fill-Bucket");
         }
         //Remove scrub with Jones
-        if (GetParent<AiNode>().Name.Equals("Big Tree") && caller.Name.ToString().Equals("Ally2"))
+        if (GetParent<AiNode>().Name.Equals("Big Tree") && caller.Name.ToString().Equals("Ally2") && !ScrubRemoved)
         {
+            ScrubRemoved = true;
             Ally? jones = caller as Ally;
             Chat jonesChat = jones!.Chat;
             jonesChat.SendSystemMessage("You've successfully removed the scrub from the tree and a big hideous scar appears underneath it", new Ally());
@@ -98,6 +103,7 @@ public partial class Interactable : Node2D
             };
             _scar.AddChild(scarVisibileForAI, false);
             GD.Print("Scar VFAI added");
+            _scrub.SetDeferred("disabled", true);
             EmitSignal(SignalName.Interact);
             EmitSignal(SignalName.InteractFromNode, caller);
         }

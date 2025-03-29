@@ -75,7 +75,7 @@ public partial class Ally : CharacterBody2D
         //SsInventory.AddItem(new Itemstack(Items.Material.FestiveStaff, 1));
         // SsInventory.AddItem(new Itemstack(Items.Material.Copper, 1));
         //SsInventory.AddItem(new Itemstack(Items.Material.BucketWater, 1));
-        //SsInventory.AddItem(new Itemstack(Items.Material.Chipcard, 1));
+        SsInventory.AddItem(new Itemstack(Items.Material.Chipcard, 1));
         _torch = GetNode<PointLight2D>("AllyTorch");
         _ally1ResponseField = GetNode<RichTextLabel>("ResponseField");
         _ally2ResponseField = GetNode<RichTextLabel>("ResponseField");
