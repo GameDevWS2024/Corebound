@@ -91,6 +91,21 @@ public partial class InventoryUiSlot : Panel
                 _icon.Visible = true;
                 _icon.Texture = GD.Load<Texture2D>("res://assets/items/missing_texture.png");
                 break;
+
+            case Game.Scripts.Items.Material.FestiveStaff:
+                _icon.Visible = true;
+                _icon.Texture = GD.Load<Texture2D>("res://assets/items/festiveStaff.png");
+                break;
+
+            case Game.Scripts.Items.Material.Chipcard:
+                _icon.Visible = true;
+                _icon.Texture = GD.Load<Texture2D>("res://assets/items/chip_card.png");
+                break;
+
+            case Game.Scripts.Items.Material.Key:
+                _icon.Visible = true;
+                _icon.Texture = GD.Load<Texture2D>("res://Key.png");
+                break;
         }
         _count.Text = item.Amount <= 1 ? "" : item.Amount.ToString();
     }

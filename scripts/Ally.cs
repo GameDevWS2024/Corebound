@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -34,19 +35,20 @@ public partial class Ally : CharacterBody2D
     private bool _interactOnArrival, _busy, _reached, _harvest, _returning;
     public bool IsTextBoxReady = true, Lit;
 
+    public bool AnimationIsAlreadyPlaying = false;
 
     [Export] public Chat Chat = null!;
     public Map? Map;
     [Export] public VisibleForAI[] AlwaysVisible = [];
     private GenerativeAI.Methods.ChatSession? _chat;
     private GeminiService? _geminiService;
-    [Export] AnimationPlayer _animPlayer = null!;
+    [Export] public AnimationPlayer AnimPlayer = null!;
     private PointLight2D _coreLight = null!;
 
     private PointLight2D _torch = null!;
     private AiNode _well = null!;
 
-    //Enum with states for ally in darkness, in bigger or smaller circle for map damage system
+    //enum with states for ally in darkness, in bigger or smaller circle for map damage system
     public enum AllyState
     {
         Darkness,
@@ -58,7 +60,7 @@ public partial class Ally : CharacterBody2D
     private Ally _otherAlly = null!;
     public override void _Ready()
     {
-        _well = GetNode<AiNode>("%Well");
+        _well = GetTree().Root.GetNode<AiNode>("Node2D/%Well");
         _coreLight = GetParent().GetNode<PointLight2D>("%Core/%CoreLight");
         foreach (Ally ally in GetTree().GetNodesInGroup("Entities").OfType<Ally>().ToList())
         {
@@ -70,10 +72,11 @@ public partial class Ally : CharacterBody2D
         /*
         SsInventory.AddItem(new Itemstack(Game.Scripts.Items.Material.Torch));
         lit = true; */
-        // SsInventory.AddItem(new Itemstack(Items.Material.FestiveStaff, 1));
-        //SsInventory.AddItem(new Itemstack(Items.Material.Copper, 1));
+        //SsInventory.AddItem(new Itemstack(Items.Material.FestiveStaff, 1));
+        // SsInventory.AddItem(new Itemstack(Items.Material.Copper, 1));
+        //SsInventory.AddItem(new Itemstack(Items.Material.BucketWater, 1));
+        //SsInventory.AddItem(new Itemstack(Items.Material.Chipcard, 1));
         _torch = GetNode<PointLight2D>("AllyTorch");
-
         _ally1ResponseField = GetNode<RichTextLabel>("ResponseField");
         _ally2ResponseField = GetNode<RichTextLabel>("ResponseField");
         _audioOutput = Chat.GetNode<AudioOutput>("Speech");
@@ -82,7 +85,7 @@ public partial class Ally : CharacterBody2D
         Map = GetTree().Root.GetNode<Map>("Node2D");
 
         //sorgt dafür dass die zwei allies am Anfang nicht wegrennen
-        PathFindingMovement.TargetPosition = this.GlobalPosition;
+        PathFindingMovement.TargetPosition = GlobalPosition;
 
         _geminiService = Chat.GeminiService;
         _chat = _geminiService!.Chat;
@@ -114,8 +117,18 @@ public partial class Ally : CharacterBody2D
             GD.PrintErr("PathFindingMovement node is not assigned in the editor!");
         }
         Chat.ResponseReceived += HandleResponse;
-        _animPlayer = GetNode<AnimationPlayer>("AnimationPlayer2");
-        _animPlayer.Play("Idle-Left");
+        AnimPlayer = GetNode<AnimationPlayer>("AnimationPlayer2");
+        AnimPlayer.Play("Idle-Left");
+
+        RunBeginning();
+    }
+
+    void RunBeginning()
+    {
+        if (Name.ToString().Equals("Ally"))
+        {
+            Chat.SendSystemMessage("BEGINNING OF THE GAME (Corebound) \n Greet the commander in a friendly tone, ask for his name and tell him to move upwards. Keep explaining to the commander what our missions is for the first few messages but stop if he indicates he understood everything.", new Ally());
+        }
     }
 
     private void HandleTargetReached()
@@ -173,6 +186,23 @@ public partial class Ally : CharacterBody2D
 
     }
 
+    private void PlayPlayerAnimation()
+    {
+        if (PathFindingMovement.CurrentDirection == PathFindingMovement.WalkingState.Left)
+        {
+            AnimPlayer.Play("Walk-Left");
+        }
+        else if (PathFindingMovement.CurrentDirection == PathFindingMovement.WalkingState.Right)
+        {
+            AnimPlayer.Play("Walk-Right");
+        }
+        else if (PathFindingMovement.CurrentDirection == PathFindingMovement.WalkingState.IdleLeft)
+        {
+            AnimPlayer.Play("Idle-Left");
+        }
+        else { AnimPlayer.Play("Idle-Right"); }
+    }
+
     private bool _hasSeenOtherAlly = false;
     public override void _PhysicsProcess(double delta)
     {
@@ -208,19 +238,14 @@ public partial class Ally : CharacterBody2D
 
         UpdateTarget();
 
-        if (PathFindingMovement.CurrentDirection == PathFindingMovement.WalkingState.Left)
+        if (!AnimationIsAlreadyPlaying)
         {
-            _animPlayer.Play("Walk-Left");
+            PlayPlayerAnimation();
         }
-        else if (PathFindingMovement.CurrentDirection == PathFindingMovement.WalkingState.Right)
+        else if (!AnimPlayer.IsPlaying())
         {
-            _animPlayer.Play("Walk-Right");
+            AnimationIsAlreadyPlaying = false;
         }
-        else if (PathFindingMovement.CurrentDirection == PathFindingMovement.WalkingState.IdleLeft)
-        {
-            _animPlayer.Play("Idle-Left");
-        }
-        else { _animPlayer.Play("Idle-Right"); }
 
         _reached = GlobalPosition.DistanceTo(PathFindingMovement.TargetPosition) < 150;
 
@@ -246,13 +271,6 @@ public partial class Ally : CharacterBody2D
              GD.Print("Core position" + GetNode<Core>("%Core").GlobalPosition);
              GD.Print("Core position" + GetNode<PointLight2D>("%CoreLight").GlobalPosition);
              */
-        }
-
-        //Well logic:
-        if (GlobalPosition.DistanceTo(_well.GlobalPosition) < 300 &&
-            SsInventory.ContainsMaterial(Game.Scripts.Items.Material.BucketEmpty))
-        {
-            _well.Interactable = true;
         }
 
     }//Node2D/Abandoned Village/HauntedForestVillage/Big House/Sprite2D/InsideBigHouse2/InsideBigHouse/Sprite2D/ChestInsideHouse
@@ -318,46 +336,38 @@ public partial class Ally : CharacterBody2D
                 GD.Print("Couldn't extract the relevant part to be spoken.");
             }
         }
-        //
+
 
         _responseQueue.Enqueue(response);
         ProcessResponseQueue();
 
-        // probably not necessary here
-        GD.Print("got response of length: " + response.Length + ". Waiting for: " + (int)(1000 * 0.009f * response.Length) + " ms.");
-        await Task.Delay((int)(1000 * 0.015f * response.Length));
-
     }
 
-    private async void ProcessResponseQueue()
+    private async void ProcessResponseQueue() // Changed to async Task
     {
         while (_responseQueue.Count > 0)
         {
-            IsTextBoxReady = false;
+            IsTextBoxReady = false; // Consider removing this; see below
             string response = _responseQueue.Dequeue();
             GD.Print($"{Name}: processing response: {response}");
 
+            _matches = ExtractRelevantLines(response);
 
-
-            /*if (!_hasSeenOtherAlly)
+            // Use a StringBuilder for efficiency
+            StringBuilder richtextBuilder = new StringBuilder();
+            foreach ((string op, string content) in _matches!)
             {
-                _otherAlly.Chat.SendSystemMessage("Hello, this is " + this.Name + ", the other ally speaking to you. Before, I've said " + response + ". What do you think about that?]", this);
-                _hasSeenOtherAlly = true;
-            }*/
-
-            _matches = ExtractRelevantLines(response); // Split lines into tuples. Put command in first spot, args in second spot, keep only tuples with an allowed command
-            string? richtext = "";
-            foreach ((string op, string content) in _matches!) // foreach command-content-tuple
-            {
-                richtext += FormatPart(op, content);
-
+                richtextBuilder.Append(FormatPart(op, content));
                 DecideWhatCommandToDo(op, content);
             }
+            string richtext = richtextBuilder.ToString();
 
-            // formatted text with TypeWriter effect into response field
+            // Get the ButtonControl (consider caching this)
             ButtonControl buttonControl = GetTree().Root.GetNode<ButtonControl>("Node2D/UI");
+
             await buttonControl.TypeWriterEffect(richtext, _responseField);
-            IsTextBoxReady = true;
+
+            IsTextBoxReady = true; // Consider removing this; see below
         }
     }
 
@@ -376,6 +386,7 @@ public partial class Ally : CharacterBody2D
             case "GOTO AND INTERACT":
                 SetInteractOnArrival(true);
                 Goto(content);
+                //Interact();
                 break;
             case "GOTO": // goto (x, y) location
                 GD.Print("DEBUG: GOTO Match");

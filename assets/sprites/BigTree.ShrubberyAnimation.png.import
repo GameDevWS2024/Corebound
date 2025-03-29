@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dt3mmn8grl1vd"
-path="res://.godot/imported/torch.png-32608f85300872d5701f3e0ddb3afde5.ctex"
+uid="uid://cmy47y4t8sx0w"
+path="res://.godot/imported/BigTree.ShrubberyAnimation.png-7c77c2aedd6c371a98aa88e8e7713a21.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/items/torch.png"
-dest_files=["res://.godot/imported/torch.png-32608f85300872d5701f3e0ddb3afde5.ctex"]
+source_file="res://assets/sprites/BigTree.ShrubberyAnimation.png"
+dest_files=["res://.godot/imported/BigTree.ShrubberyAnimation.png-7c77c2aedd6c371a98aa88e8e7713a21.ctex"]
 
 [params]
 

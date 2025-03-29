@@ -9,16 +9,19 @@ visible = false
 
 [node name="Label" type="Label" parent="CanvasLayer"]
 z_index = 5
-offset_left = 3347.0
-offset_top = 2036.0
-offset_right = 4004.0
-offset_bottom = 2231.0
+offset_left = -2470.0
+offset_top = 137.0
+offset_right = 4401.0
+offset_bottom = 966.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_font_sizes/font_size = 70
-text = "Want to play more?
-More to come soon"
+theme_override_font_sizes/font_size = 100
+text = "\"You win! 
+ And the game developer finally
+ gets to go home and eat dinner.  
+Thanks for playing!\"
+"
 horizontal_alignment = 1
 vertical_alignment = 1
 

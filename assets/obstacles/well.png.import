@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dt3mmn8grl1vd"
-path="res://.godot/imported/torch.png-32608f85300872d5701f3e0ddb3afde5.ctex"
+uid="uid://cltp3i5osth53"
+path="res://.godot/imported/well.png-47ab58b9e19a33f7c42ba745c3fedec7.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/items/torch.png"
-dest_files=["res://.godot/imported/torch.png-32608f85300872d5701f3e0ddb3afde5.ctex"]
+source_file="res://assets/obstacles/well.png"
+dest_files=["res://.godot/imported/well.png-47ab58b9e19a33f7c42ba745c3fedec7.ctex"]
 
 [params]
 

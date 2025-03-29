@@ -45,16 +45,6 @@ public partial class ItemAdder : Node2D
     // Make this public so it can be called from anywhere
     public void AddItem()
     {
-        /*
-    GD.Print("item: " + ItemToAddName);
-    Core? core = GetTree().GetNodesInGroup("Core").OfType<Core>().FirstOrDefault();
-
-    if (core != null)
-    {
-        core!.Inventory!.AddItem(new Itemstack(ItemToAdd));
-        core.Inventory.Print();
-    }
-    */
         List<CharacterBody2D> entityGroup = GetTree().GetNodesInGroup("Entities").OfType<CharacterBody2D>().ToList();
         float nearestDistance = float.MaxValue;
         Ally nearestEntity = null!;

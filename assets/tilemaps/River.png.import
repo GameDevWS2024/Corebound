@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dt3mmn8grl1vd"
-path="res://.godot/imported/torch.png-32608f85300872d5701f3e0ddb3afde5.ctex"
+uid="uid://dl74w1haml5l0"
+path="res://.godot/imported/River.png-711d1bc15fc90dcf16aab8a0ebc6fe60.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/items/torch.png"
-dest_files=["res://.godot/imported/torch.png-32608f85300872d5701f3e0ddb3afde5.ctex"]
+source_file="res://assets/tilemaps/River.png"
+dest_files=["res://.godot/imported/River.png-711d1bc15fc90dcf16aab8a0ebc6fe60.ctex"]
 
 [params]
 

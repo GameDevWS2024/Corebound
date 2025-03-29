@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dt3mmn8grl1vd"
-path="res://.godot/imported/torch.png-32608f85300872d5701f3e0ddb3afde5.ctex"
+uid="uid://bowpgw34oftui"
+path="res://.godot/imported/chip_card.png-d90570b4758ff75c363c38b51c1a4064.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/items/torch.png"
-dest_files=["res://.godot/imported/torch.png-32608f85300872d5701f3e0ddb3afde5.ctex"]
+source_file="res://assets/items/chip_card.png"
+dest_files=["res://.godot/imported/chip_card.png-d90570b4758ff75c363c38b51c1a4064.ctex"]
 
 [params]
 

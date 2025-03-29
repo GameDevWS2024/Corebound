@@ -10,9 +10,9 @@ public partial class PathFindingMovement : Node
     [Signal] public delegate void ReachedTargetEventHandler();
 
     [Export] private int _minTargetDistance = 40;
-    [Export] private int _targetDistanceVariation = 50; // Not currently used, consider removing or implementing variation
+    [Export] private int _targetDistanceVariation = 50;
     [Export] private int _speed = 250;
-    [Export] int _minimumSpeed = 50;
+    [Export] int _minimumSpeed = 150;
     private int _origMinimumSpeed;
 
     [Export] bool _debug = false;
@@ -22,8 +22,8 @@ public partial class PathFindingMovement : Node
     [Export] Sprite2D _sprite = null!;
 
     public Vector2 TargetPosition { get; set; }
-    private object _lastCollider = null; // Speichert den letzten Kollisionspartner
-    private bool _recentlyBumped = false; // Verhindert Dauersound
+    private object _lastCollider = null;
+    private bool _recentlyBumped = false;
     private bool _reachedTarget;
     private int _currentTargetDistance;
     private AudioStreamPlayer? _bumpSound = null!;
@@ -44,7 +44,7 @@ public partial class PathFindingMovement : Node
     {
         _origMinimumSpeed = _minimumSpeed;
         _currentTargetDistance = _minTargetDistance;
-        this.CallDeferred("ActorSetup"); // Still good to defer setup
+        this.CallDeferred("ActorSetup");
         _bumpSound = GetTree().Root.GetNode<AudioStreamPlayer>("Node2D/AudioManager/bump_sound");
         _buttonControl = GetTree().Root.GetNode<ButtonControl>("Node2D/UI");
 
@@ -65,7 +65,7 @@ public partial class PathFindingMovement : Node
     {
         _speed = 250;
 
-        _agent.SetTargetPosition(TargetPosition); // Keep this for consistent target setting
+        _agent.SetTargetPosition(TargetPosition);
 
         if (_debug)
         {
@@ -80,9 +80,9 @@ public partial class PathFindingMovement : Node
             _reachedTarget = false;
             Vector2 currentLocation = _character.GlobalPosition, nextLocation = _agent.GetNextPathPosition();
 
-            Motivation motivation = GetParent().GetNode<Motivation>("Motivation");
-            double motivationFactor = (double)motivation.Amount / 10;
-            int modifiedSpeed = (int)(_minimumSpeed + (_speed - _minimumSpeed) * motivationFactor);
+            /* Motivation motivation = GetParent().GetNode<Motivation>("Motivation");
+             double motivationFactor = (double)motivation.Amount / 10;*/
+            int modifiedSpeed = (int)(_minimumSpeed + (_speed - _minimumSpeed) * 2);
             Ally ally = GetParent().GetParent().GetChild<Ally>(0);
             Chat chat = ally.FindChild("Speech").GetParent() as Chat ?? throw new InvalidOperationException();
             _minimumSpeed = (chat!.GeminiService.IsBusy() || ally!.GetResponseQueue().Count > 0 || !ally!.IsTextBoxReady) ? 0 : _origMinimumSpeed; // dont move while responding or if more than one response is being processed.
@@ -105,12 +105,11 @@ public partial class PathFindingMovement : Node
             KinematicCollision2D collision = _character.MoveAndCollide(newVel * (float)delta);
             if (collision != null)
             {
-                // Prüfen, ob der Kollisionspartner neu ist
                 if (collision.GetCollider() != _lastCollider)
                 {
                     if (_character.Name == "Ally" && _buttonControl.CurrentCamera == 1 || _character.Name == "Ally2" && _buttonControl.CurrentCamera == 2)
                     {
-                        _lastCollider = collision.GetCollider(); // Aktualisieren
+                        _lastCollider = collision.GetCollider();
                         _bumpSound!.Play();
                         _recentlyBumped = true;
                     }
@@ -118,14 +117,13 @@ public partial class PathFindingMovement : Node
             }
             else
             {
-                // Keine Kollision mehr, Zustand zurücksetzen
                 _lastCollider = null;
                 _recentlyBumped = false;
             }
 
             _character.Velocity = newVel;
         }
-        else if (!_reachedTarget) // Only emit and set _reachedTarget once, when the condition is first met
+        else if (!_reachedTarget) // only emit and set _reachedTarget once, when the condition is first met
         {
             if (CurrentDirection == PathFindingMovement.WalkingState.Left)
             {
@@ -136,7 +134,7 @@ public partial class PathFindingMovement : Node
                 CurrentDirection = WalkingState.IdleRight;
             }
 
-            _currentTargetDistance = _minTargetDistance; // Reset for the next target
+            _currentTargetDistance = _minTargetDistance; // reset for the next target
             EmitSignal(SignalName.ReachedTarget);
             _reachedTarget = true;
         }
