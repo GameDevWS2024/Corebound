@@ -34,9 +34,10 @@ public partial class CodeInput : Node2D
 
     private void OpenTextField()
     {
-        if(!CodeCorrect) {
-        _codeinputfield.Visible = true;
-        _codeinputfield.GrabFocus();
+        if (!CodeCorrect)
+        {
+            _codeinputfield.Visible = true;
+            _codeinputfield.GrabFocus();
         }
     }
 

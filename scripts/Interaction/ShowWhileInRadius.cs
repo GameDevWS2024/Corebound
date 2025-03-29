@@ -36,7 +36,7 @@ public partial class ShowWhileInRadius : Node2D
     Sprite2D _notebookSprite = null!;
     Sprite2D _keySprite = null!;
     CodeInput _codeInput = null!;
-    private CollisionShape2D _smallHouseBarrier= null!;
+    private CollisionShape2D _smallHouseBarrier = null!;
 
     private bool _keyExist = false;
 
@@ -168,7 +168,7 @@ public partial class ShowWhileInRadius : Node2D
                     //GD.Print("Ally has FestiveStaff: ", allyinv.SsInventory.ContainsMaterial(Game.Scripts.Items.Material.FestiveStaff));
                     if (parentNode.Name == "Rune" && allyinv.GlobalPosition.DistanceTo(parentNode.GlobalPosition) < 250 && allyinv.SsInventory.ContainsMaterial(Game.Scripts.Items.Material.FestiveStaff) && !_ghostspawned)
                     {
-                        
+
                         GD.Print("Ghost spawned");
                         PackedScene scene = (PackedScene)ResourceLoader.Load("res://scenes/prefabs/ai_node.tscn");
                         AiNode instance = scene.Instantiate<AiNode>();
@@ -218,11 +218,12 @@ public partial class ShowWhileInRadius : Node2D
                         GD.Print("Key spawned");
                     }
                     */
-                    if(CodeInput.CodeCorrect) {
+                    if (CodeInput.CodeCorrect)
+                    {
                         _smallHouseBarrier.SetDeferred("disabled", true);
                     }
-                    
-                    
+
+
                 }
             }
         }

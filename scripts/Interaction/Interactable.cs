@@ -46,15 +46,15 @@ public partial class Interactable : Node2D
         {
             AnimationPlayer fade = GetTree().Root.GetNode<AnimationPlayer>("Node2D/ColorRect/FadeToWhite");
             fade.Play("fade_to_white");
-            
+
             await Task.Delay(3000);
-                
+
             Node2D oben = GetTree().Root.GetNode<Node2D>("Node2D");
             PackedScene victoryScene = ResourceLoader.Load<PackedScene>("scenes/prefabs/VictoryScreen.tscn");
-            Node2D victoryInstance = victoryScene.Instantiate<Node2D>(); 
-            oben.AddChild(victoryInstance); 
+            Node2D victoryInstance = victoryScene.Instantiate<Node2D>();
+            oben.AddChild(victoryInstance);
         }
-        
+
         //Ally response
         if (!string.IsNullOrEmpty(SystemMessageForAlly) && caller.Name.ToString().Contains("Ally"))
         {
@@ -66,7 +66,8 @@ public partial class Interactable : Node2D
         if (GetParent<AiNode>().Name.Equals("LockedDoor") && caller.Name.ToString().Contains("Ally"))
         {
             Ally ally = (caller as Ally)!;
-            if (!ally.SsInventory.ContainsMaterial(Game.Scripts.Items.Material.Key)) {
+            if (!ally.SsInventory.ContainsMaterial(Game.Scripts.Items.Material.Key))
+            {
                 Ally? confirmedAlly = caller as Ally;
                 Chat confirmedAllyChat = confirmedAlly!.Chat;
                 confirmedAllyChat.SendSystemMessage("The door is locked, you cannot enter.", new Ally());
@@ -114,10 +115,10 @@ public partial class Interactable : Node2D
             Ally ally = (caller as Ally)!;
             if (!ally.SsInventory.ContainsMaterial(Game.Scripts.Items.Material.BucketWater))
             {
-            ally!.Chat.SendSystemMessage("Can't interact. Maybe there is something missing.", new Ally());
+                ally!.Chat.SendSystemMessage("Can't interact. Maybe there is something missing.", new Ally());
                 return;
             }
-            
+
             ally.AnimationIsAlreadyPlaying = true;
             ally._animPlayer.Play("Empty-Bucket");
             _animTree.Play("TreeOpens");

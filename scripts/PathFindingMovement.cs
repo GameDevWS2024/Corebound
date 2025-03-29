@@ -80,8 +80,8 @@ public partial class PathFindingMovement : Node
             _reachedTarget = false;
             Vector2 currentLocation = _character.GlobalPosition, nextLocation = _agent.GetNextPathPosition();
 
-           /* Motivation motivation = GetParent().GetNode<Motivation>("Motivation");
-            double motivationFactor = (double)motivation.Amount / 10;*/
+            /* Motivation motivation = GetParent().GetNode<Motivation>("Motivation");
+             double motivationFactor = (double)motivation.Amount / 10;*/
             int modifiedSpeed = (int)(_minimumSpeed + (_speed - _minimumSpeed) * 2);
             Ally ally = GetParent().GetParent().GetChild<Ally>(0);
             Chat chat = ally.FindChild("Speech").GetParent() as Chat ?? throw new InvalidOperationException();
