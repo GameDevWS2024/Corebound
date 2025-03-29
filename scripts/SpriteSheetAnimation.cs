@@ -5,11 +5,11 @@ using Godot;
 public partial class SpriteSheetAnimation : Sprite2D
 {
     private Sprite2D _animTree = null!;
-    private int currentFrame = 0;
-    private float frameTimer = 0f;
-    public static bool isAnimating = false;
-    private float frameDuration = 0.1f;
-    private int frameCount = 17;
+    private int _currentFrame = 0;
+    private float _frameTimer = 0f;
+    public static bool IsAnimating = false;
+    private float _frameDuration = 0.1f;
+    private int _frameCount = 17;
 
     public override void _Ready()
     {
@@ -18,20 +18,20 @@ public partial class SpriteSheetAnimation : Sprite2D
 
     public override void _Process(double delta)
     {
-        if (isAnimating)
+        if (IsAnimating)
         {
             _animTree.Frame += 1;
-            frameTimer += (float)delta;
-            if (frameTimer >= frameDuration)
+            _frameTimer += (float)delta;
+            if (_frameTimer >= _frameDuration)
             {
                 if (_animTree.Frame == 9)
                 {
-                    isAnimating = false;
+                    IsAnimating = false;
                 }
 
                 if (_animTree.Frame == 16)
                 {
-                    isAnimating = false;
+                    IsAnimating = false;
                 }
             }
 

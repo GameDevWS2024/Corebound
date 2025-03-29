@@ -81,7 +81,7 @@ public partial class Interactable : Node2D
             Ally ally = (caller as Ally)!;
             ally.SsInventory.HardSwapItems(Game.Scripts.Items.Material.BucketEmpty, Game.Scripts.Items.Material.BucketWater);
             ally.AnimationIsAlreadyPlaying = true;
-            ally._animPlayer.Play("Fill-Bucket");
+            ally.AnimPlayer.Play("Fill-Bucket");
         }
         //Remove scrub with Jones
         if (GetParent<AiNode>().Name.Equals("Big Tree") && caller.Name.ToString().Equals("Ally2"))
@@ -120,7 +120,7 @@ public partial class Interactable : Node2D
             }
 
             ally.AnimationIsAlreadyPlaying = true;
-            ally._animPlayer.Play("Empty-Bucket");
+            ally.AnimPlayer.Play("Empty-Bucket");
             _animTree.Play("TreeOpens");
             ally.SsInventory.HardSwapItems(Game.Scripts.Items.Material.BucketWater, Game.Scripts.Items.Material.BucketEmpty);
             //Tree is now cured (for story progression)

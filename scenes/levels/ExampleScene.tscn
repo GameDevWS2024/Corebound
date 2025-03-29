@@ -15124,14 +15124,13 @@ script = ExtResource("1_pa1ge")
 _darknessCircleDamage = 1
 _allyHealthChangeIntervall = 5.0
 
-[node name="Ally" parent="." node_paths=PackedStringArray("_responseField", "_nameLabel", "Chat", "_animPlayer") instance=ExtResource("6_l8h37")]
+[node name="Ally" parent="." node_paths=PackedStringArray("_responseField", "_nameLabel", "Chat") instance=ExtResource("6_l8h37")]
 position = Vector2(937, 2122)
 _responseField = NodePath("ResponseField")
 _nameLabel = NodePath("Label")
 _visionRadius = 300
 _interactionRadius = 300
 Chat = NodePath("Ally1Cam/Ally1Chat")
-_animPlayer = NodePath("AnimationPlayer2")
 
 [node name="Ally1Cam" type="Camera2D" parent="Ally"]
 light_mask = 2
@@ -15225,14 +15224,13 @@ shadow_filter = 2
 shadow_filter_smooth = 2.3
 texture_scale = 14.0
 
-[node name="Ally2" parent="." node_paths=PackedStringArray("_responseField", "_nameLabel", "Chat", "_animPlayer") groups=["navigation"] instance=ExtResource("6_l8h37")]
+[node name="Ally2" parent="." node_paths=PackedStringArray("_responseField", "_nameLabel", "Chat") groups=["navigation"] instance=ExtResource("6_l8h37")]
 position = Vector2(179, 2125)
 _responseField = NodePath("ResponseField")
 _nameLabel = NodePath("Label")
 _visionRadius = 200
 _interactionRadius = 250
 Chat = NodePath("Ally2Cam/Ally2Chat")
-_animPlayer = NodePath("AnimationPlayer2")
 
 [node name="Ally2Cam" type="Camera2D" parent="Ally2"]
 light_mask = 2
