@@ -97,7 +97,9 @@ _visionRadius = 600
 _interactionRadius = 100
 
 [node name="NavigationAgent2D" type="NavigationAgent2D" parent="."]
-path_max_distance = 20.0
+path_desired_distance = 60.0
+target_desired_distance = 25.0
+path_max_distance = 350.0
 simplify_path = true
 debug_enabled = true
 
@@ -119,7 +121,6 @@ shape = SubResource("CapsuleShape2D_rn1pq")
 
 [node name="PathFindingMovement" type="Node" parent="." node_paths=PackedStringArray("_character", "_agent", "_sprite")]
 script = ExtResource("4_v650j")
-_targetDistanceVariation = 30
 _character = NodePath("..")
 _agent = NodePath("../NavigationAgent2D")
 _sprite = NodePath("../Sprite2D")

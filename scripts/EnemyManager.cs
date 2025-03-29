@@ -1,58 +1,53 @@
+using Godot;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
-using Game.Scripts.Items;
-
-using Godot;
 
 namespace Game.Scripts;
 
 public partial class EnemyManager : Node2D
 {
-    [Export] public PackedScene? EnemyScene { get; set; }  // Set this in editor
-    [Export] private float _minSpawnInterval = 10;
-    [Export] private float _maxSpawnInterval = 60;
+    [Export] public PackedScene? EnemyScene { get; set; }
+    [Export] private float _minSpawnInterval = 2;
+    [Export] private float _maxSpawnInterval = 10;
     [Export] private int _maxEnemies = 10;
-    [Export] private float _baseInterval = 10f;
-    [Export] private float _decayFactor = -1.6f; // -1.6f for regular game   // higher negative number means longer and longer duration between spawning
+    [Export] private float _baseInterval = 5f;
+    [Export] private float _minSpawnDistance = 1000; // Now consistently named
+    [Export] private float _maxSpawnDistance = 1500;
+    [Export] private float _decayFactor = 1.5f;
+    [Export] private int _maxSpawnAttempts = 100; // Add a maximum number of attempts
 
     private double _timeSinceLastSpawn = 0;
-    private bool _isSpawnOnHarvested = true;
-    private bool _isSpawn = false;
-
+    private bool _isSpawn = true;
+    private Random _random = new Random();
 
     private float CalculateSpawnInterval(int enemyCount)
     {
-        float adjustedInterval = _baseInterval * Mathf.Pow(1 - (float)enemyCount / _maxEnemies, _decayFactor);
+        float adjustedInterval = _baseInterval * Mathf.Pow(0.9f, enemyCount);
         return Mathf.Clamp(adjustedInterval, _minSpawnInterval, _maxSpawnInterval);
     }
 
     public override void _Ready()
     {
-        if (_isSpawnOnHarvested)
-        {
-            _isSpawn = false;
-        }
+        // No player reference needed in this version
     }
+
     public override void _Process(double delta)
     {
-        CheckIfSpawn();
         if (!_isSpawn)
         {
             return;
         }
-        _timeSinceLastSpawn += (float)delta;
 
-        List<Enemy> enemies = GetTree().GetNodesInGroup("Enemies").OfType<Enemy>().ToList();
-        int enemyCount = enemies.Count;
+        _timeSinceLastSpawn += delta;
+
+        int enemyCount = GetTree().GetNodesInGroup("Enemies").Count;
         float spawnInterval = CalculateSpawnInterval(enemyCount);
+
         if (_timeSinceLastSpawn >= spawnInterval)
         {
             SpawnEnemy();
             _timeSinceLastSpawn = 0;
-            // GD.Print($"{enemyCount} enemies on the scene");
-            //GD.Print($"calculatedSpawnInterval: {spawnInterval}");
         }
     }
 
@@ -60,35 +55,55 @@ public partial class EnemyManager : Node2D
     {
         if (EnemyScene == null)
         {
+            GD.PrintErr("EnemyScene is not set!");
             return;
         }
+
+        if (GetTree().GetNodesInGroup("Enemies").Count >= _maxEnemies)
+        {
+            return;
+        }
+
+        List<Node2D> entities = GetTree().GetNodesInGroup("Entities").OfType<Node2D>().ToList();
+
+        if (entities.Count == 0)
+        {
+            GD.Print("No entities found in the 'Entities' group.");
+            return;
+        }
+
+        Node2D targetEntity = entities[_random.Next(entities.Count)];
+
+        // --- LOOP TO ENSURE MINIMUM DISTANCE ---
+        Vector2 spawnPosition;
+        int attempts = 0;
+        do
+        {
+            spawnPosition = GetRandomPositionAround(targetEntity.GlobalPosition, _minSpawnDistance, _maxSpawnDistance);
+            attempts++;
+            if (attempts > _maxSpawnAttempts)
+            {
+                GD.Print("Max spawn attempts reached. Spawning anyway.");
+                break; // Exit the loop after too many attempts
+            }
+
+        } while (spawnPosition.DistanceTo(Vector2.Zero) < _minSpawnDistance); // Check distance to the *OFFSET*
+
 
         Enemy enemy = EnemyScene.Instantiate<Enemy>();
-        AddChild(enemy);
-        enemy.AddToGroup("Enemies"); // Add the enemy to the "Enemies" group
+        GetTree().Root.GetNode<Node2D>("Node2D").AddChild(enemy);
+        enemy.AddToGroup("Enemies");
+		enemy.Position = targetEntity.GlobalPosition + spawnPosition; // VERY IMPORTANT, add offset vector to the global position!
 
-        // Set random position (adjust based on your needs)
-        Vector2 viewportSize = GetViewport().GetVisibleRect().Size;
-        // while new pos within core area create new position
-        enemy.Position = new Vector2(
-            Random.Shared.Next(-(int)viewportSize.X, (int)viewportSize.X),
-            Random.Shared.Next(-(int)viewportSize.Y, (int)viewportSize.Y)
-        );
-
-
-        // GD.Print("spawned new enemy at " + enemy.GlobalPosition.X + ", " + enemy.GlobalPosition.Y);
+        GD.Print($"Spawned enemy at: {enemy.Position} (relative to entity at {targetEntity.GlobalPosition}, attempts: {attempts})");
     }
 
-    private void CheckIfSpawn()
+    private Vector2 GetRandomPositionAround(Vector2 center, float minDistance, float maxDistance)
     {
-        Node2D coreNode = GetTree().Root.GetNode<Node2D>("Node2D/Core");
-        Inventory? inventory = (coreNode as Core)?.Inventory;
-        if (inventory!.GetTotalItemCount() < 1) // Löst Null pointer Exception aus
-        {
-            _isSpawn = false;
-            return;
-        }
-        _isSpawn = true;
-
+        float distance = (float)(_random.NextDouble() * (maxDistance - minDistance) + minDistance);
+        float angle = (float)(_random.NextDouble() * Mathf.Tau);
+        float offsetX = Mathf.Cos(angle) * distance;
+        float offsetY = Mathf.Sin(angle) * distance;
+        return new Vector2(offsetX, offsetY); // Return only the offset.
     }
 }

@@ -12,6 +12,7 @@ radius = 40.0
 height = 140.0
 
 [node name="Enemy" type="CharacterBody2D" node_paths=PackedStringArray("_pathFindingMovement") groups=["Enemies"]]
+z_index = 30
 script = ExtResource("1_q3x6f")
 _pathFindingMovement = NodePath("PathFindingMovement")
 
